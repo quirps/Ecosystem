@@ -1,0 +1,53 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        // {
+        //     "name": "Deploy",
+        //     "program": "${workspaceFolder}/scripts/deploy.js",
+        //     //"program": "${file}",
+
+        //     "request": "launch",
+        //     "skipFiles": [
+        //         "<node_internals>/**"
+        //     ],
+        //     "type": "node"
+        // },
+        
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Mocha Tests",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "args": ["npx", "hardhat", "test"],
+            "program": "${workspaceFolder}",
+            
+        }
+    ]
+}
+
+
+
+// {
+//     "type": "pwa-node",
+//     "request": "launch",
+//     "name": "Mocha Tests",
+//     "skipFiles": [
+//         "<node_internals>/**"
+//     ],
+//     //"args": ["npx", "hardhat", "run", "--network", "local"],
+//     //"program": "${workspaceFolder}/test/TokenFactory.js",
+//     "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+//     "args": [
+//         "-u",
+//         "bdd",// set to bdd, not tdd
+//         "--timeout",
+//         "999999",
+//         "--colors",
+//         "${workspaceFolder}/test/**/*.js"
+//       ],
+// }

@@ -1,0 +1,11 @@
+How verify members?
+
+An ecosystem could enable logged in users (on a given social media platform) to send their 
+ethereum address. Ecosystem would then routinely upload a merkle root which would verify 
+struct Member exists (as a leaf of the tree). 
+
+struct Member{
+    username:"...",
+    platform:"...",
+    rank: ""
+}
