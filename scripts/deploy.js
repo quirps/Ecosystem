@@ -2,6 +2,7 @@
 /* eslint prefer-const: "off" */
 
 const { getSelectors, FacetCutAction } = require('./libraries/diamond.js')
+const { ethers } = require("hardhat");
 
 async function deployDiamond () {
   const accounts = await ethers.getSigners()
@@ -62,8 +63,12 @@ async function deployDiamond () {
     throw Error(`Diamond upgrade failed: ${tx.hash}`)
   }
   console.log('Completed diamond cut')
+  const diamondLoupeFacet = await ethers.getContractAt('IDiamondLoupe', diamond.address)
+let _facetAddresses = await diamondLoupeFacet.facetAddresses();
+console.log(3)
   return diamond.address
 }
+
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.

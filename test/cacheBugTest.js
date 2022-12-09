@@ -2,7 +2,7 @@
 /* eslint-disable prefer-const */
 
 const { deployDiamond } = require('../scripts/deploy.js')
-
+const { ethers } = require("hardhat");
 const { FacetCutAction } = require('../scripts/libraries/diamond.js')
 
 const { assert } = require('chai')

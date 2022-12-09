@@ -6,9 +6,8 @@ const {
   removeSelectors,
   findAddressPositionInFacets
 } = require('../scripts/libraries/diamond.js')
-
 const { deployDiamond } = require('../scripts/deploy.js')
-
+const { ethers } = require("hardhat");
 const { assert } = require('chai')
 
 describe('DiamondTest', async function () {
