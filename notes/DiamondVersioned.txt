@@ -1,0 +1,9 @@
+Everytime one can eliminate a quasi-static variable, you save 2100*x gas per use.
+
+With this Diamond Version implementation, would there be a way for EcoOwners to redeploy
+to make things cheaper?
+
+Quasistatic variables should also be looked at from a redeployment perspective. 
+Ecosystem Diamond structures shouldn't change too much, as facets must be gas optimized
+as is. Instead of making a variable for version change, just mark the facet as ready for
+an update.

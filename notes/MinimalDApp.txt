@@ -1,0 +1,26 @@
+Database supporting ecossytems
+    - Tickets
+    - Auctions
+    - Currencies
+    - Members
+    - Ranks
+    - ...
+
+App
+    - Page Design
+    - Edit Ecosystem
+        
+
+Minimal Facets
+    Need up and running minimal ecosystem for testing purposes.
+        -Tests
+        -Facets with ERC1155 tokens/Tickets
+        -Users loaded with predefined tickets/tokens/ether
+        -Moderator methods
+        -
+Tutorial Web Page
+GSN
+    - User has no base currency or chooses gassless, automatically routes
+        their order through GSN if a viable paymaster (MasSwap can run their 
+        own paymaster)
+    - DApp should have a toggle switch in settings for gassless transaction

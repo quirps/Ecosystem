@@ -1,0 +1,27 @@
+Minimal Ecosystem complimented with testing environment
+User Interface (DApp) Twitch Extension
+Database configuration 
+Backend service 
+Minimalist Token Exchange
+Ticket Exchange 
+GSN compatablity 
+
+
+Database configuration should be completely inspired by solidity getters
+and events
+
+1. Finish minimal ecosystem 
+2. Create a database configuration for minimal ecosystem
+3. Create backend service listening to on-chain events with database
+    compatablity 
+4. Generate userbase/ecosystems (test environment)
+    - Owner/Moderators/Members with various amounts of tickets/tokens
+5. Create minimal UI Edit/Interact mode
+    - Display various features contingent on owner/moderator/ member status
+    - Display Member/Moderator status 
+    - Backend routes to retrieve necessary data
+6+ ... UI Pages for rest of DApp
+       Exchanges Ticket/Token 
+       GSN compatability 
+       Version/Optimization change test 
+    

@@ -4,7 +4,7 @@ pragma solidity ^0.8.6;
 import "../libraries/LibEIP712Base.sol";
 
 contract EIP712MetaTransaction is EIP712Base {
-    using SafeMath for uint256;
+    //using SafeMath for uint256;
     bytes32 private constant META_TRANSACTION_TYPEHASH = keccak256(bytes("MetaTransaction(uint256 nonce,address from,bytes functionSignature)"));
 
     event MetaTransactionExecuted(address userAddress, address payable relayerAddress, bytes functionSignature);

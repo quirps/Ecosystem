@@ -12,7 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/mudgen/contracts-starter.git"
   },
-  "author": "Nick Mudge",
+  "author": "Joe Cocchi",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/mudgen/contracts-starter/issues"
@@ -24,6 +24,8 @@
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@opengsn/dev": "3.0.0-beta.2",
+    "@openzeppelin/merkle-tree": "^1.0.4",
     "chai": "^4.3.4",
     "dotenv": "^8.6.0",
     "ethereum-waffle": "^3.4.0",

@@ -1,0 +1,9 @@
+Exclusive Sales to members
+Exclusive discounts to members
+Max Trade limits member specific
+Trade/Consumption counter
+
+
+Could embed this functionality in the contract, but readily break apart. 
+
+In the _transferFrom internal method, we'd create

@@ -1,0 +1,101 @@
+How verify members?
+
+An ecosystem could enable logged in users (on a given social media platform) to send their 
+ethereum address. Ecosystem would then routinely upload a merkle root which would verify 
+struct Member exists (as a leaf of the tree). 
+
+Leaf contains the history of rank changes for reward 
+
+struct Member{
+    username:"...",
+    platform:"...",
+    rank : [Rank]
+}
+struct Rank{
+    rank: enum,
+    timestamp:""
+}
+
+Open Source program where owners can run a program periodically or manually which
+updates merkle tree.
+    - Where merkle tree uploaded? Of course this method is to avoid being the server
+    themself, so it's a signal to a various hosting servers. 
+Owner would send out merkle tree once root was uploaded to ecosystem.
+
+User would need to send address to owner in order for leaf to be added
+    -How does user change address? Does it on-chain.
+        Let Owner control the initiation of user and have user in control of address
+        change on-chain
+        -Issue if first instance is hacked, how would they properly handle their
+        account?
+        Balance between Owner not having to resolve account issues and avoiding
+        first instance hack situation?
+        User could create an alias which is defaulted too. Aliases would enable
+        multiple effective usernames. This way an address could never be changed 
+        off-chain
+Check if alias taken on-chain.
+User then includes their leaf per transaction that requires it. 
+
+Is there a better way to deal with lots of state changes that need to be verified
+by a single user? Use this method until now.
+
+Expand on aliases:
+    Aliases are the usernames of the ecosystem.
+    Is there a way to centralize aliases?
+    How to enable twitch usernames priority for alias default, but allow
+    users to choose an alias also?
+    Could go the discord/Bnet route and add an id after the username
+    Would seem like the easiest solution
+Each alias has a unique address, immutable once initiated on-chain. 
+
+How to enforce leaf's address immutability? First succesful rank transaction (a transaction
+in which the user needs their rank) sets the alias and address, leaving rank information 
+mutable. 
+Owner could still mutate history. 
+Unwanted changes that shouldn't be changed, user can prove the unwanted changes are
+false by giving the appropiate data structure, which is then compared to ..?
+Could also enable users to update their 
+Give members a rank expiration, that way don't need owner meta tx every timestamp
+
+Give user an ID and Username + discriminator tag
+Automatically assign id and username to account.
+
+How to consistently maintain user id and address with changes across ecosystems?
+
+Just have users create an ID via registry, and enable individual ecosystems
+to verify user. Ecosystems will choose a unique ID from registry and associate 
+it with a username.
+User's can change their registry ID so long as they're using the same address.
+
+So flow would be this:
+    User registers --> registryID <--> address
+    User verifies registryId with username on twitch
+        -Note this can be changed whenever the user wants, just needs
+        to associate a new registryID with given username. 
+        
+Only one username can be associated with an ID at a given time.
+Owner will only make sign meta txs for a default user. 
+So how does rank history get calculated? Shouldn't be an issue if ecoystem has a
+unique mapping between username and registry ID.
+
+Only one username can have a rank at a time.
+
+Ecosystem restricts a username to one registry ID at a time, conditions if changed.
+
+Only default account can have a non-zero rank.
+For events, EcoOwner limits a single entry per user, doesn't care about registryID
+At the same time we want the address of user to be in charge.
+Owner is blind to the registryID, making that the user's responsibility, 
+
+
+Let's take stake rewards for example. Suppose user has three different registry Id's.
+Initial default registry id is RI-1 (i.e. 0x29933... (uint20))
+User stakes coin given current rank + expiration time (this essentially allows user to 
+not have to verify their rank again until the time has expired.)
+Suppose user changes default id, what should happen?
+    End any ongoing attachments to that ID. 
+    User would need to end these bindings before changing id
+
+Universal Username uses?
+It makes sense to keep usernames within ecosystems as the primary identifier.
+Is there a way 

@@ -1,0 +1,7 @@
+ERC1155
+ERC20
+FreezeOwner
+FreezeGlobal
+DiamondFacets
+MemberVerify
+Rankings

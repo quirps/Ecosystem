@@ -1,0 +1,15 @@
+How can ecosystem owners upgrade/deploy their diamonds?
+
+Fortunately diamonds only need to be upgraded after initial deployment
+
+Flow:
+Owner deploys via online app w/ metamask 
+Later changes owner to their multisig
+Once diamond deployed, all user has to do is facetCut method
+Extension will have an independent verification for deployment 
+
+How to uniquely identify a version? concat the bytecode and take 
+keccack256 (facet bytecode is ordered by lowest address to highest)
+
+Each version has an associated hash.
+Hashes stored in extension, repo, website.

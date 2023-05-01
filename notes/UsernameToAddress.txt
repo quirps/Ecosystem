@@ -1,0 +1,40 @@
+How to associate username with address? 
+Initially a user can set their address right away.
+
+Owner will uploada merkle root of tree whose leaves consist
+of username and address. 
+Member proves this fact and in turn associates username with address
+Members can set an address change delay (default 24hrs)
+
+An EcoSystem Util which helps verify members? How would this really help? 
+Going to take two calls anyway unless ecosystems are built with call & delegate call
+functionality in fallback. 
+
+2 Patterns. 
+  1. 
+    dApp calls the ecosystem util first which then routes to the respective ecosystem.
+    ecosystem can simply use msgSender() verify the  trusted contract. 
+  2. all calls go through ecosystem, which can perform external calls to trusted 
+     contracts before continuing
+
+Option 1 seems more natural and easier to use, as the second option would require
+new dapps using these services understand how call data works more previsely.
+
+Only main issue is you're adding new addresses, which the ecosystem does...
+
+Option 1 it is.
+
+
+-----------------------------------------
+
+How do deal with case where user initially has a bad address? User who has
+control of twitch account has authority to change. Would also need an override feature
+where owner/moderator could put a 2 week change, where 
+
+
+How about initially, from when first verifying, there is a week-long delay until verified.
+So if a user verifies membership with an initial address, it takes 7 days to be locked in.
+Moderators can also, on a case-by-case basis, a 2 week verification process which can
+be cancelled by the logged in user at anytime.
+ 
+

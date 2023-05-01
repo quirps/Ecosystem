@@ -1,0 +1,39 @@
+What logic is needed/wanted for Members/Ranks?
+
+How do we measure member history, honestly?
+
+
+What if we set the leaf to the  entire history of membership of given user.
+Then when user membership is verified, it stores their history individually.
+When an individual is verified, their history is treated as final, and can 
+only be appended. 
+
+Downgrading members? 
+
+Members rewards should always be contingent on a proof. If someone wants to 
+do something in regards to membership, can't be proved every. So membership tier
+is based on time
+
+Timestamp based membership, would have to check timestamp on member related events.
+Members can be reminded when new upgrade is ready or they need to update their member
+timestamp. 
+Could enable proving as part of membership calls, must proved
+
+------------------
+So we have total user history in leafs (rank,timestamp) array with user_id, platform.
+Check timestamp to see if membership is valid
+
+What stays. 
+
+User has an on-chain member history, which is final. All new member updates must 
+be checked against that for consistency (i.e. after merkle proof, check new member
+rank timestamp greater than last user's timestmap).
+
+Issue with setting a bounty for demoting a member is need to be tied with an exchange.
+This is a political issue with semi-volitale assets. 
+
+How about MasSwap gives ecosystem owners a list of users who can be demoted, a suggested
+token bounty for demoting them, which of course can be overridden.
+
+
+MasSwap can still implement 
