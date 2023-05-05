@@ -1,0 +1,9 @@
+Complete ERC1155 and testing
+Fix a main version for ERC1155 
+Create a comment with optimization version, where the first optimization of that 
+create insertion script
+optimization version is inserted repedeatedly
+check for bytecode size limit
+deploy to registry, alert owner. 
+( do we deploy main + optimization version? )
+dapp verifies version and demonstrates updates to user
