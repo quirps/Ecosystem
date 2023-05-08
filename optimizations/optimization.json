@@ -1,0 +1,9 @@
+{
+    "mainVersion":"1.0.0",
+    "optimizationMethods" : {
+        "maxTicket": {
+            "paramType" : ["uint256[]"]
+        }
+    }
+    
+}
