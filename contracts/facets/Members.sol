@@ -20,7 +20,7 @@ contract Members{
     // param takes in merkle proof
     // rejects on invalid prooof
 
-    function _proveMembership(MerkleProof[] proof) internal view{
+    function _proveMembership(MerkleProof[] memory proof) internal view{
         // prove
     }
 }

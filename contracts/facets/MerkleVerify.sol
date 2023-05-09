@@ -1,5 +1,5 @@
 pragma solidity ^0.8.6;
-import "../libraries/Utils/MerkleProof.sol";
+import "../libraries/utils/MerkleProof.sol";
 
 contract Verifier {
     bytes32 private root;
