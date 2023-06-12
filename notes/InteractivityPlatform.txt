@@ -1,0 +1,6 @@
+How do we setup interactive applications into the ecosystem and websites?
+
+For twitch, twitch extension or browser extension. 
+Can potentially allow users to install program on OS with permissions.
+
+Need to force extension.

@@ -1,3 +1,5 @@
+import { Bytes } from "ethers";
+
 const fs = require('fs')
 
 /**
@@ -38,5 +40,13 @@ function expressionGenerator(ids: number[]): string {
     return switchStatement
 }
 
+
+
+function maxTicket(ids : number[]){
+    let optimizedCodeString =  expressionGenerator(ids)
+    //load config
+    //copy and move file to temp
+    //add code to temp
+}
 
 console.log( expressionGenerator([1,2,3,4,5]) )

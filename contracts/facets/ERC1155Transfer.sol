@@ -21,11 +21,6 @@ import "../internals/ERC1155/iERC1155Transfer.sol";
  */
 contract ERC1155Transfer is   Context, iERC1155Transfer {
     using Address for address;
-
-    
-
-
-
     /**
      * @dev See {IERC1155-safeTransferFrom}.
      */

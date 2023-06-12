@@ -2,8 +2,11 @@
     "mainVersion":"1.0.0",
     "optimizationMethods" : {
         "maxTicket": {
+            "facetDependency": ["ERC1155Transfer"], 
+            "signature":"0xbcdb7658841ce9c561c1b6c13d7d97a7bd29fd4692179bb7db06cd4c77338c8a",
+            "handlerName" :"maxTicket",
             "paramType" : ["uint256[]"]
+
         }
     }
-    
 }

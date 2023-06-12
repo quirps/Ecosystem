@@ -1,0 +1,20 @@
+Want a full classification of Facets and their corresponding optimizations
+
+What should we accomplish?
+
+Diamond Base bytecode, on-chain deployment mechanism 
+Upgrade mechanism 
+Optimization Upgrade
+Registration 
+
+User Create New Diamond
+    - Initialize Owner
+    - Create Base Diamond Contract 
+    - Add Appropriate Facets + initializations of given version 
+Upgrade given Diamond to new version 
+    *Need to figure this out*
+Optimize 
+    - Upgrades relevant facets with optimized versions
+Register
+    Registers facets/optimized facet/ base Diamond
+

@@ -1,0 +1,14 @@
+Need high level of interaction and usage of ecosystems. 
+How to do this? 
+
+Code will likely live in an extension, with main app accesible on website. Mobile
+app can come later.
+
+How can Interactive Dapps be imported?
+
+Likely would need to be vetted, that way they can be statically built, security
+and efficiency purposes. 
+
+Would need a play/app store meant for ecosystems, create a list of items.
+
+

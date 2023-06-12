@@ -1,0 +1,23 @@
+Finish minimal ecosystem
+    **FACETS**
+    =================
+    ERC1155 - Facet Done, Interfaces Done, Unit Tests Done 
+    FREEZE - Facet Done, Interfaces No, Unit Tests No
+    MEMBERS - Facet No, Interfaces No, Unit Tests No
+    SALES - Facets No, Interfaces No, Unit Tests No
+    VERSION - Facets No, Interfaces No, Unit Tests No 
+    *DIAMOND_RELATED_FACETS* Done***
+    MERKLE_VERIFY 
+    MEMBER VERIFY 
+    OWNERSHIP_FACET - MODERATOR permissions
+
+
+JS
+    EVENT DATABASE BACKEND QUERIES
+
+FRONTEND
+    EDIT ECOSYSTEM 
+NON-ECOSYSTEM 
+    REGISTRY 
+    AUCTION 
+    TICKET_EXCHANGE
