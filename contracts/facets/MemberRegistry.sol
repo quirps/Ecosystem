@@ -1,7 +1,7 @@
 pragma solidity ^0.8.6;
 
-import "@opengsn/contracts/src/ERC2771Recipient.sol";
 
+import "../internals/iMetaTX.sol";
 /**
  * Role of this facet is to associate a username from a given value producing
  * platform to a public address
@@ -9,7 +9,7 @@ import "@opengsn/contracts/src/ERC2771Recipient.sol";
  * Methods must be in place for initally setting a username, changing a username,
  * and recovering a username. 
  */
-contract UserVerifcation is ERC2771Recipient  {
+contract UserVerifcation is MetaTX  {
     // would need to verify ecosystem owner or moderator signed this message
     // msgSender() will 
     mapping(string => address) usernameToAddress;

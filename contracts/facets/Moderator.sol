@@ -1,4 +1,4 @@
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.6;
 
 /**
  * Moderators take on a heightened role in ecosystems and are responsible
@@ -10,24 +10,23 @@ pragma solidity ^0.8.9;
  */
 
 contract Moderator{
-    struct ModeratorRank{
-    
-    }
-
+    /**
+     * Just create a ranked list, address associated with number.
+     * Moderators should only need to be referencable via current ecosystem, 
+     * or directly called by other ecosystems. 
+     */
     modifier moderator (){
         //moderator of rank index n-1 or lower reject
         _;
     }
-    mapping( address => bytes30 ) moderatorRankLabel;
-    mapping( bytes30 => uint8 ) moderatorRank
-    bytes30[] rankLabels;
+    mapping( address => uint8 ) moderatorRank;
 
-    function setModeratorRank(address newModerator, bytes30 rankLabel) external {
-        moderatorRankLabel[ newModerator ] = rankLabel;
+
+    function setModeratorRank(address newModerator, uint8 _rank) external {
+        moderatorRank[ newModerator ] = _rank;
     }
-    function getModeratorRank(address moderator) external returns(address moderatorRank_){
-        bytes30 moderatorRankLabel = moderatorRankLabel[ moderator ];
-        moderatorRank_ = moderatorRank[ moderatorRankLabel ];
+    function getModeratorRank(address _moderator) external returns(uint8 moderatorRank_){
+        moderatorRank_ = moderatorRank[ _moderator ];
     }
     
 }

@@ -30,8 +30,8 @@ import "../../libraries/utils/Context.sol";
      * this function emits no events.
      */
     function _setURI(string memory newuri) internal  {
-        LibERC1155.StorageERC1155 storage es =  LibERC1155.storageERC1155();
-        es._uri = newuri;
+        LibERC1155.ERC1155Storage storage es =  LibERC1155.erc1155Storage();
+        es.uri = newuri;
     }
     
   
@@ -49,14 +49,14 @@ import "../../libraries/utils/Context.sol";
     function _mint(address to, uint256 id, uint256 amount, bytes memory data) internal {
         require(to != address(0), "ERC1155: mint to the zero address");
 
-        LibERC1155.StorageERC1155 storage es = LibERC1155.storageERC1155();
+        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
         address operator = _msgSender();
         uint256[] memory ids = _asSingletonArray(id);
         uint256[] memory amounts = _asSingletonArray(amount);
 
         _beforeTokenTransfer(operator, address(0), to, ids, amounts, data);
 
-        es._balances[id][to] += amount;
+        es.balance[id][to] += amount;
         emit TransferSingle(operator, address(0), to, id, amount);
 
         _afterTokenTransfer(operator, address(0), to, ids, amounts, data);
@@ -84,14 +84,14 @@ import "../../libraries/utils/Context.sol";
         require(to != address(0), "ERC1155: mint to the zero address");
         require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
 
-        LibERC1155.StorageERC1155 storage es = LibERC1155.storageERC1155();
+        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
 
         address operator = _msgSender();
 
         _beforeTokenTransfer(operator, address(0), to, ids, amounts, data);
 
         for (uint256 i = 0; i < ids.length; i++) {
-            es._balances[ids[i]][to] += amounts[i];
+            es.balance[ids[i]][to] += amounts[i];
         }
 
         emit TransferBatch(operator, address(0), to, ids, amounts);
@@ -113,7 +113,7 @@ import "../../libraries/utils/Context.sol";
     function _burn(address from, uint256 id, uint256 amount) internal {
         require(from != address(0), "ERC1155: burn from the zero address");
 
-        LibERC1155.StorageERC1155 storage es = LibERC1155.storageERC1155();
+        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
 
         address operator = _msgSender();
         uint256[] memory ids = _asSingletonArray(id);
@@ -121,10 +121,10 @@ import "../../libraries/utils/Context.sol";
 
         _beforeTokenTransfer(operator, from, address(0), ids, amounts, "");
 
-        uint256 fromBalance = es._balances[id][from];
+        uint256 fromBalance = es.balance[id][from];
         require(fromBalance >= amount, "ERC1155: burn amount exceeds balance");
         unchecked {
-            es._balances[id][from] = fromBalance - amount;
+            es.balance[id][from] = fromBalance - amount;
         }
 
         emit TransferSingle(operator, from, address(0), id, amount);
@@ -145,7 +145,7 @@ import "../../libraries/utils/Context.sol";
         require(from != address(0), "ERC1155: burn from the zero address");
         require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
 
-        LibERC1155.StorageERC1155 storage es = LibERC1155.storageERC1155();
+        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
 
         address operator = _msgSender();
 
@@ -155,10 +155,10 @@ import "../../libraries/utils/Context.sol";
             uint256 id = ids[i];
             uint256 amount = amounts[i];
 
-            uint256 fromBalance = es._balances[id][from];
+            uint256 fromBalance = es.balance[id][from];
             require(fromBalance >= amount, "ERC1155: burn amount exceeds balance");
             unchecked {
-                es._balances[id][from] = fromBalance - amount;
+                es.balance[id][from] = fromBalance - amount;
             }
         }
 

@@ -66,8 +66,8 @@ contract ERC1155Transfer is   Context, iERC1155Transfer {
      * @dev See {IERC1155-isApprovedForAll}.
      */
     function isApprovedForAll(address account, address operator) public view  returns (bool) {
-        LibERC1155.StorageERC1155 storage es = LibERC1155.storageERC1155();
+        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
 
-        return es._operatorApprovals[account][operator];
+        return es.operatorApprovals[account][operator];
     }
 }

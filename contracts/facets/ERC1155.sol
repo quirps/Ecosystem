@@ -54,8 +54,8 @@ contract ERC1155 is  iERC1155, IERC1155, IERC1155MetadataURI {
      * actual token type ID.
      */
     function uri(uint256) public view override returns (string memory) {
-        LibERC1155.StorageERC1155 storage es = LibERC1155.storageERC1155();
-        return es._uri;
+        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
+        return es.uri;
     }
 
     function mint(address to, uint256 id, uint256 amount, bytes memory data) external override {
@@ -86,8 +86,8 @@ contract ERC1155 is  iERC1155, IERC1155, IERC1155MetadataURI {
      */
     function balanceOf(address account, uint256 id) public view  override  returns (uint256) {
         require(account != address(0), "ERC1155: address zero is not a valid owner");
-        LibERC1155.StorageERC1155 storage es = LibERC1155.storageERC1155();        
-        return es._balances[id][account];
+        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();        
+        return es.balance[id][account];
     }
 
     /**
@@ -111,6 +111,4 @@ contract ERC1155 is  iERC1155, IERC1155, IERC1155MetadataURI {
 
         return batchBalances;
     }
-
-
 }

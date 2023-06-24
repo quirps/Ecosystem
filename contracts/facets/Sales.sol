@@ -1,4 +1,4 @@
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.6;
 
 /**
  * Here we want to capture a sales of tickets/ticket bundles, which comprise of a
@@ -22,7 +22,7 @@ pragma solidity ^0.8.9;
  */
 contract Sales{
     Sales[] sale;
-    mapping( id => Sales) idToSale;
+    mapping( uint256 => Sales) idToSale;
     struct Bundle{
         uint256[] rewardIds;
         uint256[] rewardAmounts;
@@ -34,7 +34,11 @@ contract Sales{
         Bundle[] bundleTier;
         uint16 index;
     }
-    struct rankedSale{
+    struct RankLabel{
+        address l;
+    }
+  
+    struct RankedSale{
         RankTier[] rankTiers;
         uint96 expirationTimestamp;
     }

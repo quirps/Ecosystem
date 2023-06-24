@@ -61,3 +61,10 @@ abstract contract ERC2771Recipient is IERC2771Recipient {
         }
     }
 }
+
+contract MetaTX is ERC2771Recipient{
+
+    function msgSender() internal view returns (address) {
+        return _msgSender();
+    }
+}
