@@ -1,0 +1,6 @@
+How are we to properly decompose facet? 
+Keeping main logic in internals helps future imports into other facets 
+Not sure. 
+
+Make an interface for external contract.
+Events placed in internal 

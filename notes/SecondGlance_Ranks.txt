@@ -1,0 +1,4 @@
+It seems ranks data structures are getting overly complicated. Let's 
+reevaluate the necessity for ranks. This all seems uneccessary now as
+the defacto norm now makes updating all memebers ranks much more continious
+, less issues in lag. J

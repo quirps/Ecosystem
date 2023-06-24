@@ -1,44 +1,43 @@
 pragma solidity ^0.8.0;
 
 import "../libraries/utils/Context.sol";
-contract MemberRegistry{
-    uint96 constant WEEK = 604800;
-    mapping(address => string) addressToUsername;
-    mapping(string => address) usernameToAddress;
-    mapping(string => Recovery) usernameToVerification;
+import "../internals/iMemberRegistry.sol";
+import "../libraries/verification/MemberRegistryVerification.sol";
 
-    struct Recovery{
-        address userNewAddress;
-        uint96 recoveryTimestamp; //times after this timestamp allow for the user to
-                                //permenantely change. 
+contract MemberRegistry is Context, iMemberRegistry {
+    function initializor(uint96 _recoveryTime) external {
+        _initializor(_recoveryTime);
     }
-    struct SignatureVerfication{
-        uint256 domain;
-        uint256 nonce;
-    }
+
     //delete userAddress parameter and replace with msgSender() function
-    function verifyUsername(string memory username, SignatureVerfication memory _signature ) external {
-        // verifies signature of user
+    function verifyUsername(
+        string memory username,
+        uint8 v,
+        bytes32 r,
+        bytes32 s,
+        address owner,
+        bytes32 merkleRoot,
+        uint256 nonce,
+        uint256 deadline
+    ) external {
+        _verifyUsername(username, v, r, s, owner, merkleRoot, nonce, deadline);
+    }
 
-         usernameToAddress[ username ] == address(0) ? setUsernamePair(username)
-                                                     : usernameRecovery(username);
-    }
     function setUsernamePair(string memory username) internal {
-        setUsernameAddressPair( username );
-        usernameToVerification[ username ] = Recovery(msgSender(), 0);
+        _setUsernamePair(username);
     }
-    function usernameRecovery(string memory username) internal{
-        Recovery memory _userVerification = usernameToVerification[ username ];
-        if( msgSender() != _userVerification.userNewAddress ){
-            usernameToVerification[ username ] = Recovery(msgSender(), uint96(block.timestamp) + WEEK );
-        }
-        else if( _userVerification.recoveryTimestamp < uint96( block.timestamp ) ){
-            setUsernameAddressPair( username );
-        }
+
+    function usernameRecovery(string memory username) internal {
+        _usernameRecovery(username);
     }
-    function setUsernameAddressPair(string memory username) internal{
-        usernameToAddress[ username ] = msgSender();
-        addressToUsername[ msgSender() ] = username;
+
+    function finalizeRecovery(string memory username) external {
+        _finalizeRecovery(username);
     }
+
+    function cancelVerify(string memory username) external {
+        _cancelVerify(username);
+    }
+
     // need a case in which account is in recovery but current user wants to cancel
 }
