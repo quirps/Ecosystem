@@ -6,10 +6,12 @@ import "./ERC1155/iERC1155Transfer.sol";
 import "../libraries/LibMembers.sol";
 import "../libraries/LibERC1155.sol";
 import "../libraries/LibDiamond.sol";
+import "../libraries/utils/Incrementer.sol";
 
 contract iMembers is iERC1155Transfer {
     //history is to save gas on not having to prove every time
-    using LibMembers for bytes28;
+    using Incrementer for bytes28;
+    using Incrementer for bytes8;
     enum BountyAccountChange {
         Positive,
         Negative
@@ -18,48 +20,13 @@ contract iMembers is iERC1155Transfer {
     event Bounty(address receiver, uint256 bountyUp, uint256 bountyUpRate, uint256 bountiesDown, uint256 bountyDownRate);
     event BountyBalanceChange(uint256 amount, BountyAccountChange direction);
 
-    function _initialization(address _bountyAddress) internal {
-        LibMembers.MembersStorage storage ms = LibMembers.memberStorage();
-        LibMembers.Bounty storage _bounty = LibMembers.getBounty();
-        _bounty.bountyAddress = _bountyAddress;
+    function _initialization(address _bountyAddress, uint256 _currencyId, uint256 _maxBalance) internal {
+        _setBountyAddress(_bountyAddress);
+        _setBountyCurrencyId(_currencyId);
+        _setBountyMaxBalance(_maxBalance);
     }
 
-    function _getUserRankHistory(address user) internal view returns (LibMembers.MemberRank[] memory) {
-        LibMembers.MembersStorage storage ms = LibMembers.memberStorage();
-        //loop
-        LibMembers.PointerMeta memory pointerMeta = ms.memberRankPointer[user];
-        LibMembers.MemberRank[] memory _memberRankHistory = new LibMembers.MemberRank[](pointerMeta.length);
-        for (uint48 i; i < pointerMeta.length; i++) {
-            if (pointerMeta.key == type(uint128).min) {
-                break;
-            }
-            LibMembers.MemberRankBlock memory _memberRankBlock = ms.memberRankBlock[pointerMeta.key];
-            _memberRankHistory[i] = _memberRankBlock.memberRank;
-            uint192 pointerKey = _memberRankBlock.key;
-        }
-        return _memberRankHistory;
-        // go through pointer -> block -> pointer -> block ...
-    }
-
-    function _getUserRank(address user) internal view returns (uint16 rank_) {
-        LibMembers.MembersStorage storage ms = LibMembers.memberStorage();
-        uint192 _key = ms.memberRankPointer[user].key;
-        rank_ = ms.memberRankBlock[_key].memberRank.rank;
-    }
-
-    function _addRankBlock(LibMembers.MembersStorage storage ms, address user) private {
-        
-        // get key of latest block (if exists)
-        // if doesnt existt - generate key kec(address), create PointerMeta
-        // else - new key kec(key), create PointerMeta
-        // get key to previou block from PointerMeta
-        //
-    }
-
-    function generateKey(address userAddress, uint48 timestamp) internal {
-        bytes24(keccak256(abi.encodePacked(userAddress)));
-    }
-
+    
     //
     //MODERATOR 
     function _setMembersRankPermissioned(LibMembers.MerkleLeaf[] memory leaves) internal {
@@ -69,40 +36,40 @@ contract iMembers is iERC1155Transfer {
         MembersVerify.multiProofVerify(proof, proofFlags, leaves);
         __changeMemberRanks( leaves );
     }
-
+    
     function __changeMemberRanks( LibMembers.MerkleLeaf[] memory leaves ) private {
         LibMembers.MembersStorage storage ms = LibMembers.memberStorage();
-        LibMembers.Bounty storage _bounty = LibMembers.getBounty();
-
         uint128 bountiesUp;
         uint128 bountiesDown;
         for (uint256 i; i < leaves.length; i++) { 
-            
-            (address _user, uint48 _timestamp, uint32 _rank) = ( leaves[i].user, 
+            (address _user, uint48 _timestamp, uint32 _rank) = ( leaves[i].memberAddress, 
                                                                 leaves[i].memberRank.timestamp,
                                                                 leaves[i].memberRank.rank);
-            bytes8 maxIndex = ms.memberRankPointer[ _user ].maxIndex;
+            bytes8 maxIndex = ms.memberRankPointer[ _user ];
 
-            bytes28 _currentKey = abi.encodePacked( maxIndex, user);
+            bytes28 _currentKey = LibMembers.createInitialKey(_user, maxIndex);
             if( _timestamp < ms.memberRank[_currentKey].timestamp || _timestamp == block.timestamp ){
                 continue;
             }
-            bytes28 _incrementedKey = _currentKey.increment;
+            bytes28 _incrementedKey = _currentKey.incrementKey();
             
-            ms.memberRankPointer[ _user ] = maxIndex.increment;
-            ms.memberRank[ _incrementedKey ] = LibMembers.MemberRank(block.timestamp, _rank);
+            ms.memberRankPointer[ _user ] = maxIndex.incrementIndex();
+            ms.memberRank[ _incrementedKey ] = LibMembers.MemberRank( uint48(block.timestamp), _rank);
 
-            if( maxIndex == type( bytes8 ).min ){
+            if( maxIndex == bytes8(0)){
                 bountiesUp++;
                 continue;
             }
             ms.memberRank[ _currentKey ].rank < _rank ? bountiesUp++ : bountiesDown++;
         }
-        uint256 bounty = bountiesUp * _bounty.UpRate + bountiesDown * _bounty.DownRate;
 
-        _safeTransferFrom(_bounty.Address, msgSender(), _bounty.CurrencyId, bounty, "");
+        LibMembers.Bounty storage _bounty = LibMembers.getBounty();
+        uint256 _bountyUpRate = _bounty.upRate;
+        uint256 _bountyDownRate = _bounty.downRate;
+        uint256 bounty = bountiesUp * _bountyUpRate + bountiesDown * _bountyDownRate;
+        _safeTransferFrom(_bounty.bountyAddress, msgSender(), _bounty.currencyId, bounty, "");
 
-        emit Bounty(msgSender(), bountiesUp, _bounty.UpRate, bountiesDown, _bounty.DownRate);
+        emit Bounty(msgSender(), bountiesUp, _bounty.upRate, bountiesDown, _bounty.downRate);
     }
 
     
@@ -117,11 +84,11 @@ contract iMembers is iERC1155Transfer {
         uint256 bountyBalance;
         uint256 newAmount;
 
-        bountyBalance = LibERC1155.getBalance(_bounty.Address, _bounty.CurrencyId);
+        bountyBalance = LibERC1155.getBalance(_bounty.currencyId, _bounty.bountyAddress);
         //get bountyBalance(bountyAddress, bountyCurrencyId)
 
         newAmount = bountyBalance + amount;
-        require(newAmount <= _bounty.MaxBalance, "New bounty balance exceeds bountyMaxBalance");
+        require(newAmount <= _bounty.maxBalance, "BMB: New bounty balance exceeds bountyMaxBalance");
         //tranfer msgSender, currency
         emit BountyBalanceChange(amount, BountyAccountChange.Positive);
     }
@@ -132,7 +99,7 @@ contract iMembers is iERC1155Transfer {
 
         LibMembers.Bounty storage _bounty = LibMembers.getBounty();
 
-        _safeTransferFrom(_bounty.Address, LibDiamond.getContractOwner(), _bounty.CurrencyId, amount, "");
+        _safeTransferFrom(_bounty.bountyAddress, LibDiamond.contractOwner(), _bounty.currencyId, amount, "");
         emit BountyBalanceChange(amount, BountyAccountChange.Negative);
     }
 
@@ -140,19 +107,19 @@ contract iMembers is iERC1155Transfer {
     function _setBountyCurrencyId(uint256 currencyId) internal {
         LibMembers.Bounty storage _bounty = LibMembers.getBounty();
 
-        _bounty.CurrencyId = currencyId;
+        _bounty.currencyId = currencyId;
     }
 
     function _setBountyMaxBalance(uint256 maxBalance) internal {
         LibMembers.Bounty storage _bounty = LibMembers.getBounty();
-        _bounty.MaxBalance = maxBalance;
+        _bounty.maxBalance = maxBalance;
     }
 
     function _setBountyAddress(address _bountyAddress) internal {
         require(_bountyAddress != address(0), "Bounty address cannot equal the zero address.");
         LibMembers.Bounty storage _bounty = LibMembers.getBounty();
 
-        _bounty.Address = _bountyAddress;
+        _bounty.bountyAddress = _bountyAddress;
     }
 
     /**

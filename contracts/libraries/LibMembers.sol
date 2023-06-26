@@ -1,6 +1,10 @@
 pragma solidity ^0.8.6;
 
+import "./utils/Incrementer.sol";
+
 library LibMembers {
+    using Incrementer for bytes28;
+    using Incrementer for bytes8;
     bytes32 constant MEMBER_STORAGE_POSITION = keccak256("diamond.standard.members.storage");
     struct MembersStorage {
         bytes32 MembersMerkleRoot;
@@ -68,25 +72,8 @@ library LibMembers {
 
     //Key management
     //================================================
-    function createInitialKey(address user, bytes8 index) internal returns (bytes28 keyInit_){
-        keyInit_ = abi.encodePacked( index, user);
-    }
-    function decrement(bytes28 self) external returns( bytes28 decrementedKey_ ){
-        decrementedKey_ = abi.encodePacked( uint64( bytes8( self ) ) - 1, self << 64 );
-    }
-    function increment(bytes28 self) external returns( bytes28 incrementedKey_ ){
-        incrementedKey_ = abi.encodePacked( uint64( bytes8( self ) ) + 1, self << 64 );
-    }
-    function decrement(bytes8 self) internal returns( bytes8 decrementMaxIndex_ ){
-        decrementMaxIndex_ = bytes8( uint64( self ) - 1 );
-    }
-    function increment(bytes8 self) internal returns( bytes8 incrementMaxIndex_ ){
-        incrementMaxIndex_ = bytes8( uint64( self ) + 1 );
-    }
-    //retrieve history batch 
-
-    function getHistoryBatch(address[] users, bytes28[] keys) external{
-
+    function createInitialKey(address user, bytes8 index) internal view returns (bytes28 keyInit_){
+        keyInit_ = bytes28( abi.encodePacked( index, user) );
     }
   
     /**
@@ -96,17 +83,17 @@ library LibMembers {
      * @param depth the amount of historical blocks we'd like to retrieve
      */
     function rankHistory(address user, uint64 depth) internal view returns (MemberRank[] memory rankHistory_){
-        (uint192 _key,uint64 _length) = ( memberStorage().memberRankPointer[ user ].key, 
-                                          memberStorage().memberRankPointer[ user ].length );
+        bytes28 key;
+        bytes8 _maxIndex =  memberStorage().memberRankPointer[ user ];
         rankHistory_ = new MemberRank[](depth);
-        for( uint64 i; i < _length; i++){
-            if( _key == type( uint192 ).min ){
+
+        key = createInitialKey(user,_maxIndex);
+        for( uint64 i; i < depth; i++){
+            if( key == bytes20( user ) ){
                 break;
             }
-            MemberRankBlock memory _memberRankBlock = memberStorage().memberRankBlock[ _key ];
-            rankHistory_[i] =  _memberRankBlock.memberRank ;
-            _key = _memberRankBlock.key;
-
+            rankHistory_[i] =  memberStorage().memberRank[ key ];
+            key.decrementKey;
         }
     }
 

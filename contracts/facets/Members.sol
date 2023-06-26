@@ -1,3 +1,4 @@
+
 pragma solidity ^0.8.6;
 pragma experimental ABIEncoderV2;
 
@@ -5,46 +6,25 @@ import "./ERC1155Transfer.sol";
 import "../internals/iMembers.sol";
 import "../libraries/merkleVerify/MembersVerify.sol";
 import "../interfaces/IMembers.sol";
-contract Members is  iMembers, IMembers {
+contract Members is   IMembers, iMembers {
     
 
-    function initialization(address _bountyAddress) external {
-       _initialization( _bountyAddress );
+    function initialization(address _bountyAddress, uint256 _currencyId, uint256 _maxBalance) external {
+       _initialization( _bountyAddress, _currencyId, _maxBalance);
     }
+    
 
-    function changeRankLabels(bytes30[] memory _oldRankLabels, bytes30[] memory _newRankLabels) external {
-        _changeRankLabels( _oldRankLabels, _newRankLabels);
-    }
 
-    function getUserRankHistory(address user) external view returns (LibMembers.MemberRank[] memory memberHistory_) {
-        _getUserRankHistory( user);
-    }
-
-    function getUserRankLabel(address user) external view returns (bytes30 rankLabel_) {
-        rankLabel_ = _getUserRankLabel( user );
-    }
-
-    function getUserRank(address user) external view returns (uint16 rank_) {
-        rank_ = _getUserRank( user );
-    }
-
-    /**
-     * Enable Owner/Moderator priveleged
-     * @param _rankLabels rank label to be added or deleted
-     * @param _ranks  rank to be given to new label, ignores value on delete
-     * @param _delete  true if deleting a rank label, else push new label
-     * @param _index index of rank label in storage, needed for delete
-     */
-    function changeRanks(bytes30[] memory _rankLabels, uint16[] memory _ranks, bool[] memory _delete, uint16[] memory _index) external {
-        _changeRanks( _rankLabels, _ranks, _delete, _index);
+    function getUserRankHistory(address user, uint64 depth) external view returns (LibMembers.MemberRank[] memory rank_) {
+        rank_ = LibMembers.rankHistory(user, depth);
     }
 
     //
-    function setMemberRankPermissioned(address[] memory _member, bytes30[] memory _rankLabel) external {
-       _setMemberRankPermissioned( _member, _rankLabel);
+    function setMembersRankPermissioned(LibMembers.MerkleLeaf[] memory leaves) external {
+       _setMembersRankPermissioned( leaves);
     }
 
-    function setMembersRanks(bytes32[] memory proof, bool[] memory proofFlags, MembersVerify.Leaf[] memory leaves) external {
+    function setMembersRanks(bytes32[] memory proof, bool[] memory proofFlags, LibMembers.MerkleLeaf[] memory leaves) external {
         _setMembersRanks( proof, proofFlags, leaves);
     }
 
@@ -53,12 +33,6 @@ contract Members is  iMembers, IMembers {
      * Bounty Methods
      */
 
-
-    uint256 bountyCurrencyId;
-    uint256 bountyMaxBalance;
-    address bountyAddress;
-    uint256 bountyUpRate;
-    uint256 bountyDownRate;
 
     function addBountyBalance(uint256 amount) external {
         _addBountyBalance( amount );
@@ -81,6 +55,9 @@ contract Members is  iMembers, IMembers {
         _setBountyAddress( _bountyAddress );
     }
 
+    function getBounty() external view returns(LibMembers.Bounty memory bounty_){
+        bounty_ = LibMembers.getBounty();
+    }
     /**
      * Implement an optimized version of erc1155 specific for bounties? Or unoptimized
      * version for now. But this certainly opens up the possibility of having

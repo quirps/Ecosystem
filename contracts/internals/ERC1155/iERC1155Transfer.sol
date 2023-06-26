@@ -9,9 +9,6 @@ import "../../interfaces/IERC1155Transfer.sol";
 
 contract iERC1155Transfer is iERC1155ContractTransfer, iERC1155Hooks, Context{
 
-    
-
-    
     function _safeTransferFrom(
         address from,
         address to,
