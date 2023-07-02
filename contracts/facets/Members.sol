@@ -1,4 +1,3 @@
-
 pragma solidity ^0.8.6;
 pragma experimental ABIEncoderV2;
 
@@ -6,56 +5,52 @@ import "./ERC1155Transfer.sol";
 import "../internals/iMembers.sol";
 import "../libraries/merkleVerify/MembersVerify.sol";
 import "../interfaces/IMembers.sol";
-contract Members is   IMembers, iMembers {
-    
 
+contract Members is IMembers, iMembers {
     function initialization(address _bountyAddress, uint256 _currencyId, uint256 _maxBalance) external {
-       _initialization( _bountyAddress, _currencyId, _maxBalance);
+        _initialization(_bountyAddress, _currencyId, _maxBalance);
     }
-    
 
-
-    function getUserRankHistory(address user, uint64 depth) external view returns (LibMembers.MemberRank[] memory rank_) {
-        rank_ = LibMembers.rankHistory(user, depth);
+    function getUserRankHistory(address user, uint64 depth) external returns (LibMembers.MemberRank[] memory rank_) {
+        rank_ = _rankHistory(user, depth);
+        //rank_ = LibMembers.rankHistory(user, depth);
     }
 
     //
-    function setMembersRankPermissioned(LibMembers.MerkleLeaf[] memory leaves) external {
-       _setMembersRankPermissioned( leaves);
+    function setMembersRankPermissioned(LibMembers.Leaf[] memory leaves) external {
+        _setMembersRankPermissioned(leaves);
     }
 
-    function setMembersRanks(bytes32[] memory proof, bool[] memory proofFlags, LibMembers.MerkleLeaf[] memory leaves) external {
-        _setMembersRanks( proof, proofFlags, leaves);
+    function setMembersRanks(uint8 v, bytes32 r, bytes32 s, address owner, uint256 nonce, LibMembers.Leaf[] memory leaves) external {
+        _setMembersRanks(v, r, s, owner, nonce, leaves);
     }
 
-    
     /**
      * Bounty Methods
      */
 
-
     function addBountyBalance(uint256 amount) external {
-        _addBountyBalance( amount );
+        _addBountyBalance(amount);
     }
 
     function removeBountyBalance(uint256 amount) external {
-        _removeBountyBalance( amount );
+        _removeBountyBalance(amount);
     }
 
     //permissioned OWNER ONLY
     function setBountyCurrencyId(uint256 currencyId) external {
-        _setBountyCurrencyId( currencyId);
+        _setBountyCurrencyId(currencyId);
     }
 
     function setBountyMaxBalance(uint256 maxBalance) external {
-        _setBountyMaxBalance( maxBalance);
+        _setBountyMaxBalance(maxBalance);
     }
 
     function setBountyAddress(address _bountyAddress) external {
-        _setBountyAddress( _bountyAddress );
+        _setBountyAddress(_bountyAddress);
     }
 
-    function getBounty() external view returns(LibMembers.Bounty memory bounty_){
+    function getBounty() external view returns (LibMembers.Bounty memory bounty_) {
         bounty_ = LibMembers.getBounty();
     }
     /**
@@ -79,9 +74,6 @@ contract Members is   IMembers, iMembers {
      * get updated at some point.
      *
      */
-
-
-
 }
 
 /**

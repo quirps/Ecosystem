@@ -1,8 +1,8 @@
 
 /* global ethers task */
-require("hardhat-gas-reporter");
+//require("hardhat-gas-reporter");
 require("@nomicfoundation/hardhat-toolbox");
-require("hardhat-tracer");
+//require("hardhat-tracer");
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 task('accounts', 'Prints the list of accounts', async () => {

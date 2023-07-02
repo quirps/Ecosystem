@@ -8,25 +8,21 @@ pragma solidity ^0.8.6;
  * 
  * Same system as member rank is used, RankLabel mapped to well ordered set.
  */
-
+import "../libraries/LibModerator.sol";
 contract Moderator{
     /**
      * Just create a ranked list, address associated with number.
      * Moderators should only need to be referencable via current ecosystem, 
      * or directly called by other ecosystems. 
      */
-    modifier moderator (){
-        //moderator of rank index n-1 or lower reject
-        _;
-    }
-    mapping( address => uint8 ) moderatorRank;
+ 
 
-
-    function setModeratorRank(address newModerator, uint8 _rank) external {
-        moderatorRank[ newModerator ] = _rank;
+    //only owner
+    function setModeratorRank(address _moderator, uint8 _rank) external {
+        LibModerator.setModeratorRank(_moderator, _rank);
     }
-    function getModeratorRank(address _moderator) external returns(uint8 moderatorRank_){
-        moderatorRank_ = moderatorRank[ _moderator ];
+    function getModeratorRank(address _moderator) external view returns(uint8 moderatorRank_){
+        moderatorRank_ = LibModerator.getModeratorRank( _moderator );
     }
     
 }

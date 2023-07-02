@@ -10,9 +10,9 @@ library LibMembers {
         bytes32 MembersMerkleRoot;
         mapping(bytes28 => MemberRank) memberRank;
         mapping(address => bytes8) memberRankPointer;
-        uint32 maxRank;
-        bytes32 memberRankRoot;
+        uint256 recoveryNonce;
         mapping(uint8 => Bounty) bounty;
+        uint32 maxRank;
     }
 
     struct Bounty {
@@ -40,7 +40,7 @@ library LibMembers {
      * the member's latest MemberRank. The previous block can be
      * 
      */
-    struct MerkleLeaf {
+    struct Leaf {
         address memberAddress;
         MemberRank memberRank;
     }
@@ -93,7 +93,7 @@ library LibMembers {
                 break;
             }
             rankHistory_[i] =  memberStorage().memberRank[ key ];
-            key.decrementKey;
+            key = key.decrementKey();
         }
     }
 

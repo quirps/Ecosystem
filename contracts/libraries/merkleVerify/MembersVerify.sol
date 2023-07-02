@@ -17,7 +17,7 @@ library MembersVerify {
         // ...
     }
 
-    function multiProofVerify(bytes32[] memory proof, bool[] memory proofFlags, LibMembers.MerkleLeaf[] memory leaves) internal view {
+    function multiProofVerify(bytes32[] memory proof, bool[] memory proofFlags, LibMembers.Leaf[] memory leaves) internal view {
         LibMembers.MembersStorage storage ms = LibMembers.memberStorage();
         bytes32 root = ms.MembersMerkleRoot;
         bytes32[] memory hashedLeaves = new bytes32[](leaves.length);

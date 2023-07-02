@@ -1,14 +1,18 @@
-pragma solidity ^0.8.6;
+pragma solidity ^0.8.9;
 pragma experimental ABIEncoderV2;
 
-import "../libraries/merkleVerify/MembersVerify.sol";
+import "hardhat/console.sol";
+
 import "./ERC1155/iERC1155Transfer.sol";
 import "../libraries/LibMembers.sol";
 import "../libraries/LibERC1155.sol";
 import "../libraries/LibDiamond.sol";
 import "../libraries/utils/Incrementer.sol";
+import "../libraries/verification/MemberVerification.sol";
+import "../libraries/LibModerator.sol";
+import "./Moderators/ModeratorModifiers.sol";
 
-contract iMembers is iERC1155Transfer {
+contract iMembers is iERC1155Transfer, ModeratorModifiers {
     //history is to save gas on not having to prove every time
     using Incrementer for bytes28;
     using Incrementer for bytes8;
@@ -26,41 +30,46 @@ contract iMembers is iERC1155Transfer {
         _setBountyMaxBalance(_maxBalance);
     }
 
-    
     //
-    //MODERATOR 
-    function _setMembersRankPermissioned(LibMembers.MerkleLeaf[] memory leaves) internal {
-        __changeMemberRanks( leaves );
+    //MODERATOR
+    function _setMembersRankPermissioned(LibMembers.Leaf[] memory leaves) internal moderatorMemberPermission {
+        __changeMemberRanks(leaves);
     }
-    function _setMembersRanks(bytes32[] memory proof, bool[] memory proofFlags, LibMembers.MerkleLeaf[] memory leaves) internal {
-        MembersVerify.multiProofVerify(proof, proofFlags, leaves);
-        __changeMemberRanks( leaves );
+
+    function _setMembersRanks(
+        uint8 v,
+        bytes32 r,
+        bytes32 s,
+        address owner,
+        uint256 nonce,
+        LibMembers.Leaf[] memory leaves
+    ) internal {
+        MemberRecover.executeMyFunctionFromSignature(v, r, s, owner, nonce, leaves);
+        __changeMemberRanks(leaves);
     }
-    
-    function __changeMemberRanks( LibMembers.MerkleLeaf[] memory leaves ) private {
+
+    function __changeMemberRanks(LibMembers.Leaf[] memory leaves) private {
         LibMembers.MembersStorage storage ms = LibMembers.memberStorage();
         uint128 bountiesUp;
         uint128 bountiesDown;
-        for (uint256 i; i < leaves.length; i++) { 
-            (address _user, uint48 _timestamp, uint32 _rank) = ( leaves[i].memberAddress, 
-                                                                leaves[i].memberRank.timestamp,
-                                                                leaves[i].memberRank.rank);
-            bytes8 maxIndex = ms.memberRankPointer[ _user ];
+        for (uint256 i; i < leaves.length; i++) {
+            (address _user, uint48 _timestamp, uint32 _rank) = (leaves[i].memberAddress, leaves[i].memberRank.timestamp, leaves[i].memberRank.rank);
+            bytes8 maxIndex = ms.memberRankPointer[_user];
 
             bytes28 _currentKey = LibMembers.createInitialKey(_user, maxIndex);
-            if( _timestamp < ms.memberRank[_currentKey].timestamp || _timestamp == block.timestamp ){
+            if (_timestamp < ms.memberRank[_currentKey].timestamp || _timestamp == block.timestamp) {
                 continue;
             }
             bytes28 _incrementedKey = _currentKey.incrementKey();
-            
-            ms.memberRankPointer[ _user ] = maxIndex.incrementIndex();
-            ms.memberRank[ _incrementedKey ] = LibMembers.MemberRank( uint48(block.timestamp), _rank);
 
-            if( maxIndex == bytes8(0)){
+            ms.memberRankPointer[_user] = maxIndex.incrementIndex();
+            ms.memberRank[_incrementedKey] = LibMembers.MemberRank(uint48(block.timestamp), _rank);
+
+            if (maxIndex == bytes8(0)) {
                 bountiesUp++;
                 continue;
             }
-            ms.memberRank[ _currentKey ].rank < _rank ? bountiesUp++ : bountiesDown++;
+            ms.memberRank[_currentKey].rank < _rank ? bountiesUp++ : bountiesDown++;
         }
 
         LibMembers.Bounty storage _bounty = LibMembers.getBounty();
@@ -71,8 +80,6 @@ contract iMembers is iERC1155Transfer {
 
         emit Bounty(msgSender(), bountiesUp, _bounty.upRate, bountiesDown, _bounty.downRate);
     }
-
-    
 
     /**
      * Bounty Methods
@@ -90,6 +97,7 @@ contract iMembers is iERC1155Transfer {
         newAmount = bountyBalance + amount;
         require(newAmount <= _bounty.maxBalance, "BMB: New bounty balance exceeds bountyMaxBalance");
         //tranfer msgSender, currency
+        _safeTransferFrom(msgSender(), _bounty.bountyAddress, _bounty.currencyId, amount, "");
         emit BountyBalanceChange(amount, BountyAccountChange.Positive);
     }
 
@@ -120,6 +128,25 @@ contract iMembers is iERC1155Transfer {
         LibMembers.Bounty storage _bounty = LibMembers.getBounty();
 
         _bounty.bountyAddress = _bountyAddress;
+    }
+
+    function _rankHistory(address user, uint64 depth) internal  returns (LibMembers.MemberRank[] memory rankHistory_){
+        bytes28 key;
+        uint64 _maxLoops;
+        uint64 _maxIndex64;
+        bytes8 _maxIndex =  LibMembers.memberStorage().memberRankPointer[ user ];
+        _maxIndex64 = uint64( _maxIndex );
+        key = LibMembers.createInitialKey(user,_maxIndex);
+
+        _maxLoops = _maxIndex64 < depth ? _maxIndex64 : depth;
+        rankHistory_ = new LibMembers.MemberRank[]( _maxLoops );
+
+        for( uint64 i; i < _maxLoops; i++){
+            console.logBytes28(key);
+            rankHistory_[_maxLoops - i - 1] =  LibMembers.memberStorage().memberRank[ key ];
+            console.log(rankHistory_[i].timestamp);
+            key = key.decrementKey();
+        }
     }
 
     /**
