@@ -124,12 +124,13 @@ describe("Members", function () {
     let r;
     let s;
     let data;
+    let nonce = 394;
 
     beforeEach(async function () {
       const network = await ethers.getDefaultProvider().getNetwork();
       console.log("Network chain id=", network.chainId);
       const chainId = await ethers.provider.getNetwork().then((network) => network.chainId);
-       ( { v, r, s, data } = generateMemberSignature(diamondAddress, chainId, verificationSigner, verificationPrivateKey, 394, 200) )
+       ( { v, r, s, data } = generateMemberSignature(diamondAddress, chainId, verificationSigner, verificationPrivateKey, nonce, 200) )
       await Moderator.setModeratorRank(moderator.address, 220);
     })
 
@@ -147,7 +148,6 @@ describe("Members", function () {
     });
 
     it("should set leaves via signature", async function () {
-      const nonce = 398;
       await Members.setMembersRanks(v, r, s, verificationSigner.address, nonce, data)
       
       // Add assertions or further checks

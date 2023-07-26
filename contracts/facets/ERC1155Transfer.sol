@@ -70,4 +70,5 @@ contract ERC1155Transfer is   Context, iERC1155Transfer {
 
         return es.operatorApprovals[account][operator];
     }
+    
 }
