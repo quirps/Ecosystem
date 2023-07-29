@@ -2,7 +2,6 @@
 pragma solidity ^0.8.6;
 pragma experimental ABIEncoderV2;
 
-import "hardhat/console.sol";
 import "./LibDiamond.sol";
 library LibFreeze {
     bytes32 constant FREEZE_STORAGE_POSITION = keccak256("diamond.standard.freeze.storage");
@@ -64,7 +63,6 @@ library LibFreeze {
     //============================================
     
     function freezeGlobal(uint256 _freezeDuration, address _facetAddress ) internal  {
-        console.log("Inside freezglobal");
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
         FreezeStorage storage fs = freezeStorage();
         uint16 _maxFreezeSelectors = 65535; 
@@ -79,11 +77,9 @@ library LibFreeze {
 
         uint16 _arrayIndex;
         for(uint16 i; i < facetAddresses.length; i++){
-            console.log("Current address - %s, Facet address - %s",_facetAddress,facetAddresses[i] ) ;
             if( facetAddresses[i] != _facetAddress ){
                 // retrieve selectors of given facet, retrieve address of facet
                bytes4[] memory _facetSelectors = ds.facetFunctionSelectors[ facetAddresses[ i ] ].functionSelectors;
-               console.log("FacetSelectors %s ",_facetSelectors.length);
                for ( uint16 ii; ii < _facetSelectors.length; ii++){
                     fs.facetFreezeAddress[ _facetSelectors[ii] ] = facetAddresses[i];
                     // _freezeCachedSelectors[_arrayIndex] = _facetSelectors[ii] ;
