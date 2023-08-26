@@ -214,7 +214,17 @@ contract ShippingRedeem is Ownable {
  * 
  * 
  * 
- *Simple
- Owner can cancel
- User can return if returnable
+Seller sells to user. 
+Once sold, countdown starts to track free hold time. 
+view function calculate current hold rate 
+view function calculate amount of time before expunged
+user redeem ticket with shipping info
+seller can cancel
+user can change shipping address until seller ships
+create max completion time function
+once shipped create max completion time
+seller can rate once shipped
+user can rate once shipped. once user rates, marks as complete
+
+
  */

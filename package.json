@@ -5,8 +5,11 @@
   "main": "index.js",
   "scripts": {
     "deploy0": "npx hardhat deploy",
-    "test": "mocha ./test/**",
-    "resetUniswap": "rm /home/joe/Documents/UniswapV3Deploy/deploy-v3/state.json"
+    "resetUniswap": "rm /home/joe/Documents/UniswapV3Deploy/deploy-v3/state.json",
+    "test-local": "hardhat --network local test test/test-with-ethers.js",
+    "test": "yarn run-with-hardhat-node 'hardhat test test/test-with-ethers.js' ",
+    "run-with-hardhat-node": "run-with-testrpc --testrpc-cmd ./scripts/hardhat-node",
+    "node-with-gsn": "yarn run-with-hardhat-node 'gsn start'"
   },
   "repository": {
     "type": "git",
@@ -26,7 +29,9 @@
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
     "@opengsn/dev": "3.0.0-beta.2",
+    "@opengsn/provider": "^3.0.0-beta.6",
     "@openzeppelin/merkle-tree": "^1.0.4",
+    "aws-sdk": "^2.1436.0",
     "chai": "^4.3.4",
     "dotenv": "^8.6.0",
     "ethereum-waffle": "^3.4.0",

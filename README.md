@@ -1,3 +1,18 @@
+# MasSwap - A scalable foundation for centralized sources of value to tokenize their assets and distribute accordingly
+
+
+# Features
+- Uses Diamond Standard which enables scalability, upgradeability, reusability, optimizations, Proxy-Architecture solution, static address. [EIP-2535 Diamond Standard](https://github.com/ethereum/EIPs/issues/2535)
+- GSN network integration, offering gassless payments 
+- Optimized token 
+- User's can upgrade their ecosystem at their liesure 
+- Security mechanism to assert valid ecosystem. 
+- Optimization Validations
+- Membership and Rank system for everyone apart of ecosystem
+- Freeze your ecosystem to make it ownerless* or halt your ecosystem entirely
+- Register members
+
+
 # Diamond-3-Hardhat Implementation
 
 This is an implementation for [EIP-2535 Diamond Standard](https://github.com/ethereum/EIPs/issues/2535). To learn about other implementations go here: https://github.com/mudgen/diamond

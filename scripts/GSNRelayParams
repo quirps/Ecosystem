@@ -1,0 +1,9 @@
+{
+  "url": "https://ai-gurus.org",
+  "workdir":  "./app/data",
+  "relayHubAddress": "0x7DDa9Bf2C0602a96c06FA5996F715C7Acfb8E7b0",
+  "managerStakeTokenAddress": "0xE8172A9bf53001d2796825AeC32B68e21FDBb869",
+  "ownerAddress": "0x1dF62f291b2E969fB0849d99D9Ce41e2F137006e",
+  "gasPriceFactor": 1,
+  "ethereumNodeUrl": "https://eth-goerli.g.alchemy.com/v2/_qiTCmzHxP95095KfDnVUp1VKEjJm0QA"
+}
