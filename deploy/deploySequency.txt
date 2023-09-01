@@ -1,0 +1,6 @@
+Deploy and Initialization Sequences are separate
+
+First we will go over deploy sequence (without registry), and then 
+go over what needs to be created. 
+deploy
+======================
