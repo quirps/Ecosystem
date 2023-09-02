@@ -4,3 +4,18 @@ First we will go over deploy sequence (without registry), and then
 go over what needs to be created. 
 deploy
 ======================
+1. deploy diamondDeploy contract
+2. call the deployBytecode method and retrieve address
+3. deploy all contracts associated with this version 
+4. cut the contracts to the diamond 
+
+initialize
+======================
+1. read config file and sequentially deploy each ecosystem
+
+
+/*
+Diamond for the registry? This would enable dynamic typing, which would be needed for optimizations.
+Focus on that later, still too dependent on optimization properties to consider at this point. 
+
+*/
