@@ -22,16 +22,23 @@ task('accounts', 'Prints the list of accounts', async () => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
+  
   solidity: '0.8.9',
   settings: {
     optimizer: {
       enabled: true,
-      runs: 200
+      runs: 80
     }
   },
   gasReporter: {
     enabled: true,
     currency: 'CHF',
     gasPrice: 21
+  },
+  networks: {
+    hardhat: {
+      //blockGasLimit: 10000000
+      gas: 29900000,  // 12 million
+    }
   }
 }
