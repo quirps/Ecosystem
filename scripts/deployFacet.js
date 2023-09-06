@@ -20,7 +20,6 @@ async function deployFacet(FacetNames, diamondAddress, initAddress, calldata){
         functionSelectors: getSelectors(facet)
         })
     }
-    console.log('')
     console.log('Diamond Cut:', cut)
     const diamondCut = await ethers.getContractAt('IDiamondCut', diamondAddress)
     let tx

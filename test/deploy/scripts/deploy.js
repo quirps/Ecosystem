@@ -16,10 +16,17 @@ async function deployDiamond () {
   await diamondCutFacet.deployed()
   console.log('DiamondCutFacet deployed:', diamondCutFacet.address)
 
+  // //Registry 
+  // const Registry = await ethers.getContractFactory('Registry')
+  // const registry = await Registry.deploy()
+  // await registry.deployed()
+
   //diamond bytecode
   const Diamond= await ethers.getContractFactory('Diamond')
   const diamonds = await Diamond.deploy(accounts[0].address, diamondCutFacet.address);
+  await diamonds.deployed()
   const diamondBytecode =Diamond.bytecode 
+
 
   //deploy DiamondDeploy 
   const DiamondDeploy = await ethers.getContractFactory('DiamondDeploy')

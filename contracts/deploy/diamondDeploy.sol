@@ -14,7 +14,7 @@ contract DiamondDeploy {
 
     function deploy(bytes memory _bytecode) external returns (address diamond_) {
         // Initialize a variable to hold the deployed address
-        address deployedAddress;
+        address deployedAddress; //fksdf
 
         require(keccak256(_bytecode) == bytecodeHash, "Bytecode must match that of the Diamond associated with this contract.");
         // ABI encode the constructor parameters

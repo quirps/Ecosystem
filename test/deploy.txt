@@ -8,3 +8,7 @@ Status - Diamond currently being deploy via diamondDeploy and passing all diamon
 What needs to be deployed through registry?
 Just bytecode of diamondDeploy and optimizations
 Facets should be fairly static and be verified at the community's leisure
+
+
+//Implement Registry Deployment
+//Implement Initialization Sequence

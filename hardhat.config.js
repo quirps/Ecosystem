@@ -22,7 +22,7 @@ task('accounts', 'Prints the list of accounts', async () => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  
+  sources: ["./contracts", "./node_modules/registry/contracts"],
   solidity: '0.8.9',
   settings: {
     optimizer: {

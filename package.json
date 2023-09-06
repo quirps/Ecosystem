@@ -1,11 +1,9 @@
 {
-  "name": "contracts-starter",
+  "name": "ecosystem",
   "version": "1.0.0",
   "description": "Template for contract projects.",
   "main": "index.js",
-  "bin": {
-    "mycli": "./gpt/GPTCLITextGenerator.js"
-  },
+ 
   "scripts": {
     "deploy0": "npx hardhat deploy",
     "resetUniswap": "rm /home/joe/Documents/UniswapV3Deploy/deploy-v3/state.json",
@@ -40,7 +38,7 @@
     "dotenv": "^8.6.0",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.4.1",
-    "hardhat": "^2.4.1",
+    "hardhat": "2.11.2",
     "hardhat-gas-reporter": "^1.0.9",
     "hardhat-tracer": "^1.1.0-rc.9",
     "mocha": "^10.0.0",
