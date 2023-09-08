@@ -81,7 +81,6 @@ contract EventFactory is iERC1155Transfer {
         EventDetails storage eventDetails = events[eventId];
         require(block.timestamp < eventDetails.endTime, "The event has ended");
 
-        eventDetails.endTime = uint32(block.timestamp);
         eventDetails.isCancelled = true;
     }
 

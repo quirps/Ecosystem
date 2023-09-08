@@ -6,9 +6,6 @@ pragma solidity ^0.8.9;
 /// @dev This interface describes the methods available in the DiamondDeploy contract
 interface IDiamondDeploy {
 
-    /// @notice This event is emitted when a new Diamond is deployed
-    /// @param bytecode The bytecode of the deployed Diamond contract
-    event NewDiamond(bytes bytecode);
 
     /// @notice Deploy a new Diamond contract
     /// @dev Deploys a new Diamond contract and returns its address

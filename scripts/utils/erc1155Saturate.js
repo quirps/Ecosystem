@@ -5,7 +5,7 @@ const fs = require('fs');
 let CONFIG;
 // Get document, or throw exception on error
 try {
-  CONFIG = yaml.load(fs.readFileSync('/home/jed/Documents/MasSwapTickets/ERC1155Config.yml', 'utf8'));
+  CONFIG = yaml.load(fs.readFileSync('/home/joe/Documents/EcoSystem1/ERC1155Config.yml', 'utf8'));
   console.log(CONFIG);
 } catch (e) {
   console.log(e);

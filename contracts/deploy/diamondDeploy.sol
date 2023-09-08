@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
-
-contract DiamondDeploy {
+import "../interfaces/IDiamondDeploy.sol";
+contract DiamondDeploy is IDiamondDeploy{
     address public diamondCutFacet;
     bytes32 bytecodeHash;
+    /// @notice This event is emitted when a new Diamond is deployed
+    /// @param bytecode The bytecode of the deployed Diamond contract
     event NewDiamond(bytes bytecode);
 
     constructor(bytes memory _bytecode, address _diamondCutFacet) {

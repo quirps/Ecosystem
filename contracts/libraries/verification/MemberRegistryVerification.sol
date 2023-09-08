@@ -15,7 +15,7 @@ library MemberRegistryVerification {
         bytes32 merkleRoot,
         uint256 nonce,
         uint256 deadline
-    ) external {
+    ) internal {
         LibMemberRegistry.MemberRegistry_Storage storage ls = LibMemberRegistry.MemberRegistryStorage();
         require(nonce > ls.nonces[owner],"Nonce is less than or equal to current nonce value associated with this address." );
         bytes32 eip712DomainHash = keccak256(

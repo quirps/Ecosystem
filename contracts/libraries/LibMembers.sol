@@ -66,7 +66,7 @@ library LibMembers {
 
     }
     
-    function getBlockHistoryNumber(bytes28 key) external returns(bytes8 number_){
+    function getBlockHistoryNumber(bytes28 key) internal returns(bytes8 number_){
         number_ = bytes8( key );
     }
 
