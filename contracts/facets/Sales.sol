@@ -17,15 +17,15 @@ contract Sales is Ownable {
         IERC20 paymentToken;
     }
 
-struct SaleInput {
-    uint32 startTime;
-    uint32 endTime;
-    uint256 rankRequired;
-    uint256 limit;
-    uint256[] itemIds;
-    uint256[] itemAmounts;
-    address paymentTokenAddress;
-}
+    struct SaleInput {
+        uint32 startTime;
+        uint32 endTime;
+        uint256 rankRequired;
+        uint256 limit;
+        uint256[] itemIds;
+        uint256[] itemAmounts;
+        address paymentTokenAddress;
+    }
     uint256 public salesCounter; // New counter to keep track of sale IDs
 
     // memberRank[address] => rank
@@ -44,75 +44,68 @@ struct SaleInput {
         itemContract = IERC1155(_itemContract);
     }
 
- 
-function createTieredSales( SaleInput[] calldata salesInputs) external onlyOwner {
-    uint256 inputLength = salesInputs.length;
-    uint256 localCounter = salesCounter;
+    function createTieredSales(SaleInput[] calldata salesInputs) external onlyOwner {
+        uint256 inputLength = salesInputs.length;
+        uint256 localCounter = salesCounter;
 
-    for (uint256 i = 0; i < inputLength; i++) {
-        uint256 currentSaleId = localCounter + 1;
+        for (uint256 i = 0; i < inputLength; i++) {
+            uint256 currentSaleId = localCounter + 1;
 
-        createSale(
-            currentSaleId,
-            salesInputs[i],
-            i == 0 ? 0 : localCounter  // Set predecessorSaleId to 0 for the first sale
-        );
+            createSale(
+                currentSaleId,
+                salesInputs[i],
+                i == 0 ? 0 : localCounter // Set predecessorSaleId to 0 for the first sale
+            );
 
+            localCounter = currentSaleId;
+        }
 
-        localCounter = currentSaleId;
+        salesCounter = localCounter; // Update the salesCounter in storage at the end of the function
     }
 
-    salesCounter = localCounter; // Update the salesCounter in storage at the end of the function
-}
+    function createSale(uint256 saleId, SaleInput calldata saleInput, uint256 predecessorSaleId) internal {
+        require(saleInput.itemIds.length == saleInput.itemAmounts.length, "Item IDs and amounts must have the same length");
+        require(saleInput.endTime > saleInput.startTime, "End time must be greater than start time");
 
-function createSale(
-    uint256 saleId,
-    SaleInput calldata saleInput,
-    uint256 predecessorSaleId
-) internal {
-    require(saleInput.itemIds.length == saleInput.itemAmounts.length, "Item IDs and amounts must have the same length");
-    require(saleInput.endTime > saleInput.startTime, "End time must be greater than start time");
+        sales[saleId] = Sale({
+            startTime: saleInput.startTime,
+            endTime: saleInput.endTime,
+            rankRequired: saleInput.rankRequired,
+            limit: saleInput.limit,
+            predecessorSaleId: predecessorSaleId,
+            itemIds: saleInput.itemIds,
+            itemAmounts: saleInput.itemAmounts,
+            paymentToken: IERC20(saleInput.paymentTokenAddress)
+        });
 
-    sales[saleId] = Sale({
-        startTime: saleInput.startTime,
-        endTime: saleInput.endTime,
-        rankRequired: saleInput.rankRequired,
-        limit: saleInput.limit,
-        predecessorSaleId: predecessorSaleId,
-        itemIds: saleInput.itemIds,
-        itemAmounts: saleInput.itemAmounts,
-        paymentToken: IERC20(saleInput.paymentTokenAddress)
-    });
-
-    emit SaleCreated(saleId);
-}
+        emit SaleCreated(saleId);
+    }
 
     function viewSale(uint256 saleId) external view returns (Sale[] memory sales_) {
-    require(sales[saleId].endTime > 0 ,"Sale must have existed.");
+        require(sales[saleId].endTime > 0, "Sale must have existed.");
 
-    uint256 maxPredecessors = 100; // to prevent infinite loops, you can adjust this value
-    Sale[] memory salesList = new Sale[](maxPredecessors);
-    uint256 count = 0;
-    Sale memory currentSale = sales[saleId];
+        uint256 maxPredecessors = 100; // to prevent infinite loops, you can adjust this value
+        Sale[] memory salesList = new Sale[](maxPredecessors);
+        uint256 count = 0;
+        Sale memory currentSale = sales[saleId];
 
-    while(currentSale.predecessorSaleId != 0 && count < maxPredecessors) {
+        while (currentSale.predecessorSaleId != 0 && count < maxPredecessors) {
+            salesList[count] = currentSale;
+            count++;
+            currentSale = sales[currentSale.predecessorSaleId];
+        }
+
+        // Add the last sale which has predecessorSaleId = 0
         salesList[count] = currentSale;
-        count++;
-        currentSale = sales[currentSale.predecessorSaleId];
-    }
-    
-    // Add the last sale which has predecessorSaleId = 0
-    salesList[count] = currentSale;
-    
-    // Now we resize the array to remove the unused slots
-    Sale[] memory trimmedSalesList = new Sale[](count + 1);
-    for(uint256 i = 0; i <= count; i++) {
-        trimmedSalesList[i] = salesList[i];
-    }
 
-    return trimmedSalesList;
-}
+        // Now we resize the array to remove the unused slots
+        Sale[] memory trimmedSalesList = new Sale[](count + 1);
+        for (uint256 i = 0; i <= count; i++) {
+            trimmedSalesList[i] = salesList[i];
+        }
 
+        return trimmedSalesList;
+    }
 
     function buyItems(uint256 saleId, uint256 amount) external {
         Sale storage sale = sales[saleId];

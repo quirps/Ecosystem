@@ -1,5 +1,5 @@
 //Deploys current version
-const hre = require('hardhat')
+const {ethers} = require('hardhat')
 const {
     getSelectors
 } = require("../scripts/libraries/diamond")
@@ -11,12 +11,12 @@ const {FACETS } = require('./constants')
 // Facet[] memory facets
 //Likely import this from config
 
-async function deploy() {
+async function preDiamondDeploy() {
     let diamondCutFacetAddress;
     let facets = []
     let deployedStatuses = [];
     for (let facetName of FACETS) {
-        let Facet = await hre.ethers.getContractFactory(facetName);
+        let Facet = await ethers.getContractFactory(facetName);
         const facet = await Facet.deploy()
         deployedStatuses.push(facet.deployed());
         if (facetName = "DiamondCutFacet") {
@@ -37,4 +37,12 @@ async function deploy() {
     return [diamondDeploy.address, facets]
 }
 
-deploy()
+if (require.main === module) {
+    preDiamondDeploy()
+      .then(() => process.exit(0))
+      .catch(error => {
+        console.error(error)
+        process.exit(1)
+      })
+  }
+module.exports = {preDiamondDeploy}
