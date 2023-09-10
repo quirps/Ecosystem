@@ -3,6 +3,7 @@
 //require("hardhat-gas-reporter");
 require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-diamond-abi");
+const {FACETS} = require('./deploy/constants')
 //require("hardhat-tracer");
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -28,6 +29,10 @@ module.exports = {
   diamondAbi: {
     // (required) The name of your Diamond ABI
     name: "BestDappEver",
+    filter: function (abiElement, index, fullAbi, fullyQualifiedName) {
+      return FACETS.includes(abiElement.name);
+    },
+    strict: true
   },
   settings: {
     optimizer: {
