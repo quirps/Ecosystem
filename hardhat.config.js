@@ -28,7 +28,7 @@ module.exports = {
   solidity: '0.8.9',
   diamondAbi: {
     // (required) The name of your Diamond ABI
-    name: "BestDappEver",
+    name: "Ecosystem",
     filter: function (abiElement, index, fullAbi, fullyQualifiedName) {
       return FACETS.includes(abiElement.name);
     },
