@@ -2,6 +2,7 @@
 /* global ethers task */
 //require("hardhat-gas-reporter");
 require("@nomicfoundation/hardhat-toolbox");
+require("hardhat-diamond-abi");
 //require("hardhat-tracer");
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -24,6 +25,10 @@ task('accounts', 'Prints the list of accounts', async () => {
 module.exports = {
   sources: ["./contracts", "./node_modules/registry/contracts"],
   solidity: '0.8.9',
+  diamondAbi: {
+    // (required) The name of your Diamond ABI
+    name: "BestDappEver",
+  },
   settings: {
     optimizer: {
       enabled: true,

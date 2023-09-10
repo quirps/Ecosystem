@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Template for contract projects.",
   "main": "index.js",
- 
   "scripts": {
     "deploy0": "npx hardhat deploy",
     "resetUniswap": "rm /home/joe/Documents/UniswapV3Deploy/deploy-v3/state.json",
@@ -49,6 +48,7 @@
     "standard": "^16.0.3"
   },
   "dependencies": {
+    "hardhat-diamond-abi": "^3.0.1",
     "package.json": "^2.0.1"
   }
 }
