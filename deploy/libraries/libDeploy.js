@@ -6,5 +6,11 @@ function facetNameOrder(facetNames){
       });
 }
 
+function facetUploadVersionConvert(facetContractFactories){
+  let facetsUpload = []
+  for( let factory of facetContractFactories){
+      facetsUpload.push( [factory.address, getSelectors] )
+  }
+}
 
 module.exports = {facetNameOrder}

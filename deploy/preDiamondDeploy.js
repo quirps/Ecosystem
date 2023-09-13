@@ -12,23 +12,24 @@ const {FACETS } = require('./constants')
 // Facet[] memory facets
 //Likely import this from config
 
-async function preDiamondDeploy() {
+async function preDiamondDeploy(facetNames) {
     let diamondCutFacetAddress;
     let facets = []
     let deployedStatuses = [];
-    for (let facetName of FACETS) {
+    for (let facetName of facetNames || FACETS) {
         let Facet = await ethers.getContractFactory(facetName);
         const facet = await Facet.deploy()
         deployedStatuses.push(facet.deployed());
-        if (facetName = "DiamondCutFacet") {
+        if (facetName == "DiamondCutFacet") {
             diamondCutFacetAddress = facet.address;
+            continue
         }
         facets.push([
             facet.address, getSelectors(facet)
         ])
     }
     await Promise.all(deployedStatuses)
-
+ 
     const Diamond = await hre.ethers.getContractFactory('Diamond');
 
     const DiamondDeploy = await hre.ethers.getContractFactory('DiamondDeploy');

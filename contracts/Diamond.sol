@@ -11,6 +11,7 @@ pragma solidity ^0.8.0;
 import { LibDiamond } from "./libraries/LibDiamond.sol";
 import { IDiamondCut } from "./interfaces/IDiamondCut.sol";
 
+import "hardhat/console.sol";
 contract Diamond {    
 
     constructor(address _contractOwner, address _diamondCutFacet) payable {        
@@ -38,6 +39,7 @@ contract Diamond {
             ds.slot := position
         }
         // get facet from function selector
+        console.logBytes4(msg.sig);
         address facet = ds.selectorToFacetAndPosition[msg.sig].facetAddress;
         require(facet != address(0), "Diamond: Function does not exist");
         // Execute external function from facet using delegatecall and return any value.

@@ -8,6 +8,15 @@ import "../../interfaces/IERC1155Transfer.sol";
 
 
 contract iERC1155Transfer is iERC1155ContractTransfer, iERC1155Hooks, Context{
+/**
+     * @dev Emitted when `account` grants or revokes permission to `operator` to transfer their tokens, according to
+     * `approved`.
+     */
+    event ApprovalForAll(address indexed account, address indexed operator, bool approved);
+  /**
+     * @dev Equivalent to multiple {TransferSingle} events, where `operator`, `from` and `to` are the same for all
+     * transfers.
+     */
 
     function _safeTransferFrom(
         address from,

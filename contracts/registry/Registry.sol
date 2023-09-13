@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 import "../interfaces/IDiamondDeploy.sol";
 import "../interfaces/IDiamondCut.sol";
 
+import "hardhat/console.sol";
+
 contract DiamondRegistry {
     // State Variables
     address public owner;
@@ -157,6 +159,9 @@ contract DiamondRegistry {
         Facet[] memory facets = _version.facets;
         IDiamondCut.FacetCut[] memory _facetCut = new IDiamondCut.FacetCut[](facets.length);
         for (uint256 i = 0; i < facets.length; i++) {
+            console.log(i);
+            console.log(facets[i].facetAddress);
+            console.logBytes4(facets[i].functionSelectors[0]);
             _facetCut[i] = IDiamondCut.FacetCut({
                 facetAddress: facets[i].facetAddress,
                 action: IDiamondCut.FacetCutAction.Add,

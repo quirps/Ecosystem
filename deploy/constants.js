@@ -1,6 +1,6 @@
 const FACETS = [
     'DiamondCutFacet', 'DiamondLoupeFacet', 'ERC1155', 'ERC1155Transfer', 'FreezeGlobal', 'FreezeOwner', 'MemberRegistry',
-    'Members', 'Moderator', 'OwnershipFacet', 'Sales', 'TicketRedeemFacet'
+    'Members', 'Moderator', 'OwnershipFacet'
 ]
 const INITALIZE = [
     ['ERC1155', 'mint()'],

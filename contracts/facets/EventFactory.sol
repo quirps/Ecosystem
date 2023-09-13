@@ -15,13 +15,13 @@ contract EventFactory {
         uint256 minEntries;
         uint256 maxEntries;
         uint256 currentEntries;
+        bytes imageUri;
         mapping(uint256 => TicketDetail) ticketDetails;  // ticketId to TicketDetail
     }
 
     address public owner;
     IERC1155 public trustedTokenContract;
     mapping(uint256 => EventDetail) public events;  // eventId to EventDetail
-
     event EventCreated(uint256 eventId);
     event TicketRedeemed(uint256 eventId, uint256 ticketId, uint256 amount);
 
@@ -34,7 +34,12 @@ contract EventFactory {
         owner = msg.sender;
         trustedTokenContract = IERC1155(_trustedTokenContract);
     }
+    function setUri( 
+        uint256 eventId,
+        bytes memory imageLink
+    ) external onlyOwner{
 
+    }
     function createEvent(
         uint256 eventId,
         uint32 startTime,

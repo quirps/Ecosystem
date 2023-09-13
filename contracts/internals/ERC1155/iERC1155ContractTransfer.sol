@@ -16,6 +16,10 @@ contract iERC1155ContractTransfer{
      * @dev Equivalent to multiple {TransferSingle} events, where `operator`, `from` and `to` are the same for all
      * transfers.
      */
+   /**
+     * @dev Equivalent to multiple {TransferSingle} events, where `operator`, `from` and `to` are the same for all
+     * transfers.
+     */
     event TransferBatch(
         address indexed operator,
         address indexed from,
@@ -23,12 +27,6 @@ contract iERC1155ContractTransfer{
         uint256[] ids,
         uint256[] values
     );
-
-/**
-     * @dev Emitted when `account` grants or revokes permission to `operator` to transfer their tokens, according to
-     * `approved`.
-     */
-    event ApprovalForAll(address indexed account, address indexed operator, bool approved);
 
      function _doSafeTransferAcceptanceCheck(
         address operator,

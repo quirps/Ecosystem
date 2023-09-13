@@ -40,7 +40,7 @@ contract Sales is Ownable {
     event SaleCreated(uint256 saleId);
     event ItemPurchased(uint256 saleId, address buyer, uint256 amount);
 
-    constructor(address _itemContract) {
+    function initializor(address _itemContract) external {
         itemContract = IERC1155(_itemContract);
     }
 

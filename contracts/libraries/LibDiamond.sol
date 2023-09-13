@@ -6,7 +6,6 @@ pragma solidity ^0.8.0;
 * EIP-2535 Diamonds: https://eips.ethereum.org/EIPS/eip-2535
 /******************************************************************************/
 import { IDiamondCut } from "../interfaces/IDiamondCut.sol";
-
 // Remember to add the loupe functions from DiamondLoupeFacet to the diamond.
 // The loupe functions are required by the EIP2535 Diamonds standard
 
@@ -89,6 +88,7 @@ library LibDiamond {
     }
 
     function addFunctions(address _facetAddress, bytes4[] memory _functionSelectors) internal {
+
         require(_functionSelectors.length > 0, "LibDiamondCut: No selectors in facet to cut");
         DiamondStorage storage ds = diamondStorage();        
         require(_facetAddress != address(0), "LibDiamondCut: Add facet can't be address(0)");

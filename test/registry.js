@@ -60,7 +60,7 @@ describe("DiamondRegistry", () => {
             const versionNumber = 1;
             const optimizationMaps = [];
 
-
+            console.log(facets)
             await expect(diamondRegistry.uploadVersion(versionNumber, deployDiamondAddress, optimizationMaps, facets))
                 .to.emit(diamondRegistry, 'VersionUploaded')
                 .withArgs(versionNumber);

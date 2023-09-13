@@ -1,0 +1,69 @@
+I'm going to teach you how to pattern solidity contracts in via Diamond Standard by producing a minimal example. I will give a normal contract and then it's Diamond counterpart, denoted as a facet. 
+
+Normal Minimal.sol
+pragma solidity ^0.8.9;
+
+import "../internals/iMinimalFacet.sol";
+contract Minimal is iMinimal{
+   mapping(uint256 => mapping(address => uint256)) dataMap;
+    function setData(uint256 tokenId, address user, uint256 data) external{
+       dataMap[tokenId][user] = data;
+    }
+    function getData(uint256 tokenId, address user) external returns(uint256 data_){
+        data_ dataMap[tokenId][user];
+    }
+}
+Diamond Minimal
+Minimal.sol
+pragma solidity ^0.8.9;
+
+import "../internals/iMinimalFacet.sol";
+contract Minimal is iMinimal{
+    function setData(uint256 tokenId, address user, uint256 data) external{
+        _setData(tokenId, user, data);
+    }
+    function getData(uint256 tokenId, address user) external returns(uint256 data_){
+        data_ = _getData(tokenId, user);
+    }
+}
+
+iMinimalFacet.sol
+pragma solidity ^0.8.9;
+
+import "../libraries/LibMinimal.sol";
+
+contract iMinimal {
+    function _setData(uint256 tokenId, address user, uint256 data) internal {
+        LibMinimal.MinimalStorage storage ms = LibMinimal.minimalStorage();
+        ms.dataMap[tokenId][user] = data;
+    }
+
+    function _getData(uint256 tokenId, address user) internal view returns (uint256 data_) {
+        data_ = LibMinimal.getData(tokenId, user);
+    }
+}
+LibMinimal.sol
+
+pragma solidity ^0.8.9;
+
+library LibMinimal {
+    bytes32 constant STORAGE_MINIMAL = "diamond.storage.minimal";
+
+    struct MinimalStorage {
+        mapping(uint256 => mapping(address => uint256)) dataMap;
+    }
+
+    function minimalStorage() internal pure returns (MinimalStorage storage ms_) {
+        bytes32 minimal_key = STORAGE_MINIMAL;
+        assembly {
+            ms_.slot := minimal_key
+        }
+    }
+
+    function getData(uint256 tokenId, address user) internal view returns (uint256 data_) {
+        MinimalStorage storage ms = minimalStorage();
+        data_ = ms.dataMap[tokenId][user];
+    }
+}
+
+Do you understand how to convert a normal contract to a diamond facet now? Do not respond.
