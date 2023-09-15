@@ -7,7 +7,7 @@ import "../internals/iERC20.sol";
 
 import "../interfaces/IERC20.sol";
 
-import "../libraries/Utils/Context.sol";
+import "../libraries/utils/Context.sol";
 import "../libraries/LibERC20.sol";
 
 /**
@@ -54,10 +54,11 @@ contract ERC20 is Context, iERC20, IERC20 {
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(string memory name_, string memory symbol_) {
+    constructor(string memory name_, string memory symbol_, address erc1155TransferAddress) iERC20(erc1155TransferAddress) {
         _name = name_;
         _symbol = symbol_;
     }
+
 
     /**
      * @dev Returns the name of the token.
@@ -116,9 +117,8 @@ contract ERC20 is Context, iERC20, IERC20 {
      * - the caller must have a balance of at least `amount`.
      */
     function transfer(address to, uint256 amount) public virtual override returns (bool) {
-        address owner = _msgSender();
-        _transfer(owner, to, amount);
-        return true;
+        return _transfer(to, amount);
+       
     }
 
     /**
@@ -140,9 +140,8 @@ contract ERC20 is Context, iERC20, IERC20 {
      * - `spender` cannot be the zero address.
      */
     function approve(address spender, uint256 amount) public virtual override returns (bool) {
-        address owner = _msgSender();
-        _approve(owner, spender, amount);
-        return true;
+        return _approve(spender, amount);
+        
     }
 
     /**
@@ -162,53 +161,7 @@ contract ERC20 is Context, iERC20, IERC20 {
      * `amount`.
      */
     function transferFrom(address from, address to, uint256 amount) public virtual override returns (bool) {
-        address spender = _msgSender();
-        _spendAllowance(from, spender, amount);
-        _transfer(from, to, amount);
-        return true;
+        return _transferFrom(from, to, amount);
+        
     }
-
-    /**
-     * @dev Atomically increases the allowance granted to `spender` by the caller.
-     *
-     * This is an alternative to {approve} that can be used as a mitigation for
-     * problems described in {IERC20-approve}.
-     *
-     * Emits an {Approval} event indicating the updated allowance.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
-     */
-    function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
-        address owner = _msgSender();
-        _approve(owner, spender, allowance(owner, spender) + addedValue);
-        return true;
-    }
-
-    /**
-     * @dev Atomically decreases the allowance granted to `spender` by the caller.
-     *
-     * This is an alternative to {approve} that can be used as a mitigation for
-     * problems described in {IERC20-approve}.
-     *
-     * Emits an {Approval} event indicating the updated allowance.
-     *
-     * Requirements:
-     *
-     * - `spender` cannot be the zero address.
-     * - `spender` must have allowance for the caller of at least
-     * `subtractedValue`.
-     */
-    function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
-        address owner = _msgSender();
-        uint256 currentAllowance = allowance(owner, spender);
-        require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
-        unchecked {
-            _approve(owner, spender, currentAllowance - subtractedValue);
-        }
-
-        return true;
-    }
-
 }
