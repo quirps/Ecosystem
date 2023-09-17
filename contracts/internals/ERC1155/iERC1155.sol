@@ -7,10 +7,10 @@ import "../../interfaces/IERC1155Receiver.sol";
 import "../../libraries/utils/Address.sol";
 import "../../libraries/utils/Context.sol";
 
- contract iERC1155 is  iERC1155ContractTransfer, Context{
+contract iERC1155 is iERC1155ContractTransfer, Context {
     using Address for address;
 
- /**
+    /**
      * @dev Sets a new URI for all token types, by relying on the token type ID
      * substitution mechanism
      * https://eips.ethereum.org/EIPS/eip-1155#metadata[defined in the EIP].
@@ -29,12 +29,11 @@ import "../../libraries/utils/Context.sol";
      * Because these URIs cannot be meaningfully represented by the {URI} event,
      * this function emits no events.
      */
-    function _setURI(string memory newuri) internal  {
-        LibERC1155.ERC1155Storage storage es =  LibERC1155.erc1155Storage();
+    function _setURI(string memory newuri) internal {
+        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
         es.uri = newuri;
     }
-    
-  
+
     /**
      * @dev Creates `amount` tokens of token type `id`, and assigns them to `to`.
      *
@@ -51,15 +50,12 @@ import "../../libraries/utils/Context.sol";
 
         LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
         address operator = _msgSender();
-        uint256[] memory ids = _asSingletonArray(id);
-        uint256[] memory amounts = _asSingletonArray(amount);
-
-        _beforeTokenTransfer(operator, address(0), to, ids, amounts, data);
+        uint256[] memory ids = LibERC1155._asSingletonArray(id);
+        uint256[] memory amounts = LibERC1155._asSingletonArray(amount);
 
         es.balance[id][to] += amount;
+        es.totalSupply += amount;
         emit TransferSingle(operator, address(0), to, id, amount);
-
-        _afterTokenTransfer(operator, address(0), to, ids, amounts, data);
 
         _doSafeTransferAcceptanceCheck(operator, address(0), to, id, amount, data);
     }
@@ -75,31 +71,24 @@ import "../../libraries/utils/Context.sol";
      * - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155BatchReceived} and return the
      * acceptance magic value.
      */
-    function _mintBatch(
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) internal {
+    function _mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) internal {
         require(to != address(0), "ERC1155: mint to the zero address");
         require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
-
+        uint256 _totalSupply;
         LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
 
         address operator = _msgSender();
 
-        _beforeTokenTransfer(operator, address(0), to, ids, amounts, data);
-
         for (uint256 i = 0; i < ids.length; i++) {
             es.balance[ids[i]][to] += amounts[i];
+            _totalSupply += amounts[i];
         }
-
+        es.totalSupply = _totalSupply;
         emit TransferBatch(operator, address(0), to, ids, amounts);
-
-        _afterTokenTransfer(operator, address(0), to, ids, amounts, data);
 
         _doSafeBatchTransferAcceptanceCheck(operator, address(0), to, ids, amounts, data);
     }
+
     /**
      * @dev Destroys `amount` tokens of token type `id` from `from`
      *
@@ -116,20 +105,18 @@ import "../../libraries/utils/Context.sol";
         LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
 
         address operator = _msgSender();
-        uint256[] memory ids = _asSingletonArray(id);
-        uint256[] memory amounts = _asSingletonArray(amount);
-
-        _beforeTokenTransfer(operator, from, address(0), ids, amounts, "");
+        uint256[] memory ids = LibERC1155._asSingletonArray(id);
+        uint256[] memory amounts = LibERC1155._asSingletonArray(amount);
 
         uint256 fromBalance = es.balance[id][from];
         require(fromBalance >= amount, "ERC1155: burn amount exceeds balance");
+        require(es.totalSupply >= amount, "Exceeds total supply.");
         unchecked {
             es.balance[id][from] = fromBalance - amount;
+            es.totalSupply -= amount;
         }
 
         emit TransferSingle(operator, from, address(0), id, amount);
-
-        _afterTokenTransfer(operator, from, address(0), ids, amounts, "");
     }
 
     /**
@@ -146,92 +133,25 @@ import "../../libraries/utils/Context.sol";
         require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
 
         LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
-
         address operator = _msgSender();
 
-        _beforeTokenTransfer(operator, from, address(0), ids, amounts, "");
-
+        uint256 _totalAmount;
         for (uint256 i = 0; i < ids.length; i++) {
             uint256 id = ids[i];
             uint256 amount = amounts[i];
+            _totalAmount += amount;
 
             uint256 fromBalance = es.balance[id][from];
             require(fromBalance >= amount, "ERC1155: burn amount exceeds balance");
+            require(es.totalSupply >= _totalAmount, "Exceeds total supply.");
             unchecked {
                 es.balance[id][from] = fromBalance - amount;
             }
         }
+        es.totalSupply -= _totalAmount;
 
         emit TransferBatch(operator, from, address(0), ids, amounts);
-
-        _afterTokenTransfer(operator, from, address(0), ids, amounts, "");
     }
-    
-
-    /**
-     * @dev Hook that is called before any token transfer. This includes minting
-     * and burning, as well as batched variants.
-     *
-     * The same hook is called on both single and batched variants. For single
-     * transfers, the length of the `ids` and `amounts` arrays will be 1.
-     *
-     * Calling conditions (for each `id` and `amount` pair):
-     *
-     * - When `from` and `to` are both non-zero, `amount` of ``from``'s tokens
-     * of token type `id` will be  transferred to `to`.
-     * - When `from` is zero, `amount` tokens of token type `id` will be minted
-     * for `to`.
-     * - when `to` is zero, `amount` of ``from``'s tokens of token type `id`
-     * will be burned.
-     * - `from` and `to` are never both zero.
-     * - `ids` and `amounts` have the same, non-zero length.
-     *
-     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
-     */
-    function _beforeTokenTransfer(
-        address operator,
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) internal  {}
-
-    /**
-     * @dev Hook that is called after any token transfer. This includes minting
-     * and burning, as well as batched variants.
-     *
-     * The same hook is called on both single and batched variants. For single
-     * transfers, the length of the `id` and `amount` arrays will be 1.
-     *
-     * Calling conditions (for each `id` and `amount` pair):
-     *
-     * - When `from` and `to` are both non-zero, `amount` of ``from``'s tokens
-     * of token type `id` will be  transferred to `to`.
-     * - When `from` is zero, `amount` tokens of token type `id` will be minted
-     * for `to`.
-     * - when `to` is zero, `amount` of ``from``'s tokens of token type `id`
-     * will be burned.
-     * - `from` and `to` are never both zero.
-     * - `ids` and `amounts` have the same, non-zero length.
-     *
-     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
-     */
-    function _afterTokenTransfer(
-        address operator,
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
-    ) internal  {}
 
     
-
-    function _asSingletonArray(uint256 element) private pure returns (uint256[] memory) {
-        uint256[] memory array = new uint256[](1);
-        array[0] = element;
-
-        return array;
-    }
 }

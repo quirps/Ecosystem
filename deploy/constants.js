@@ -1,5 +1,5 @@
 const FACETS = [
-    'DiamondCutFacet', 'DiamondLoupeFacet', 'ERC1155', 'ERC1155Transfer', 'FreezeGlobal', 'FreezeOwner', 'MemberRegistry',
+    'DiamondCutFacet', 'DiamondLoupeFacet', 'ERC1155', 'ERC1155Transfer','ERC20', 'FreezeGlobal', 'FreezeOwner', 'MemberRegistry',
     'Members', 'Moderator', 'OwnershipFacet'
 ]
 const INITALIZE = [

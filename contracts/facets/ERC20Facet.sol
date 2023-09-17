@@ -54,7 +54,8 @@ contract ERC20 is Context, iERC20, IERC20 {
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(string memory name_, string memory symbol_, address erc1155TransferAddress) iERC20(erc1155TransferAddress) {
+  
+    function initializor(string memory name_, string memory symbol_, address erc1155TransferAddress) external  {
         _name = name_;
         _symbol = symbol_;
     }
@@ -105,7 +106,7 @@ contract ERC20 is Context, iERC20, IERC20 {
      */
     function balanceOf(address account) public view virtual override returns (uint256 balance_) {
         LibERC20.ERC20_Storage storage er20s = LibERC20.erc20Storage();
-        balance_ = er20s.balances[ account ];
+        balance_ = _balanceOf(account);
     }
 
     /**

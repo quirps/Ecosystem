@@ -10,6 +10,7 @@ library LibERC1155 {
         mapping(address => mapping(address => bool)) operatorApprovals;
         // Used as the URI for all token types by relying on ID substitution, e.g. https://token-cdn-domain/{id}.json
         string uri;
+        uint256 totalSupply;
     }
 
     function erc1155Storage() internal pure returns (ERC1155Storage storage es_) {
@@ -27,5 +28,11 @@ library LibERC1155 {
     function getOperatorApproval(address user, address operator) internal view returns (bool approved_) {
         ERC1155Storage storage es = erc1155Storage();
         approved_ = es.operatorApprovals[user][operator];
+    }
+    function _asSingletonArray(uint256 element) internal pure  returns (uint256[] memory) {
+        uint256[] memory array = new uint256[](1);
+        array[0] = element;
+
+        return array;
     }
 }
