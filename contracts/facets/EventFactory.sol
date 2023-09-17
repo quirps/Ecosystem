@@ -3,9 +3,10 @@ pragma solidity ^0.8.0;
 
 import "../interfaces/IERC1155Transfer.sol";
 import "../libraries/utils/MerkleProof.sol";
+import "../libraries/utils/Context.sol";
+import "../internals/iOwnership.sol";
 
-
-contract EventFactory {
+contract EventFactory is Context, iOwnership {
     struct TicketDetail {
         uint256 minAmount;
         uint256 maxAmount;
@@ -30,7 +31,7 @@ contract EventFactory {
         mapping(uint256 => TicketDetail) ticketDetails;
         mapping(address => mapping(uint256 => uint256)) ticketsRedeemed; // Moved inside
     }
-    address public owner;
+    
     IERC1155Transfer public immutable tokenContract;
     mapping(uint256 => EventDetail) public events;
 
@@ -53,12 +54,11 @@ contract EventFactory {
     event TicketRefunded(uint256 eventId, uint256 ticketId, uint256 amount);
 
     modifier onlyOwner() {
-        require(msg.sender == owner, "Only owner can call this function");
+        require(msg.sender == _owner(), "Only owner can call this function");
         _;
     }
 
     constructor(address _trustedTokenContract) {
-        owner = msg.sender;
         tokenContract = IERC1155Transfer(_trustedTokenContract);
     }
 

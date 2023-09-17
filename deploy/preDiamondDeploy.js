@@ -2,8 +2,9 @@
 
 const {ethers} = require('hardhat')
 const {
-    getSelectors
-} = require("../scripts/libraries/diamond")
+    getSelectors,
+    selectorCollsion
+} = require("./libraries/diamond")
 const {FACETS } = require('./constants')
 //Import a class for registry
 // uint240 versionNumber,
@@ -12,24 +13,29 @@ const {FACETS } = require('./constants')
 // Facet[] memory facets
 //Likely import this from config
 
+
+///need to mesh diamond deploy here with registry deploy
 async function preDiamondDeploy(facetNames) {
     let diamondCutFacetAddress;
-    let facets = []
-    let deployedStatuses = [];
+    const facets = []
+    const deployedStatuses = [];
     for (let facetName of facetNames || FACETS) {
-        let Facet = await ethers.getContractFactory(facetName);
+        const Facet = await ethers.getContractFactory(facetName);
         const facet = await Facet.deploy()
         deployedStatuses.push(facet.deployed());
         if (facetName == "DiamondCutFacet") {
             diamondCutFacetAddress = facet.address;
-            continue
         }
         facets.push([
-            facet.address, getSelectors(facet)
+            facet.address, getSelectors(facet), facetName
         ])
     }
     await Promise.all(deployedStatuses)
- 
+
+    const collision = selectorCollsion(facets)
+    if( collision ){
+        throw Error(`Collsion detected at facet ${collision[0]} and facet ${collision[1]} with selector ${collision[2]} \n `)
+    }
     const Diamond = await hre.ethers.getContractFactory('Diamond');
 
     const DiamondDeploy = await hre.ethers.getContractFactory('DiamondDeploy');

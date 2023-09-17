@@ -9,41 +9,59 @@
  * New flow required for frontend
  */
 
-const {ethers} = require('hardhat')
-const {getSelectors} = require('../scripts/libraries/diamond')
+const {
+  ethers
+} = require('hardhat')
+const {
+  getSelectors
+} = require('../scripts/libraries/diamond')
 
-const {preDiamondDeploy}  = require("./preDiamondDeploy")
-const {registryDeploy, registryUploadAndDeploy} = require("./registryDeploy")
+const {
+  preDiamondDeploy
+} = require("./preDiamondDeploy")
+const {
+  diamondDeployAndCut
+} = require("./deployDiamondAndCut")
+const {
+  registryDeploy,
+  registryUploadAndDeploy
+} = require("./registryDeploy")
 
 
-async function main(facetNames){
-    let registryAddress;
-    let diamondAddress
-    //deploy facets and diamondDeploy contract
-    const[diamondDeployAddress, facets] = await preDiamondDeploy(facetNames);
+async function main(facetNames, registryOn) {
+  let registryAddress;
+  let diamondAddress
+  //deploy facets and diamondDeploy contract
+  const [diamondDeployAddress, facets] = await preDiamondDeploy(facetNames);
+  if (registryOn) {
     registryAddress = await registryDeploy();
-    
     let version = [
-        1,
-        diamondDeployAddress,
-        [],
-        facets
+      1,
+      diamondDeployAddress,
+      [],
+      facets.slice(1)
     ]
     diamondAddress = await registryUploadAndDeploy(registryAddress, version)
+  } else {
+    diamondAddress = await diamondDeployAndCut(facets)
+  }
+  const ecosystem = await ethers.getContractAt('Ecosystem', diamondAddress)
+  let addresses = await ecosystem.callStatic.facetAddresses()
 
-    const ecosystem = await ethers.getContractAt('Ecosystem',diamondAddress)
-     let addresses = await ecosystem.callStatic.facetAddresses()
-     
-    console.log(3)
+  console.log(3)
 }
 
+
+
 if (require.main === module) {
-    main()
-      .then(() => process.exit(0))
-      .catch(error => {
-        console.error(error)
-        process.exit(1)
-      })
-  }
-  //main()
-module.exports = {main}
+  main("",true)
+    .then(() => process.exit(0))
+    .catch(error => {
+      console.error(error)
+      process.exit(1)
+    })
+}
+//main()
+module.exports = {
+  main
+}

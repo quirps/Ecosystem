@@ -1,59 +1,44 @@
 // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-pragma solidity >=0.6.0 <0.9.0;
+/// @title IEventFacet
+/// @dev Interface for the event management facet
+interface IEventFacet {
 
-/// @title An interface for the EventFactory contract
-interface IEventFactory {
+    /// @notice Creates a new event
+    /// @dev External function that allows for the creation of a new event
+    /// @param _startTime The start time of the event
+    /// @param _endTime The end time of the event
+    /// @param _minEntries The minimum number of entries for the event
+    /// @param _maxEntries The maximum number of entries for the event
+    /// @param _imageUri The URI for the event's image
+    /// @return The ID of the created event
+    function createEvent(
+        uint32 _startTime,
+        uint32 _endTime,
+        uint256 _minEntries,
+        uint256 _maxEntries,
+        string calldata _imageUri
+    ) external returns (uint256);
 
-    /// @notice This event is emitted when a new event is created
-    event EventCreated(uint256 indexed eventId, uint32 startTime, uint32 endTime);
+    /// @notice Updates the details of an existing event
+    /// @dev Allows the owner to update event details
+    /// @param eventId The ID of the event to be updated
+    /// @param newStartTime The new start time for the event
+    /// @param newEndTime The new end time for the event
+    /// @param newImageUri The new image URI for the event
+    function updateEventDetails(uint256 eventId, uint32 newStartTime, uint32 newEndTime, string calldata newImageUri) external;
 
-    /// @notice This event is emitted when the details for a token are set for an event
-    event TokenDetailsSet(uint256 indexed eventId, uint256 indexed tokenId, uint256 limitPerUser, uint256 totalLimit);
-
-    /// @notice This event is emitted when tokens are submitted for an event
-    event TokensSubmitted(uint256 indexed eventId, uint256 indexed tokenId, address indexed user, uint256 amount);
-
-    /// @notice This event is emitted when a user is reimbursed for their tokens
-    event UserReimbursed(uint256 indexed eventId, uint256 indexed tokenId, address indexed user, uint256 amount);
-
-    /// @notice This event is emitted when an event is cancelled
-    event EventCancelled(uint256 indexed eventId);
-
-    /// @notice This event is emitted when a user withdraws their tokens from a cancelled event
-    event TokensWithdrawn(uint256 indexed eventId, uint256 indexed tokenId, address indexed user, uint256 amount);
-
-    /// @notice Creates a new event with the given details
+    /// @notice Allows the redemption of multiple tickets for an event
+    /// @dev Batch process to redeem multiple tickets at once
     /// @param eventId The ID of the event
-    /// @param startTime The start time of the event
-    /// @param endTime The end time of the event
-    function createEvent(uint256 eventId, uint32 startTime, uint32 endTime) external;
+    /// @param ticketIds The IDs of the tickets to be redeemed
+    /// @param amounts The amounts corresponding to each ticket to be redeemed
+    function redeemTickets(uint256 eventId, uint256[] calldata ticketIds, uint256[] calldata amounts) external;
 
-    /// @notice Sets the details for a token for a specific event
+    /// @notice Allows the refund of tickets
+    /// @dev Batch process to refund multiple tickets at once
     /// @param eventId The ID of the event
-    /// @param tokenId The ID of the token
-    /// @param limitPerUser The limit of tokens a user can submit for the event
-    /// @param totalLimit The total limit of tokens that can be submitted for the event
-    function setTokenDetails(uint256 eventId, uint256 tokenId, uint256 limitPerUser, uint256 totalLimit) external;
-
-    /// @notice Submits tokens for a user for a specific event
-    /// @param eventId The ID of the event
-    /// @param tokenId The ID of the token
-    /// @param amount The amount of tokens to submit
-    function submitTokens(uint256 eventId, uint256 tokenId, uint256 amount) external;
-
-    /// @notice Reimburses a user for their tokens for a specific event
-    /// @param eventId The ID of the event
-    /// @param tokenId The ID of the token
-    /// @param amount The amount of tokens to reimburse
-    function reimburseUser(uint256 eventId, uint256 tokenId, uint256 amount) external;
-
-    /// @notice Cancels a specific event
-    /// @param eventId The ID of the event
-    function cancelEvent(uint256 eventId) external;
-
-    /// @notice Allows a user to withdraw their tokens from a cancelled event
-    /// @param eventId The ID of the event
-    /// @param tokenId The ID of the token
-    function withdrawTokens(uint256 eventId, uint256 tokenId) external;
+    /// @param ticketIds The IDs of the tickets to be refunded
+    function refundTickets(uint256 eventId, uint256[] calldata ticketIds) external;
 }

@@ -39,7 +39,7 @@ module.exports = {
       // console.log(abiElement.name)
       return FACETS.includes(currentContract) && fullyQualifiedName.includes('contracts/facets');
     },
-    strict: false
+    strict: true
   },
   settings: {
     optimizer: {
