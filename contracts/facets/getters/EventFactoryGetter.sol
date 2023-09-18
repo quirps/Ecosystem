@@ -2,11 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "../../libraries/LibEventFactory.sol";
-import "../../interfaces/IEventFactoryGetter.sol";
+import "../../interfaces/getters/IEventFactoryGetter.sol";
 
 contract EventFactoryGettersFacet is IEventGetterFacet {
-
-
     function getEventDetails(uint256 eventId) external view override returns (
         uint32 startTime,
         uint32 endTime,
@@ -41,5 +39,16 @@ contract EventFactoryGettersFacet is IEventGetterFacet {
 
     function getEventStatus(uint256 eventId) external view override returns (uint8) {
         return uint8(LibEventFactoryStorage.getEventStatus(eventId));
+    }
+    function getTicketDetail(uint256 eventId, uint256 ticketId) external view returns (LibEventFactoryStorage.TicketDetail memory) {
+        return LibEventFactoryStorage.getTicketDetail(eventId, ticketId);
+    }
+
+    function getRedeemedTickets(uint256 eventId, address user, uint256[] memory ticketId) external view returns (uint256[] memory) {
+        return LibEventFactoryStorage.getRedeemedTickets(eventId, user,ticketId);
+    }
+
+    function getMerkleRoot(uint256 eventId) external view returns (bytes32) {
+        return LibEventFactoryStorage.getMerkleRoot(eventId);
     }
 }

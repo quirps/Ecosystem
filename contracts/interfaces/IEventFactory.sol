@@ -4,6 +4,29 @@ pragma solidity ^0.8.0;
 /// @title IEventFacet
 /// @dev Interface for the event management facet
 interface IEventFacet {
+    /// @notice Sets the Merkle root for the specified event.
+    /// @dev Only callable by the owner or authorized addresses.
+    /// @param eventId The ID of the event to set the Merkle root for.
+    /// @param merkleRoot The new Merkle root.
+    function setMerkleRoot(uint256 eventId, bytes32 merkleRoot) external;
+
+    /// @notice Sets a new image URI for the specified event.
+    /// @dev Only callable by the owner or authorized addresses.
+    /// @param eventId The ID of the event to set the image URI for.
+    /// @param imageUri The new image URI as a string.
+    function setImageUri(uint256 eventId, string memory imageUri) external;
+
+    /// @notice Deactivates the specified event and optionally updates the Merkle root.
+    /// @dev Only callable by the owner or authorized addresses. Can be used to deactivate an event prematurely.
+    /// @param eventId The ID of the event to deactivate.
+    /// @param root Optionally, a new Merkle root to set. Pass bytes32(0) to not update the Merkle root.
+    function deactivateEvent(uint256 eventId, bytes32 root) external;
+
+    /// @notice Extends the duration of the specified event by the added time.
+    /// @dev Only callable by the owner or authorized addresses. The event time extension should respect any set maximum limits.
+    /// @param eventId The ID of the event to extend.
+    /// @param addedTime The additional time to add to the event's duration, in seconds.
+    function extendEvent(uint256 eventId, uint32 addedTime) external;
 
     /// @notice Creates a new event
     /// @dev External function that allows for the creation of a new event
@@ -20,14 +43,6 @@ interface IEventFacet {
         uint256 _maxEntries,
         string calldata _imageUri
     ) external returns (uint256);
-
-    /// @notice Updates the details of an existing event
-    /// @dev Allows the owner to update event details
-    /// @param eventId The ID of the event to be updated
-    /// @param newStartTime The new start time for the event
-    /// @param newEndTime The new end time for the event
-    /// @param newImageUri The new image URI for the event
-    function updateEventDetails(uint256 eventId, uint32 newStartTime, uint32 newEndTime, string calldata newImageUri) external;
 
     /// @notice Allows the redemption of multiple tickets for an event
     /// @dev Batch process to redeem multiple tickets at once
