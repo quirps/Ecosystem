@@ -5,8 +5,9 @@ import "../libraries/LibEventFactory.sol";
 import "../libraries/utils/MerkleProof.sol";
 import "../interfaces/IERC1155Transfer.sol";
 import "./iOwnership.sol";
+import "../libraries/utils/Context.sol";
 
-contract EventFactoryInternal is iOwnership {
+contract iEventFactory is iOwnership, Context {
 
     IERC1155Transfer public tokenContract;
     
@@ -56,6 +57,9 @@ event TicketDetails(uint256 eventId, uint256[] ticketIds, LibEventFactoryStorage
         _;
     }
 
+    function _extendEvent(uint256 eventId, uint32 addedTime) internal {
+        
+    }
     function _deactivateEvent(uint256 eventId, bytes32 root) internal onlyOwner {
         LibEventFactoryStorage.EventDetail storage eventDetail = LibEventFactoryStorage.getEventDetail(eventId);
 
@@ -72,17 +76,6 @@ event TicketDetails(uint256 eventId, uint256[] ticketIds, LibEventFactoryStorage
         }
     }
 
-    function _validateNonInclusion(
-        uint256 eventId,
-        address lowerBound,
-        address upperBound,
-        bytes32[] calldata merkleProof
-    ) internal view returns (bool) {
-        require(uint160(lowerBound) < uint160(msg.sender) && uint160(msg.sender) < uint160(upperBound), "Sender is not within the exclusive bounds");
-
-        bytes32 leaf = keccak256(abi.encodePacked(lowerBound, upperBound));
-        return !MerkleProof.verify(merkleProof, LibEventFactoryStorage.getMerkleRoot(eventId), leaf);
-    }
 
     // Additional functions such as `_redeemTickets`, `_refundTicketsWithProof`, and `_createEvent` would be implemented here following the existing logic, but leveraging the `LibEventFactoryStorage` library to interact with storage.
 
@@ -131,11 +124,8 @@ event TicketDetails(uint256 eventId, uint256[] ticketIds, LibEventFactoryStorage
      function _redeemTickets(
         uint256 eventId, 
         uint256[] memory ticketIds, 
-        uint256[] memory amounts, 
-        address msgSender, 
-        IERC1155Transfer tokenContract
+        uint256[] memory amounts
     ) internal {
-        LibEventFactoryStorage.EventStorage storage es = LibEventFactoryStorage.eventStorage();
         LibEventFactoryStorage.EventDetail storage eventDetail = LibEventFactoryStorage.getEventDetail(eventId);
         LibEventFactoryStorage.EventStatus _status = eventDetail.status;
         
@@ -149,15 +139,15 @@ event TicketDetails(uint256 eventId, uint256[] ticketIds, LibEventFactoryStorage
         
         for (uint i = 0; i < ticketIds.length; i++) {
             LibEventFactoryStorage.TicketDetail storage ticketDetail = LibEventFactoryStorage.getTicketDetail(eventId,ticketIds[i]);
-            require(eventDetail.currentEntries + amounts[i] <= eventDetail.maxEntries, "Exceeding max entries");
+            require(eventDetail.currentEntries + 1 <= eventDetail.maxEntries, "Exceeding max entries");
             require(amounts[i] >= ticketDetail.minAmount && amounts[i] <= ticketDetail.maxAmount, "Invalid ticket amount");
 
             // Transfer ERC1155 tokens from user to contract
-            tokenContract.safeTransferFrom(msgSender, address(this), ticketIds[i], amounts[i], "");
+            tokenContract.safeTransferFrom(msgSender(), address(this), ticketIds[i], amounts[i], "");
 
             // Update event and ticket details
-            eventDetail.currentEntries += amounts[i];
-            eventDetail.ticketsRedeemed[msgSender][ticketIds[i]] += amounts[i];
+            eventDetail.currentEntries += 1;
+            eventDetail.ticketsRedeemed[msgSender()][ticketIds[i]] += amounts[i];
         }
         emit TicketRedeemed(eventId, ticketIds, amounts);
     }
@@ -167,25 +157,22 @@ event TicketDetails(uint256 eventId, uint256[] ticketIds, LibEventFactoryStorage
         uint256[] memory ticketIds, 
         address lowerBound, 
         address upperBound, 
-        bytes32[] calldata merkleProof, 
-        address msgSender, 
-        IERC1155Transfer tokenContract
-    ) internal {
-        LibEventFactoryStorage.EventStorage storage es = LibEventFactoryStorage.eventStorage();
+        bytes32[] calldata merkleProof
+            ) internal {
         LibEventFactoryStorage.EventDetail storage eventDetail = LibEventFactoryStorage.getEventDetail(eventId);
 
-        require(validateNonInclusion(eventId, lowerBound, upperBound, merkleProof, msgSender), "User was honored or proof is incorrect");
+        require(validateNonInclusion(eventId, lowerBound, upperBound, merkleProof), "User was honored or proof is incorrect");
 
         for (uint i = 0; i < ticketIds.length; i++) {
-            uint256 amountToRefund = eventDetail.ticketsRedeemed[msgSender][ticketIds[i]];
+            uint256 amountToRefund = eventDetail.ticketsRedeemed[msgSender()][ticketIds[i]];
             require(amountToRefund > 0, "No tickets to refund for this ID");
 
             // Update event details before transfer to ensure state consistency
-            eventDetail.currentEntries -= amountToRefund;
-            eventDetail.ticketsRedeemed[msgSender][ticketIds[i]] = 0;
+            eventDetail.currentEntries -= 1;
+            eventDetail.ticketsRedeemed[msgSender()][ticketIds[i]] = 0;
 
             // Transfer ERC1155 tokens back to the user
-            tokenContract.safeTransferFrom(address(this), msgSender, ticketIds[i], amountToRefund, "");
+            tokenContract.safeTransferFrom(address(this), msgSender(), ticketIds[i], amountToRefund, "");
             emit TicketRefunded(eventId, ticketIds[i], amountToRefund);
         }
     }
@@ -194,14 +181,13 @@ event TicketDetails(uint256 eventId, uint256[] ticketIds, LibEventFactoryStorage
         uint256 eventId,
         address lowerBound,
         address upperBound,
-        bytes32[] calldata merkleProof,
-        address msgSender
+        bytes32[] calldata merkleProof
     ) internal view returns (bool) {
         LibEventFactoryStorage.EventStorage storage es = LibEventFactoryStorage.eventStorage();
         LibEventFactoryStorage.EventDetail storage eventDetail = LibEventFactoryStorage.getEventDetail(eventId);
 
         // Ensure sender is within bounds
-        require(uint160(lowerBound) < uint160(msgSender) && uint160(msgSender) < uint160(upperBound), "Sender is not within the exclusive bounds");
+        require(uint160(lowerBound) < uint160(msgSender()) && uint160(msgSender()) < uint160(upperBound), "Sender is not within the exclusive bounds");
 
         // Verify non-inclusion proof
         bytes32 leaf = keccak256(abi.encodePacked(lowerBound, upperBound));
