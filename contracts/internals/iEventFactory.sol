@@ -132,7 +132,7 @@ contract iEventFactory is iOwnership, Context {
 
         require(_ticketIds.length == _ticketDetails.length, "Must be same length.");
         require(_endTime > block.timestamp - 1, "Must be non-trivial event time window");
-
+        require(_maxEntries > 0,"Must have non-trivial entrant amount");
         uint256 eventId = uint256(keccak256(abi.encodePacked(_startTime, _endTime, _minEntries, _maxEntries, _imageUri, block.timestamp)));
         require(es.events[eventId].endTime == 0, "Event must not exist");
         LibEventFactoryStorage.EventDetail storage newEvent = es.events[eventId];

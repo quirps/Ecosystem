@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import "../../libraries/LibEventFactory.sol";
 import "../../interfaces/getters/IEventFactoryGetter.sol";
 
-contract EventFactoryGettersFacet is IEventGetterFacet {
+contract EventFactoryGetters is IEventGetter {
     function getEventDetails(uint256 eventId) external view override returns (
         uint32 startTime,
         uint32 endTime,

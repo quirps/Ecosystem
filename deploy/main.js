@@ -46,15 +46,15 @@ async function main(facetNames, registryOn) {
     diamondAddress = await diamondDeployAndCut(facets)
   }
   const ecosystem = await ethers.getContractAt('Ecosystem', diamondAddress)
-  let addresses = await ecosystem.callStatic.facetAddresses()
+  return ecosystem
 
-  console.log(3)
+
 }
 
 
 
 if (require.main === module) {
-  main("",true)
+  main("", true)
     .then(() => process.exit(0))
     .catch(error => {
       console.error(error)

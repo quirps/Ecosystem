@@ -1,6 +1,6 @@
 // @title IEventGetterFacet
 /// @dev Interface for the event getters facet
-interface IEventGetterFacet {
+interface IEventGetter {
 
     /// @notice Retrieves the details of an event
     /// @dev External view function to get all details of an event
