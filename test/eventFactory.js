@@ -7,13 +7,20 @@ const {
 const {
   main
 } = require("../deploy/main")
+const {
+  configInitialize,
+  configToBatchParam
+} = require("./deploy/libraries/utils")
 
 const config = {
-  ticketDistributions: [
-    { address: 'addr1', ticketId: 1, amount: 10 },
-    { address: 'addr2', ticketId: 1, amount: 5 },
-    { address: 'addr1', ticketId: 2, amount: 20 },
-    { address: 'addr2', ticketId: 2, amount: 15 },
+  ticketDistributions: [[
+    { address: '', ticketId: 1, amount: 10 },
+    { address: '', ticketId: 2, amount: 5 },
+  ],
+  [
+    { address: '', ticketId: 1, amount: 20 },
+    { address: '', ticketId: 2, amount: 15 },
+  ]
   ],
 };
 const EventStatus = new Map([
@@ -27,10 +34,10 @@ describe("EventFactory", function () {
   let owner;
   let addr1;
   let addr2;
-  
+
   before(async function () {
     [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
-    setConfigAddresses([addr1,addr2])
+    //setConfigAddresses([addr1,addr2])
     ecosystem = await main("", false)
     // fundUsers, approve contract
     console.log(3)
@@ -201,24 +208,21 @@ describe("EventFactory", function () {
 
 
   //==============================================================================================================
-  
+
   describe("_redeemTickets", function () {
-    let ecosystem;
-    let owner;
-    let addr1;
-    let addr2;
     let eventId;
-    
+
     before(async function () {
-      [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
-      ecosystem = await main("", false);
-  
+      
+      configInitialize(config, [addr1, addr2])
       // Mint tickets as per the config and approve the contract for ERC1155
-      for (const dist of config.ticketDistributions) {
-        await ecosystem.mintTickets(dist.address, dist.ticketId, dist.amount);
-        await ecosystem.approveERC1155(ecosystem.address, dist.ticketId, dist.amount);
+      for (const dists of config.ticketDistributions) {
+        //batch
+        let batchParam = configToBatchParam(dists)
+        await ecosystem.mintBatch(...batchParam);
+        await ecosystem.setApprovalForAll(ecosystem.address, true)
       }
-  
+
       // 1. Create an event with a future start and end time
       const blockTimestamp = (await ethers.provider.getBlock('latest')).timestamp;
       const startTime = blockTimestamp + 1000;
@@ -227,38 +231,42 @@ describe("EventFactory", function () {
       const maxEntries = 100;
       const imageUri = "https://example.com/image.png";
       const ticketIds = [1, 2];
-      const ticketDetails = [[50, 100], [100, 200]];
-      
+      const ticketDetails = [[0, 100], [0, 200]];
+
       const tx = await ecosystem.createEvent(startTime, endTime, minEntries, maxEntries, imageUri, ticketIds, ticketDetails);
       const receipt = await tx.wait();
       eventId = receipt.events[0].args.eventId;
     });
-  
+
     it("Should successfully redeem tickets when the event is active", async function () {
       // 2. Change the blockchain time to make the event active
       const blockTimestamp = (await ethers.provider.getBlock('latest')).timestamp;
       await ethers.provider.send('evm_increaseTime', [1000]);
       await ethers.provider.send('evm_mine'); // This will mine a new block and therefore increase the block's timestamp
-  
+
       // 3. Call the _redeemTickets function with valid inputs
       const ticketIds = [1, 2];
       const amounts = [1, 1];
-      const tx = await ecosystem.connect(addr1)._redeemTickets(eventId, ticketIds, amounts);
-  
+      const tx = await ecosystem.connect(addr1).redeemTickets(eventId, ticketIds, amounts);
+
       // 4. Verify that the correct events are emitted
       const receipt = await tx.wait();
       const ticketRedeemedEvent = receipt.events.find(event => event.event === "TicketRedeemed");
       expect(ticketRedeemedEvent.args.ticketIds).to.deep.equal(ticketIds);
       expect(ticketRedeemedEvent.args.amounts).to.deep.equal(amounts);
-  
+
       // 5. Verify that the event and ticket details have been updated correctly in the contract's storage
       const eventDetails = await ecosystem.getEventDetails(eventId);
       expect(eventDetails.currentEntries).to.equal(2); // 2 tickets were redeemed
       for (let i = 0; i < ticketIds.length; i++) {
-        const ticketsRedeemed = await ecosystem.getTicketsRedeemed(eventId, addr1.address, ticketIds[i]);
-        expect(ticketsRedeemed).to.equal(amounts[i]);
+        const ticketsRedeemed = await ecosystem.getRedeemedTickets(eventId, addr1.address, [ticketIds[i]]);
+        expect(ticketsRedeemed[0]).to.equal(amounts[i]);
       }
     });
   });
 
+
+
 });
+
+

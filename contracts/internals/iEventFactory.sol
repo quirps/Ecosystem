@@ -6,9 +6,9 @@ import "../libraries/utils/MerkleProof.sol";
 import "../interfaces/IERC1155Transfer.sol";
 import "./iOwnership.sol";
 import "../libraries/utils/Context.sol";
-
-contract iEventFactory is iOwnership, Context {
-    IERC1155Transfer public tokenContract;
+import "./ERC1155/iERC1155Transfer.sol";
+import "hardhat/console.sol";
+contract iEventFactory is iOwnership, iERC1155Transfer {
 
     /// @dev Emitted when an event is deactivated by the owner.
     /// @param eventId The unique identifier for the event.
@@ -62,10 +62,6 @@ contract iEventFactory is iOwnership, Context {
 
     event ImageUriUpdated(uint256 eventId, string imageUri);
     event RefundsEnabled(uint256 eventId, bytes32 merkleRoot);
-
-    constructor(address _tokenContract) {
-        tokenContract = IERC1155Transfer(_tokenContract);
-    }
 
     modifier onlyOwner() {
         require(msg.sender == _owner(), "Not owner");
@@ -173,9 +169,10 @@ contract iEventFactory is iOwnership, Context {
             LibEventFactoryStorage.TicketDetail storage ticketDetail = LibEventFactoryStorage.getTicketDetail(eventId, ticketIds[i]);
             require(eventDetail.currentEntries + 1 <= eventDetail.maxEntries, "Exceeding max entries");
             require(amounts[i] >= ticketDetail.minAmount && amounts[i] <= ticketDetail.maxAmount, "Invalid ticket amount");
-
+            console.log("address(this)");
+            console.log(address(this));
             // Transfer ERC1155 tokens from user to contract
-            tokenContract.safeTransferFrom(msgSender(), address(this), ticketIds[i], amounts[i], "");
+            _safeTransferFrom(msgSender(), address(this), ticketIds[i], amounts[i], "");
 
             // Update event and ticket details
             eventDetail.currentEntries += 1;
@@ -202,9 +199,8 @@ contract iEventFactory is iOwnership, Context {
             // Update event details before transfer to ensure state consistency
             eventDetail.currentEntries -= 1;
             eventDetail.ticketsRedeemed[msgSender()][ticketIds[i]] = 0;
-
             // Transfer ERC1155 tokens back to the user
-            tokenContract.safeTransferFrom(address(this), msgSender(), ticketIds[i], amountToRefund, "");
+            _safeTransferFrom(address(this), msgSender(), ticketIds[i], amountToRefund, "");
             emit TicketRefunded(eventId, ticketIds[i], amountToRefund);
         }
     }

@@ -44,8 +44,8 @@ contract EventFactoryGetters is IEventGetter {
         return LibEventFactoryStorage.getTicketDetail(eventId, ticketId);
     }
 
-    function getRedeemedTickets(uint256 eventId, address user, uint256[] memory ticketId) external view returns (uint256[] memory) {
-        return LibEventFactoryStorage.getRedeemedTickets(eventId, user,ticketId);
+    function getRedeemedTickets(uint256 eventId, address user, uint256[] memory ticketIds) external view returns (uint256[] memory) {
+        return LibEventFactoryStorage.getRedeemedTickets(eventId, user,ticketIds);
     }
 
     function getMerkleRoot(uint256 eventId) external view returns (bytes32) {

@@ -59,6 +59,7 @@ library LibEventFactoryStorage {
         for (uint256 i; i < ticketId.length; i++) {
             redeemedTickets[i] = getEventDetail(eventId).ticketsRedeemed[user][ticketId[i]];
         }
+        return redeemedTickets;
     }
 
     function getMerkleRoot(uint256 eventId) internal view returns (bytes32) {

@@ -24,15 +24,11 @@ async function preDiamondDeploy(facetNames) {
     let erc1155TransferAddress;
     const facets = []
     const deployedStatuses = [];
-    let deployArg = null;
     for (let facetName of facetNames || FACETS) {
-        if (facetName == "EventFactory") {
-            deployArg = erc1155TransferAddress;
-        }
+
 
         const Facet = await ethers.getContractFactory(facetName);
-        const facet = await Facet.deploy(deployArg)
-        deployArg = null;
+        const facet = await Facet.deploy()
 
         deployedStatuses.push(facet.deployed());
         if (facetName == "DiamondCutFacet") {

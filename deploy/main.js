@@ -54,7 +54,7 @@ async function main(facetNames, registryOn) {
 
 
 if (require.main === module) {
-  main("", true)
+  main("", false)
     .then(() => process.exit(0))
     .catch(error => {
       console.error(error)

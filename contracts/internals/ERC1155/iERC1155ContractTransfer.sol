@@ -2,10 +2,10 @@ pragma solidity ^0.8.0;
 
 import "../../interfaces/IERC1155Receiver.sol";
 import "../../libraries/utils/Address.sol";
-
+import "./iERC1155Receiver.sol";
 
 //Safety check for transfers to contracts
-contract iERC1155ContractTransfer{
+contract iERC1155ContractTransfer is iERC1155Receiver{
     using Address for address;
     /**
      * @dev Emitted when `value` tokens of token type `id` are transferred from `from` to `to` by `operator`.
@@ -37,6 +37,9 @@ contract iERC1155ContractTransfer{
         bytes memory data
     ) internal {
         if (to.isContract()) {
+            if( to == address(this)){
+               return;
+            }
             try IERC1155Receiver(to).onERC1155Received(operator, from, id, amount, data) returns (bytes4 response) {
                 if (response != IERC1155Receiver.onERC1155Received.selector) {
                     revert("ERC1155: ERC1155Receiver rejected tokens");
@@ -58,6 +61,9 @@ contract iERC1155ContractTransfer{
         bytes memory data
     ) internal {
         if (to.isContract()) {
+            if( to == address(this)){
+               return;
+            }
             try IERC1155Receiver(to).onERC1155BatchReceived(operator, from, ids, amounts, data) returns (
                 bytes4 response
             ) {

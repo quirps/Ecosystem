@@ -5,7 +5,6 @@ import "../internals/iEventFactory.sol";
 import "../libraries/LibEventFactory.sol";
 
 contract EventFactory is iEventFactory {
-    constructor(address erc1155Address) iEventFactory(erc1155Address){}
      function setMerkleRoot(uint256 eventId, bytes32 root) external onlyOwner {
         _setMerkleRoot(eventId, root);
     }
