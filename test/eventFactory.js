@@ -264,7 +264,53 @@ describe("EventFactory", function () {
       }
     });
   });
+  describe("_refundTicketsWithProof method", function () {
+    let eventId;
 
+    before(async function () {
+      
+      configInitialize(config, [addr1, addr2])
+      // Mint tickets as per the config and approve the contract for ERC1155
+      for (const dists of config.ticketDistributions) {
+        //batch
+        let batchParam = configToBatchParam(dists)
+        await ecosystem.mintBatch(...batchParam);
+        await ecosystem.setApprovalForAll(ecosystem.address, true)
+      }
+
+      // 1. Create an event with a future start and end time
+      const blockTimestamp = (await ethers.provider.getBlock('latest')).timestamp;
+      const startTime = blockTimestamp + 3000;
+      const endTime = blockTimestamp + 4000;
+      const minEntries = 1;
+      const maxEntries = 100;
+      const imageUri = "https://example.com/image.png";
+      const ticketIds = [1, 2];
+      const ticketDetails = [[0, 100], [0, 200]];
+
+      const tx = await ecosystem.createEvent(startTime, endTime, minEntries, maxEntries, imageUri, ticketIds, ticketDetails);
+      const receipt = await tx.wait();
+      eventId = receipt.events[0].args.eventId;
+    });
+
+    it("should succesfully deploy merkley root and catch event", async function(){
+      
+    })
+
+    it("should successfully refund tickets with valid inputs", async function () {
+      const eventId = await ecosystem.createEvent(/*...params*/);
+      await ecosystem.redeemTickets(eventId, /*...params*/);
+  
+      const ticketIds = [/*...valid ticket IDs*/];
+      const lowerBound = /*...valid address*/;
+      const upperBound = /*...valid address*/;
+      const merkleProof = [/*...valid merkleProof*/];
+  
+      await expect(ecosystem.refundTicketsWithProof(eventId, ticketIds, lowerBound, upperBound, merkleProof))
+        .to.emit(ecosystem, "TicketRefunded")
+        .withArgs(eventId, ticketIds[0], /*...expected amount*/);
+    });
+  });
 
 
 });
