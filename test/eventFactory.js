@@ -11,7 +11,12 @@ const {
   configInitialize,
   configToBatchParam
 } = require("./deploy/libraries/utils")
-
+const{
+  addressesToLeaves,
+  generateMerkleTree,
+  generateProof,
+  getBoundingLeaf
+} = require('../scripts/eventFactory/utils')
 const config = {
   ticketDistributions: [[
     { address: '', ticketId: 1, amount: 10 },
@@ -34,6 +39,7 @@ describe("EventFactory", function () {
   let owner;
   let addr1;
   let addr2;
+  let addrs;
 
   before(async function () {
     [owner, addr1, addr2, ...addrs] = await ethers.getSigners();
@@ -248,7 +254,6 @@ describe("EventFactory", function () {
       const ticketIds = [1, 2];
       const amounts = [1, 1];
       const tx = await ecosystem.connect(addr1).redeemTickets(eventId, ticketIds, amounts);
-
       // 4. Verify that the correct events are emitted
       const receipt = await tx.wait();
       const ticketRedeemedEvent = receipt.events.find(event => event.event === "TicketRedeemed");
@@ -266,6 +271,10 @@ describe("EventFactory", function () {
   });
   describe("_refundTicketsWithProof method", function () {
     let eventId;
+    let leaves;
+    let tree;
+    let boundingLeaf1;
+    let boundingLeaf2;
 
     before(async function () {
       
@@ -280,7 +289,7 @@ describe("EventFactory", function () {
 
       // 1. Create an event with a future start and end time
       const blockTimestamp = (await ethers.provider.getBlock('latest')).timestamp;
-      const startTime = blockTimestamp + 3000;
+      const startTime = blockTimestamp 
       const endTime = blockTimestamp + 4000;
       const minEntries = 1;
       const maxEntries = 100;
@@ -291,25 +300,64 @@ describe("EventFactory", function () {
       const tx = await ecosystem.createEvent(startTime, endTime, minEntries, maxEntries, imageUri, ticketIds, ticketDetails);
       const receipt = await tx.wait();
       eventId = receipt.events[0].args.eventId;
+
+      leaves = addressesToLeaves( [addr1.address,...addrs.map( (add)=>{return add.address} ) ] )
+      tree = generateMerkleTree(leaves)
+      boundingLeaf1 = getBoundingLeaf(addr1.address,tree)
+      boundingLeaf2 = getBoundingLeaf(addr2.address,tree)
     });
 
-    it("should succesfully deploy merkley root and catch event", async function(){
-      
-    })
+    it("should succesfully deactivate event", async function(){
+        await ecosystem.deactivateEvent(eventId, tree.root)
+        const _eventDetails = await ecosystem.getEventDetails(eventId);
+        let _merkleRoot = await ecosystem.getMerkleRoot(eventId);
 
-    it("should successfully refund tickets with valid inputs", async function () {
-      const eventId = await ecosystem.createEvent(/*...params*/);
-      await ecosystem.redeemTickets(eventId, /*...params*/);
-  
-      const ticketIds = [/*...valid ticket IDs*/];
-      const lowerBound = /*...valid address*/;
-      const upperBound = /*...valid address*/;
-      const merkleProof = [/*...valid merkleProof*/];
-  
-      await expect(ecosystem.refundTicketsWithProof(eventId, ticketIds, lowerBound, upperBound, merkleProof))
-        .to.emit(ecosystem, "TicketRefunded")
-        .withArgs(eventId, ticketIds[0], /*...expected amount*/);
+        expect(_eventDetails.status).to.equal(EventStatus.get("Deactivated"));
+        expect(_merkleRoot).to.equal(tree.root);
+
+      })
+
+    it("should reject an honored user", async function () {
+
+      let _proof = generateProof(tree,boundingLeaf1)
+      let _redeemedTickets1 = await ecosystem.connect(addr1).getRedeemedTickets(eventId,addr1.address,[1,2]);
+
+      await expect( ecosystem.connect(addr1).refundTicketsWithProof(eventId, _redeemedTickets1, ...boundingLeaf1, _proof)
+      ).to.be.revertedWith("Sender is not within the exclusive bounds")
+
     });
+    it("should reject an invalid proof", async function () {
+      const _proofLength = 3;
+      let _invalidProof = Array.from({ length: _proofLength }, () => '0x' + '0'.repeat(64));
+      let _redeemedTickets2 = await ecosystem.connect(addr2).getRedeemedTickets(eventId,addr2.address,[1,2]);
+
+      await expect( ecosystem.connect(addr2).refundTicketsWithProof(eventId, _redeemedTickets2, ...boundingLeaf2, _invalidProof)
+      ).to.be.revertedWith("Proof was invalid")
+
+    });
+
+    it("should reject for invalid ticketId", async function () {
+      let _proof = generateProof(tree,boundingLeaf2)
+      let _redeemedTickets2 = await ecosystem.connect(addr2).getRedeemedTickets(eventId,addr2.address,[3,2]);
+
+      await expect( ecosystem.connect(addr2).refundTicketsWithProof(eventId, _redeemedTickets2, ...boundingLeaf2, _proof)
+      ).to.be.revertedWith("No tickets to refund for this ID")
+
+    });
+    it("should succesfully refund user, zero redeemedTickets, and emit TicketRefunded event", async function () {
+      const _proof = generateProof(tree,boundingLeaf2)
+
+      await ecosystem.connect(addr2).redeemTickets(eventId, [1,2], [3,5]);
+
+      const _preRedeemedTickets2 = await ecosystem.connect(addr2).getRedeemedTickets(eventId,addr2.address,[1,2]);
+
+      let tx = await ecosystem.connect(addr2).refundTicketsWithProof(eventId, [1,2], ...boundingLeaf2, _proof)
+      const receipt = await tx.wait();
+      const ticketRefundedEvent = receipt.events.find(event => event.event === "TicketRefunded");
+      ticketRefundedEvent.args
+      let _postRedeemedTickets2 = await ecosystem.connect(addr2).getRedeemedTickets(eventId,addr2.address,[1,2]);
+      expect(_postRedeemedTickets2).to.be.equal([0,0]);
+      });
   });
 
 

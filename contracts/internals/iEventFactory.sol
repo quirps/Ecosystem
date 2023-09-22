@@ -190,7 +190,7 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
     ) internal {
         LibEventFactoryStorage.EventDetail storage eventDetail = LibEventFactoryStorage.getEventDetail(eventId);
 
-        require(validateNonInclusion(eventId, lowerBound, upperBound, merkleProof), "User was honored or proof is incorrect");
+        require(validateNonInclusion(eventId, lowerBound, upperBound, merkleProof), "Proof was invalid");
 
         for (uint i = 0; i < ticketIds.length; i++) {
             uint256 amountToRefund = eventDetail.ticketsRedeemed[msgSender()][ticketIds[i]];
@@ -211,7 +211,6 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
         address upperBound,
         bytes32[] calldata merkleProof
     ) internal view returns (bool) {
-        LibEventFactoryStorage.EventStorage storage es = LibEventFactoryStorage.eventStorage();
         LibEventFactoryStorage.EventDetail storage eventDetail = LibEventFactoryStorage.getEventDetail(eventId);
 
         // Ensure sender is within bounds
@@ -220,8 +219,9 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
             "Sender is not within the exclusive bounds"
         );
 
-        // Verify non-inclusion proof
-        bytes32 leaf = keccak256(abi.encodePacked(lowerBound, upperBound));
-        return !MerkleProof.verify(merkleProof, eventDetail.merkleRoot, leaf);
+        // Verify non-inclusion by proving
+        bytes32 leaf= keccak256(bytes.concat(keccak256(abi.encode(lowerBound, upperBound))));
+        // bytes32 leaf = keccak256(abi.encodePacked(lowerBound, upperBound));
+        return MerkleProof.verify(merkleProof, eventDetail.merkleRoot, leaf);
     }
 }
