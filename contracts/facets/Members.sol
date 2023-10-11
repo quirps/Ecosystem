@@ -21,8 +21,8 @@ contract Members is IMembers, iMembers {
         _setMembersRankPermissioned(leaves);
     }
 
-    function setMembersRanks(uint8 v, bytes32 r, bytes32 s, address owner, uint256 nonce, LibMembers.Leaf[] memory leaves) external {
-        _setMembersRanks(v, r, s, owner, nonce, leaves);
+    function setMembersRanks(uint8 v, bytes32 r, bytes32 s, address owner, uint256 nonce, LibMembers.Leaf memory leaf) external {
+        _setMembersRanks(v, r, s, owner, nonce, leaf);
     }
 
     /**

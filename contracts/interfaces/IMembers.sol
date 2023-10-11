@@ -23,7 +23,7 @@ interface IMembers {
     /// @notice Sets the members' ranks using Merkle proofs and flags indicating if the rank should be updated.
     
     /// @param leaves An array of MerkleLeaf structs containing the members' rank data.
-    function setMembersRanks(uint8 v, bytes32 r, bytes32 s, address owner, uint256 nonce, LibMembers.Leaf[] memory leaves) external;
+    function setMembersRanks(uint8 v, bytes32 r, bytes32 s, address owner, uint256 nonce, LibMembers.Leaf memory leaves) external;
 
     /// @notice Adds an amount to the bounty balance.
     /// @param amount The amount to be added.

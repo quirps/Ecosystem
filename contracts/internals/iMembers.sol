@@ -42,10 +42,12 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
         bytes32 s,
         address owner,
         uint256 nonce,
-        LibMembers.Leaf[] memory leaves
+        LibMembers.Leaf memory leaf
     ) internal {
-        MemberRecover.executeMyFunctionFromSignature(v, r, s, owner, nonce, leaves);
-        __changeMemberRanks(leaves);
+        MemberRecover.executeMyFunctionFromSignature(v, r, s, owner, nonce, leaf);
+        LibMembers.Leaf[] memory _leaf ;
+        _leaf[0] = leaf;
+        __changeMemberRanks(_leaf);
     }
 
     function __changeMemberRanks(LibMembers.Leaf[] memory leaves) private {
@@ -53,23 +55,21 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
         uint128 bountiesUp;
         uint128 bountiesDown;
         for (uint256 i; i < leaves.length; i++) {
-            (address _user, uint48 _timestamp, uint32 _rank) = (leaves[i].memberAddress, leaves[i].memberRank.timestamp, leaves[i].memberRank.rank);
-            bytes8 maxIndex = ms.memberRankPointer[_user];
+            (address _user, uint32 _timestamp, uint32 _rank) = (leaves[i].memberAddress, leaves[i].memberRank.timestamp, leaves[i].memberRank.rank);
+            uint96 maxIndex = ms.memberRankHistoryMaxIndex[_user];
 
-            bytes28 _currentKey = LibMembers.createInitialKey(_user, maxIndex);
-            if (_timestamp < ms.memberRank[_currentKey].timestamp || _timestamp == block.timestamp) {
+            if (_timestamp < ms.memberRank[msgSender()][maxIndex].timestamp || _timestamp == block.timestamp) {
                 continue;
             }
-            bytes28 _incrementedKey = _currentKey.incrementKey();
 
-            ms.memberRankPointer[_user] = maxIndex.incrementIndex();
-            ms.memberRank[_incrementedKey] = LibMembers.MemberRank(uint48(block.timestamp), _rank);
+            LibMembers.addUserBlock(LibMembers.MemberRank(uint32(block.timestamp), _rank),_user);
 
-            if (maxIndex == bytes8(0)) {
+            if (maxIndex == 0) {
                 bountiesUp++;
-                continue;
             }
-            ms.memberRank[_currentKey].rank < _rank ? bountiesUp++ : bountiesDown++;
+            else{
+                ms.memberRank[_user][maxIndex].rank < _rank ? bountiesUp++ : bountiesDown++;
+            }
         }
 
         LibMembers.Bounty storage _bounty = LibMembers.getBounty();
@@ -86,7 +86,6 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
      */
 
     function _addBountyBalance(uint256 amount) internal {
-        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
         LibMembers.Bounty storage _bounty = LibMembers.getBounty();
         uint256 bountyBalance;
         uint256 newAmount;
@@ -102,9 +101,6 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
     }
 
     function _removeBountyBalance(uint256 amount) internal {
-        LibMembers.MembersStorage storage ms = LibMembers.memberStorage();
-        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
-
         LibMembers.Bounty storage _bounty = LibMembers.getBounty();
 
         _safeTransferFrom(_bounty.bountyAddress, LibDiamond.contractOwner(), _bounty.currencyId, amount, "");
@@ -130,23 +126,8 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
         _bounty.bountyAddress = _bountyAddress;
     }
 
-    function _rankHistory(address user, uint64 depth) internal  returns (LibMembers.MemberRank[] memory rankHistory_){
-        bytes28 key;
-        uint64 _maxLoops;
-        uint64 _maxIndex64;
-        bytes8 _maxIndex =  LibMembers.memberStorage().memberRankPointer[ user ];
-        _maxIndex64 = uint64( _maxIndex );
-        key = LibMembers.createInitialKey(user,_maxIndex);
-
-        _maxLoops = _maxIndex64 < depth ? _maxIndex64 : depth;
-        rankHistory_ = new LibMembers.MemberRank[]( _maxLoops );
-
-        for( uint64 i; i < _maxLoops; i++){
-            console.logBytes28(key);
-            rankHistory_[_maxLoops - i - 1] =  LibMembers.memberStorage().memberRank[ key ];
-            console.log(rankHistory_[i].timestamp);
-            key = key.decrementKey();
-        }
+    function _rankHistory(address user, uint96 depth) internal view  returns (LibMembers.MemberRank[] memory rankHistory_){
+        LibMembers.rankHistory(user, depth);
     }
 
     /**
@@ -221,4 +202,11 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
  * storage and prove that the member's current rank is above the offline level
  * and at an ealier time. What is the reward? Reward would be the excess fee earned
  * from the current true member rank.
+
+ Leaves must be chained. Does nothing. Nothing stops a user uploading any leaf that is more recent than the last uploaded leaf.
+ timestamping is the only method. upload the latest timestamp and that's that.
+
+ Need low cost way to check previous history before uploading new?
+ Why need off-chain history? Only history that matters is on-chain anyway? Just need
+ timestamp and rank with user...
  */

@@ -2,14 +2,20 @@ pragma solidity ^0.8.6;
 
 import "./utils/Incrementer.sol";
 
+/**
+    user rank history keys are designed to be unique by following the program of
+    using 8 bytes for the total history length ~1E19 for the highest order 8 bytes 
+    and the lowest order 20 bytes for their address (28 byte total)
+
+    Why use a key when can just use uint96 for rank history max index?
+ */
 library LibMembers {
     using Incrementer for bytes28;
     using Incrementer for bytes8;
     bytes32 constant MEMBER_STORAGE_POSITION = keccak256("diamond.standard.members.storage");
     struct MembersStorage {
-        bytes32 MembersMerkleRoot;
-        mapping(bytes28 => MemberRank) memberRank;
-        mapping(address => bytes8) memberRankPointer;
+        mapping( address => mapping(uint96 => MemberRank) ) memberRank;
+        mapping(address => uint96) memberRankHistoryMaxIndex;
         uint256 recoveryNonce;
         mapping(uint8 => Bounty) bounty;
         uint32 maxRank;
@@ -46,7 +52,7 @@ library LibMembers {
     }
 
     struct MemberRank{
-        uint48 timestamp;
+        uint32 timestamp;
         uint32 rank;
     }
    
@@ -59,22 +65,15 @@ library LibMembers {
     }
 
     function addUserBlock(MemberRank memory _memberRank, address user) internal {
-        bytes8 maxIndex = memberStorage().memberRankPointer[ user ];
-        bytes8 newMax = bytes8( uint64(maxIndex) + 1 );
-        bytes28 newKey = bytes28( abi.encodePacked( newMax, user) );
-        memberStorage().memberRank[ newKey ]  = _memberRank;
+        uint96 maxIndex = memberStorage().memberRankHistoryMaxIndex[ user ];
+        uint96 newMaxIndex = maxIndex + 1;
+
+        memberStorage().memberRank[ user ][ newMaxIndex]  = _memberRank;
+        memberStorage().memberRankHistoryMaxIndex[ user ]  = newMaxIndex;
 
     }
-    
-    function getBlockHistoryNumber(bytes28 key) internal returns(bytes8 number_){
-        number_ = bytes8( key );
-    }
 
-    //Key management
-    //================================================
-    function createInitialKey(address user, bytes8 index) internal view returns (bytes28 keyInit_){
-        keyInit_ = bytes28( abi.encodePacked( index, user) );
-    }
+
   
     /**
      * Retrieves the user's rank history, starting from their current rank and going backwards 
@@ -82,18 +81,15 @@ library LibMembers {
      * @param user user whos rank history we're interested in
      * @param depth the amount of historical blocks we'd like to retrieve
      */
-    function rankHistory(address user, uint64 depth) internal view returns (MemberRank[] memory rankHistory_){
-        bytes28 key;
-        bytes8 _maxIndex =  memberStorage().memberRankPointer[ user ];
+    function rankHistory(address user, uint96 depth) internal view returns (MemberRank[] memory rankHistory_){
+        uint96 _maxIndex =  memberStorage().memberRankHistoryMaxIndex[ user ];
         rankHistory_ = new MemberRank[](depth);
 
-        key = createInitialKey(user,_maxIndex);
-        for( uint64 i; i < depth; i++){
-            if( key == bytes20( user ) ){
+        for( uint96 i; i < depth; i++){
+            if( _maxIndex - i < 0 ){
                 break;
             }
-            rankHistory_[i] =  memberStorage().memberRank[ key ];
-            key = key.decrementKey();
+            rankHistory_[i] =  memberStorage().memberRank[ user ][ _maxIndex - i ];
         }
     }
 

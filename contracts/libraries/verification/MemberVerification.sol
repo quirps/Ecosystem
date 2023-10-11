@@ -12,7 +12,7 @@ function executeMyFunctionFromSignature(
     bytes32 s,
     address owner,
     uint256 nonce,
-    LibMembers.Leaf[] memory data
+    LibMembers.Leaf memory data
 
 ) internal {
     bytes32 eip712DomainHash = keccak256(

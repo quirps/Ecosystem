@@ -134,3 +134,9 @@ contract Sales is Ownable {
         emit ItemPurchased(saleId, msg.sender, amount);
     }
 }
+
+/**
+    Need to finish event paradigm. How to we grow event ecosystem? How do we handle events?
+    Versioned marketplace? 
+    We can create a marketplace where DApps can embed their app in a popout iframe or website redirect.
+ */
