@@ -1,8 +1,12 @@
 
 /* global ethers task */
+const fs = require('fs');
+const path = require('path');
+
 //require("hardhat-gas-reporter");
 require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-diamond-abi");
+
 const {FACETS} = require('./deploy/constants')
 //require("hardhat-tracer");
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -42,6 +46,12 @@ module.exports = {
     strict: false
   },
   settings: {
+    outputSelection: {
+      "*": {
+        "*": ["*"],      // This line compiles everything for your contracts
+        "": ["ast"]     // This line outputs the AST for your contracts
+      }
+    },
     optimizer: {
       enabled: true,
       runs: 80
@@ -102,3 +112,26 @@ module.exports = {
     }
   }
 }
+
+
+//Output AST
+
+const execSync = require('child_process').execSync;
+
+task("compile:ast", "Compiles the contracts and outputs the AST")
+  .setAction(async () => {
+    const contractsDir = path.resolve(__dirname, "./contracts");
+
+    // Compile using solc and capture the output
+    const output = execSync(`solc --combined-json ast ${contractsDir}/*.sol`, { encoding: "utf8" });
+    const parsedOutput = JSON.parse(output);
+
+    // Write ASTs to separate files
+    for (const contractPath in parsedOutput.sources) {
+      const contractName = path.basename(contractPath, '.sol');
+      fs.writeFileSync(
+        path.resolve(__dirname, `./artifacts/${contractName}.ast.json`),
+        JSON.stringify(parsedOutput.sources[contractPath].AST, null, 2)
+      );
+    }
+  });

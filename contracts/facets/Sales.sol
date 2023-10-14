@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract Sales is Ownable {
+
+
+import "../libraries/utils/Ownable.sol";
+import "../internals/ERC1155/iERC1155Transfer.sol";
+
+
+contract Sales is Ownable, iERC1155Transfer {
     struct Sale {
         uint32 startTime;
         uint32 endTime;
@@ -14,7 +17,8 @@ contract Sales is Ownable {
         uint256 predecessorSaleId;
         uint256[] itemIds;
         uint256[] itemAmounts;
-        IERC20 paymentToken;
+        uint256 paymentTokenId;
+        uint256 paymentAmount;
     }
 
     struct SaleInput {
@@ -24,7 +28,8 @@ contract Sales is Ownable {
         uint256 limit;
         uint256[] itemIds;
         uint256[] itemAmounts;
-        address paymentTokenAddress;
+        uint256 paymentTokenId;
+        uint256 paymentAmount;
     }
     uint256 public salesCounter; // New counter to keep track of sale IDs
 
@@ -32,17 +37,15 @@ contract Sales is Ownable {
     mapping(address => uint256) public memberRank;
     // sales[saleId] => Sale
     mapping(uint256 => Sale) public sales;
-    // saleStats[saleId][address] => amount bought by user
+    // saleStats[saleId][address] => numBundles bought by user
     mapping(uint256 => mapping(address => uint256)) public saleStats;
     // item contract
-    IERC1155 public itemContract;
+    
 
     event SaleCreated(uint256 saleId);
-    event ItemPurchased(uint256 saleId, address buyer, uint256 amount);
+    event ItemPurchased(uint256 saleId, address buyer, uint256 numBundles);
 
-    function initializor(address _itemContract) external {
-        itemContract = IERC1155(_itemContract);
-    }
+   
 
     function createTieredSales(SaleInput[] calldata salesInputs) external onlyOwner {
         uint256 inputLength = salesInputs.length;
@@ -75,7 +78,8 @@ contract Sales is Ownable {
             predecessorSaleId: predecessorSaleId,
             itemIds: saleInput.itemIds,
             itemAmounts: saleInput.itemAmounts,
-            paymentToken: IERC20(saleInput.paymentTokenAddress)
+            paymentTokenId: saleInput.paymentTokenId,
+            paymentAmount: saleInput.paymentAmount
         });
 
         emit SaleCreated(saleId);
@@ -107,31 +111,31 @@ contract Sales is Ownable {
         return trimmedSalesList;
     }
 
-    function buyItems(uint256 saleId, uint256 amount) external {
+    function buyItems(uint256 saleId, uint256 numBundles) external {
         Sale storage sale = sales[saleId];
 
         require(block.timestamp >= sale.startTime && block.timestamp <= sale.endTime, "Sale not active");
         require(memberRank[msg.sender] >= sale.rankRequired, "Insufficient rank");
-        require(saleStats[saleId][msg.sender] + amount <= sale.limit, "Exceeds limit");
+        require(saleStats[saleId][msg.sender] + numBundles <= sale.limit, "Exceeds limit");
 
         if (sale.predecessorSaleId != 0) {
             require(saleStats[sale.predecessorSaleId][msg.sender] > 0, "Predecessor sale not bought");
         }
 
-        // Assume equal cost of 1 ERC20 token per unit amount
-        uint256 totalPrice = amount;
+        // Assume equal cost of 1 ERC20 token per unit numBundles
+        uint256 totalPrice = sale.paymentAmount * numBundles;
 
-        require(sale.paymentToken.transferFrom(msg.sender, owner(), totalPrice), "Payment failed");
+        _safeTransferFrom(msg.sender, owner(), sale.paymentTokenId , totalPrice, "");
 
         for (uint i = 0; i < sale.itemIds.length; i++) {
             uint256 itemId = sale.itemIds[i];
-            uint256 itemAmount = sale.itemAmounts[i] * amount;
-            itemContract.safeTransferFrom(owner(), msg.sender, itemId, itemAmount, "");
+            uint256 itemAmount = sale.itemAmounts[i] * numBundles;
+            _safeTransferFrom(owner(), msg.sender, itemId, itemAmount, "");
         }
 
-        saleStats[saleId][msg.sender] += amount;
+        saleStats[saleId][msg.sender] += numBundles;
 
-        emit ItemPurchased(saleId, msg.sender, amount);
+        emit ItemPurchased(saleId, msg.sender, numBundles);
     }
 }
 
