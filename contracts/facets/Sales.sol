@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-
-
-
 import "../libraries/utils/Ownable.sol";
 import "../internals/ERC1155/iERC1155Transfer.sol";
 
-
+/**
+ * @title Sales Contract
+ * @dev A contract to handle sales of items with ERC1155 standard
+ */
 contract Sales is Ownable, iERC1155Transfer {
+    // Structs
     struct Sale {
         uint32 startTime;
         uint32 endTime;
@@ -20,112 +21,36 @@ contract Sales is Ownable, iERC1155Transfer {
         uint256 paymentTokenId;
         uint256 paymentAmount;
     }
-
-    struct SaleInput {
-        uint32 startTime;
-        uint32 endTime;
-        uint256 rankRequired;
-        uint256 limit;
-        uint256[] itemIds;
-        uint256[] itemAmounts;
-        uint256 paymentTokenId;
-        uint256 paymentAmount;
-    }
-    uint256 public salesCounter; // New counter to keep track of sale IDs
-
-    // memberRank[address] => rank
+    // State variables
+    uint256 public salesCounter;
     mapping(address => uint256) public memberRank;
-    // sales[saleId] => Sale
     mapping(uint256 => Sale) public sales;
-    // saleStats[saleId][address] => numBundles bought by user
     mapping(uint256 => mapping(address => uint256)) public saleStats;
-    // item contract
-    
 
+    // Events
     event SaleCreated(uint256 saleId);
     event ItemPurchased(uint256 saleId, address buyer, uint256 numBundles);
 
-   
-
-    function createTieredSales(SaleInput[] calldata salesInputs) external onlyOwner {
-        uint256 inputLength = salesInputs.length;
-        uint256 localCounter = salesCounter;
-
-        for (uint256 i = 0; i < inputLength; i++) {
-            uint256 currentSaleId = localCounter + 1;
-
-            createSale(
-                currentSaleId,
-                salesInputs[i],
-                i == 0 ? 0 : localCounter // Set predecessorSaleId to 0 for the first sale
-            );
-
-            localCounter = currentSaleId;
+    // External functions
+    function createTieredSales(Sale[] calldata salesData) external onlyOwner {
+        for (uint256 i = 0; i < salesData.length; i++) {
+            uint256 predecessorSaleId = (i == 0) ? 0 : salesCounter;
+            createSale(salesCounter + 1, salesData[i], predecessorSaleId);
+            salesCounter++;
         }
-
-        salesCounter = localCounter; // Update the salesCounter in storage at the end of the function
     }
 
-    function createSale(uint256 saleId, SaleInput calldata saleInput, uint256 predecessorSaleId) internal {
-        require(saleInput.itemIds.length == saleInput.itemAmounts.length, "Item IDs and amounts must have the same length");
-        require(saleInput.endTime > saleInput.startTime, "End time must be greater than start time");
-
-        sales[saleId] = Sale({
-            startTime: saleInput.startTime,
-            endTime: saleInput.endTime,
-            rankRequired: saleInput.rankRequired,
-            limit: saleInput.limit,
-            predecessorSaleId: predecessorSaleId,
-            itemIds: saleInput.itemIds,
-            itemAmounts: saleInput.itemAmounts,
-            paymentTokenId: saleInput.paymentTokenId,
-            paymentAmount: saleInput.paymentAmount
-        });
-
-        emit SaleCreated(saleId);
-    }
-
-    function viewSale(uint256 saleId) external view returns (Sale[] memory sales_) {
-        require(sales[saleId].endTime > 0, "Sale must have existed.");
-
-        uint256 maxPredecessors = 100; // to prevent infinite loops, you can adjust this value
-        Sale[] memory salesList = new Sale[](maxPredecessors);
-        uint256 count = 0;
-        Sale memory currentSale = sales[saleId];
-
-        while (currentSale.predecessorSaleId != 0 && count < maxPredecessors) {
-            salesList[count] = currentSale;
-            count++;
-            currentSale = sales[currentSale.predecessorSaleId];
-        }
-
-        // Add the last sale which has predecessorSaleId = 0
-        salesList[count] = currentSale;
-
-        // Now we resize the array to remove the unused slots
-        Sale[] memory trimmedSalesList = new Sale[](count + 1);
-        for (uint256 i = 0; i <= count; i++) {
-            trimmedSalesList[i] = salesList[i];
-        }
-
-        return trimmedSalesList;
+    function viewSale(uint256 saleId) external view returns (Sale[] memory) {
+        return _retrieveSaleAndPredecessors(saleId);
     }
 
     function buyItems(uint256 saleId, uint256 numBundles) external {
+        _validatePurchase(saleId, numBundles);
+
         Sale storage sale = sales[saleId];
-
-        require(block.timestamp >= sale.startTime && block.timestamp <= sale.endTime, "Sale not active");
-        require(memberRank[msg.sender] >= sale.rankRequired, "Insufficient rank");
-        require(saleStats[saleId][msg.sender] + numBundles <= sale.limit, "Exceeds limit");
-
-        if (sale.predecessorSaleId != 0) {
-            require(saleStats[sale.predecessorSaleId][msg.sender] > 0, "Predecessor sale not bought");
-        }
-
-        // Assume equal cost of 1 ERC20 token per unit numBundles
         uint256 totalPrice = sale.paymentAmount * numBundles;
 
-        _safeTransferFrom(msg.sender, owner(), sale.paymentTokenId , totalPrice, "");
+        _safeTransferFrom(msg.sender, owner(), sale.paymentTokenId, totalPrice, "");
 
         for (uint i = 0; i < sale.itemIds.length; i++) {
             uint256 itemId = sale.itemIds[i];
@@ -134,13 +59,52 @@ contract Sales is Ownable, iERC1155Transfer {
         }
 
         saleStats[saleId][msg.sender] += numBundles;
-
         emit ItemPurchased(saleId, msg.sender, numBundles);
     }
-}
 
-/**
-    Need to finish event paradigm. How to we grow event ecosystem? How do we handle events?
-    Versioned marketplace? 
-    We can create a marketplace where DApps can embed their app in a popout iframe or website redirect.
- */
+    // Internal functions
+    function createSale(uint256 saleId, Sale memory saleData, uint256 predecessorSaleId) internal {
+        require(saleData.itemIds.length == saleData.itemAmounts.length, "Mismatched item data");
+        require(saleData.endTime > saleData.startTime, "Invalid time range");
+
+        saleData.predecessorSaleId = predecessorSaleId; // Assign the predecessorSaleId
+
+        sales[saleId] = saleData;
+
+        emit SaleCreated(saleId);
+    }
+
+    function _retrieveSaleAndPredecessors(uint256 saleId) internal view returns (Sale[] memory salesList) {
+        require(sales[saleId].endTime > 0, "Nonexistent sale");
+
+        uint256 maxPredecessors = 100;
+        salesList = new Sale[](maxPredecessors);
+        uint256 count = 0;
+
+        while (saleId != 0 && count < maxPredecessors) {
+            salesList[count] = sales[saleId];
+            saleId = sales[saleId].predecessorSaleId;
+            count++;
+        }
+
+        // Resize array to match the actual count
+        Sale[] memory trimmedSalesList = new Sale[](count);
+        for (uint256 i = 0; i < count; i++) {
+            trimmedSalesList[i] = salesList[i];
+        }
+
+        return trimmedSalesList;
+    }
+
+    function _validatePurchase(uint256 saleId, uint256 numBundles) internal view {
+        Sale memory sale = sales[saleId];
+
+        require(block.timestamp >= sale.startTime && block.timestamp <= sale.endTime, "Sale not active");
+        require(memberRank[msg.sender] >= sale.rankRequired, "Insufficient rank");
+        require(saleStats[saleId][msg.sender] + numBundles <= sale.limit, "Purchase limit exceeded");
+
+        if (sale.predecessorSaleId != 0) {
+            require(saleStats[sale.predecessorSaleId][msg.sender] > 0, "Must purchase from predecessor sale first");
+        }
+    }
+}
