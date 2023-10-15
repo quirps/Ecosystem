@@ -6,13 +6,13 @@ import "../internals/ERC1155/iERC1155Transfer.sol";
 import "../libraries/LibSales.sol";
 
 contract SalesMainFacet is Ownable, iERC1155Transfer {
-    using SalesLib for SalesLib.Sale;
+    using LibSales for LibSales.Sale;
 
     event SaleCreated(uint256 saleId);
     event ItemPurchased(uint256 saleId, address buyer, uint256 numBundles);
 
-    function createTieredSales(SalesLib.Sale[] calldata salesData) external onlyOwner {
-        SalesLib.SalesStorage storage ss = SalesLib.salesStorage();
+    function createTieredSales(LibSales.Sale[] calldata salesData) external onlyOwner {
+        LibSales.SalesStorage storage ss = LibSales.salesStorage();
 
         for (uint256 i = 0; i < salesData.length; i++) {
             uint256 predecessorSaleId = (i == 0) ? 0 : ss.salesCounter;
@@ -21,14 +21,14 @@ contract SalesMainFacet is Ownable, iERC1155Transfer {
         }
     }
 
-    function viewSale(uint256 saleId) external view returns (SalesLib.Sale[] memory) {
+    function viewSale(uint256 saleId) external view returns (LibSales.Sale[] memory) {
         return _retrieveSaleAndPredecessors(saleId);
     }
 
     function buyItems(uint256 saleId, uint256 numBundles) external {
         _validatePurchase(saleId, numBundles);
 
-        SalesLib.Sale memory sale = SalesLib.getSale(saleId);
+        LibSales.Sale memory sale = LibSales.getSale(saleId);
         uint256 totalPrice = sale.paymentAmount * numBundles;
 
         _safeTransferFrom(msg.sender, owner(), sale.paymentTokenId, totalPrice, "");
@@ -39,40 +39,40 @@ contract SalesMainFacet is Ownable, iERC1155Transfer {
             _safeTransferFrom(owner(), msg.sender, itemId, itemAmount, "");
         }
 
-        SalesLib.setSaleStats(saleId, msg.sender, numBundles);
+        LibSales.setSaleStats(saleId, msg.sender, numBundles);
 
         emit ItemPurchased(saleId, msg.sender, numBundles);
     }
 
-    function createSale(uint256 saleId, SalesLib.Sale memory saleData, uint256 predecessorSaleId) internal {
+    function createSale(uint256 saleId, LibSales.Sale memory saleData, uint256 predecessorSaleId) internal {
         require(saleData.itemIds.length == saleData.itemAmounts.length, "Mismatched item data");
         require(saleData.endTime > saleData.startTime, "Invalid time range");
 
         saleData.predecessorSaleId = predecessorSaleId;
 
-        SalesLib.setSale(saleId, saleData);
+        LibSales.setSale(saleId, saleData);
 
         emit SaleCreated(saleId);
     }
 
-    function _retrieveSaleAndPredecessors(uint256 saleId) internal view returns (SalesLib.Sale[] memory salesList) {
-        SalesLib.Sale memory sale = SalesLib.getSale(saleId);
+    function _retrieveSaleAndPredecessors(uint256 saleId) internal view returns (LibSales.Sale[] memory salesList) {
+        LibSales.Sale memory sale = LibSales.getSale(saleId);
 
         require(sale.endTime > 0, "Nonexistent sale");
 
         uint256 maxPredecessors = 100;
-        salesList = new SalesLib.Sale[](maxPredecessors);
+        salesList = new LibSales.Sale[](maxPredecessors);
         uint256 count = 0;
 
         while (saleId != 0 && count < maxPredecessors) {
             salesList[count] = sale;
             saleId = sale.predecessorSaleId;
-            sale = SalesLib.getSale(saleId);
+            sale = LibSales.getSale(saleId);
             count++;
         }
 
         // Resize array to match the actual count
-        SalesLib.Sale[] memory trimmedSalesList = new SalesLib.Sale[](count);
+        LibSales.Sale[] memory trimmedSalesList = new LibSales.Sale[](count);
         for (uint256 i = 0; i < count; i++) {
             trimmedSalesList[i] = salesList[i];
         }
@@ -81,15 +81,15 @@ contract SalesMainFacet is Ownable, iERC1155Transfer {
     }
 
     function _validatePurchase(uint256 saleId, uint256 numBundles) internal view {
-        SalesLib.Sale memory sale = SalesLib.getSale(saleId);
-        uint256 userSaleStats = SalesLib.getSaleStats(saleId, msg.sender);
+        LibSales.Sale memory sale = LibSales.getSale(saleId);
+        uint256 userSaleStats = LibSales.getSaleStats(saleId, msg.sender);
 
         require(block.timestamp >= sale.startTime && block.timestamp <= sale.endTime, "Sale not active");
-        require(SalesLib.salesStorage().memberRank[msg.sender] >= sale.rankRequired, "Insufficient rank");
+        require(LibSales.salesStorage().memberRank[msg.sender] >= sale.rankRequired, "Insufficient rank");
         require(userSaleStats + numBundles <= sale.limit, "Purchase limit exceeded");
 
         if (sale.predecessorSaleId != 0) {
-            require(SalesLib.getSaleStats(sale.predecessorSaleId, msg.sender) > 0, "Must purchase from predecessor sale first");
+            require(LibSales.getSaleStats(sale.predecessorSaleId, msg.sender) > 0, "Must purchase from predecessor sale first");
         }
     }
 
