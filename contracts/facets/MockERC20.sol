@@ -1,17 +1,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "../libraries/utils/Ownable.sol";
+import "../libraries/LibERC20.sol";
 
-contract MockERC20 is Ownable {
-    IERC1155 public erc1155;
+import "../internals/ERC1155/iERC1155Transfer.sol";
+
+
+contract MockERC20 is Ownable, iERC1155Transfer {
+    
     uint256 public constant tokenId = 0;
 
-    constructor(address _erc1155Address) {
-        erc1155 = IERC1155(_erc1155Address);
+    function setName(string memory _name) external {
+        LibERC20._setName(_name);
     }
-
+    function setSymbol(string memory _symbol) external{
+        LibERC20._setSymbol(_symbol);
+    }
     function name() public pure returns (string memory) {
         return "MockERC20Token";
     }
@@ -32,7 +37,7 @@ contract MockERC20 is Ownable {
     }
 
     function balanceOf(address account) public view returns (uint256) {
-        return erc1155.balanceOf(account, tokenId);
+        return balanceOf(account, tokenId);
     }
 
     function allowance(address owner, address spender) public view returns (uint256) {
@@ -43,7 +48,7 @@ contract MockERC20 is Ownable {
     }
 
     function transfer(address recipient, uint256 amount) public returns (bool) {
-        erc1155.safeTransferFrom(msg.sender, recipient, tokenId, amount, "");
+        _safeTransferFrom(msg.sender, recipient, tokenId, amount, "");
         return true;
     }
 
