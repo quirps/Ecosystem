@@ -4,12 +4,12 @@ pragma solidity ^0.8.0;
 import "../libraries/utils/Ownable.sol";
 import "../libraries/LibERC20.sol";
 
+import "../libraries/LibERC1155.sol";
 import "../internals/ERC1155/iERC1155Transfer.sol";
 
 
 contract MockERC20 is Ownable, iERC1155Transfer {
     
-    uint256 public constant tokenId = 0;
 
     function setName(string memory _name) external {
         LibERC20._setName(_name);
@@ -17,12 +17,17 @@ contract MockERC20 is Ownable, iERC1155Transfer {
     function setSymbol(string memory _symbol) external{
         LibERC20._setSymbol(_symbol);
     }
-    function name() public pure returns (string memory) {
-        return "MockERC20Token";
+
+    function getPrimaryCurrencyId() external{
+        LibERC20._getPrimaryCurrencyId();
+    }
+    //ERC20
+    function name() public view returns (string memory) {
+        return LibERC20.getName();
     }
 
-    function symbol() public pure returns (string memory) {
-        return "M20T";
+    function symbol() public view returns (string memory) {
+      return LibERC20.getSymbol();
     }
 
     function decimals() public pure returns (uint8) {
@@ -37,7 +42,7 @@ contract MockERC20 is Ownable, iERC1155Transfer {
     }
 
     function balanceOf(address account) public view returns (uint256) {
-        return balanceOf(account, tokenId);
+        return LibERC1155.getBalance( LibERC20.primaryCurrencyId, account);
     }
 
     function allowance(address owner, address spender) public view returns (uint256) {
@@ -48,7 +53,7 @@ contract MockERC20 is Ownable, iERC1155Transfer {
     }
 
     function transfer(address recipient, uint256 amount) public returns (bool) {
-        _safeTransferFrom(msg.sender, recipient, tokenId, amount, "");
+        _safeTransferFrom(msg.sender, recipient, LibERC20.primaryCurrencyId, amount, "");
         return true;
     }
 

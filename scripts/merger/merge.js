@@ -6,6 +6,8 @@ async function main() {
     // Print it out or write it to a file etc.
     console.log(mergedCode);
     fs.writeFileSync("./Minimal.sol",mergedCode)
+    return mergedCode
 }
+
 
 main()
