@@ -1,7 +1,7 @@
 pragma solidity ^0.8.6;
 
 library LibERC20{
-    uint256 constant primaryCurrencyId = 0;
+    
     bytes32 constant ERC20_STORAGE_POSITION = keccak256("diamond.standard.erc20.storage");
     struct ERC20_Storage{
         uint256 totalSupply;
@@ -30,7 +30,5 @@ library LibERC20{
     function getSymbol() internal view returns(string memory name_) {
         name_ = erc20Storage().symbol;
     }
-    function _getPrimaryCurrencyId() internal view returns(uint256 primaryCurrencyId_) {
-        primaryCurrencyId_ = primaryCurrencyId;
-    }
+
 }

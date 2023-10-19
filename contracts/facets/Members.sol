@@ -7,10 +7,8 @@ import "../libraries/merkleVerify/MembersVerify.sol";
 import "../interfaces/IMembers.sol";
 
 contract Members is IMembers, iMembers {
-    function initialization(address _bountyAddress, uint256 _currencyId, uint256 _maxBalance) external {
-        _initialization(_bountyAddress, _currencyId, _maxBalance);
-    }
 
+    constructor(address _bountyAddress, uint256 _currencyId, uint256 _maxBalance) iMembers(bountyAddress, _currencyId,  _maxBalance) {}
     function getUserRankHistory(address user, uint64 depth) external returns (LibMembers.MemberRank[] memory rank_) {
         rank_ = _rankHistory(user, depth);
         //rank_ = LibMembers.rankHistory(user, depth);

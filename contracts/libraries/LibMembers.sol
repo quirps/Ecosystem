@@ -17,17 +17,11 @@ library LibMembers {
         mapping( address => mapping(uint96 => MemberRank) ) memberRank;
         mapping(address => uint96) memberRankHistoryMaxIndex;
         uint256 recoveryNonce;
-        mapping(uint8 => Bounty) bounty;
         uint32 maxRank;
     }
 
-    struct Bounty {
-        uint256 currencyId;
-        uint256 maxBalance;
-        address bountyAddress;
-        uint256 upRate;
-        uint256 downRate;
-    }
+   
+   
     //issue with a struct array is can't trivially change struct
     //if add a member to the struct, you'll immedietely ovveride next sequential
     // slot (if of course new struct size is > 32 bytes)
@@ -93,7 +87,5 @@ library LibMembers {
         }
     }
 
-    function getBounty() internal view returns (Bounty storage bounty_){
-        bounty_ = memberStorage().bounty[0];
-    }
+    
 }

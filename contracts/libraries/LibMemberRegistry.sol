@@ -19,7 +19,6 @@ library LibMemberRegistry {
     }
 
     struct MemberRegistry_Storage {
-        uint96 verificationTime;
         mapping(address => string) addressToUsername;
         mapping(string => address) usernameToAddress;
         mapping(string => Recovery) usernameToRecoveryAddress;

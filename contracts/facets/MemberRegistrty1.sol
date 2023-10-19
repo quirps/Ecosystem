@@ -5,10 +5,7 @@ import "../internals/iMemberRegistry.sol";
 import "../libraries/verification/MemberRegistryVerification.sol";
 
 contract MemberRegistry is Context, iMemberRegistry {
-    function initializor(uint96 _recoveryTime) external {
-        _initializor(_recoveryTime);
-    }
-
+    constructor (uint32 _recoveryTime) iMemberRegistry(_recoveryTime) {    }
     //delete userAddress parameter and replace with msgSender() function
     function verifyUsername(
         string memory username,

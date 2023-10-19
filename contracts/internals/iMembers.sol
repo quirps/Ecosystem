@@ -16,19 +16,37 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
     //history is to save gas on not having to prove every time
     using Incrementer for bytes28;
     using Incrementer for bytes8;
+
+    address public immutable bountyAddress;
+    uint256 public immutable currencyId;
+    uint256 public immutable maxBalance;
+    uint256 public immutable upRate;
+    uint256 public immutable downRate;
+    struct Bounty {
+        uint256 currencyId;
+        uint256 maxBalance;
+        address bountyAddress;
+        uint256 upRate;
+        uint256 downRate;
+    }
     enum BountyAccountChange {
         Positive,
         Negative
     }
 
-    event Bounty(address receiver, uint256 bountyUp, uint256 bountyUpRate, uint256 bountiesDown, uint256 bountyDownRate);
+    event BountyEvent(address receiver, uint256 bountyUp, uint256 bountyUpRate, uint256 bountiesDown, uint256 bountyDownRate);
     event BountyBalanceChange(uint256 amount, BountyAccountChange direction);
 
-    function _initialization(address _bountyAddress, uint256 _currencyId, uint256 _maxBalance) internal {
-        _setBountyAddress(_bountyAddress);
-        _setBountyCurrencyId(_currencyId);
-        _setBountyMaxBalance(_maxBalance);
+    constructor(address _bountyAddress, uint256 _currencyId, uint256 _maxBalance, uint256 _upRate, uint256 _downRate) {
+        _bountyAddress != address(0);
+        bountyAddress = _bountyAddress;
+        currencyId = _currencyId;
+        maxBalance = _maxBalance;
+        upRate = _upRate;
+        downRate = _downRate;
     }
+
+    function getBounty() internal view returns (Bounty memory bounty_) {}
 
     //
     //MODERATOR
@@ -36,16 +54,9 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
         __changeMemberRanks(leaves);
     }
 
-    function _setMembersRanks(
-        uint8 v,
-        bytes32 r,
-        bytes32 s,
-        address owner,
-        uint256 nonce,
-        LibMembers.Leaf memory leaf
-    ) internal {
+    function _setMembersRanks(uint8 v, bytes32 r, bytes32 s, address owner, uint256 nonce, LibMembers.Leaf memory leaf) internal {
         MemberRecover.executeMyFunctionFromSignature(v, r, s, owner, nonce, leaf);
-        LibMembers.Leaf[] memory _leaf ;
+        LibMembers.Leaf[] memory _leaf;
         _leaf[0] = leaf;
         __changeMemberRanks(_leaf);
     }
@@ -62,12 +73,11 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
                 continue;
             }
 
-            LibMembers.addUserBlock(LibMembers.MemberRank(uint32(block.timestamp), _rank),_user);
+            LibMembers.addUserBlock(LibMembers.MemberRank(uint32(block.timestamp), _rank), _user);
 
             if (maxIndex == 0) {
                 bountiesUp++;
-            }
-            else{
+            } else {
                 ms.memberRank[_user][maxIndex].rank < _rank ? bountiesUp++ : bountiesDown++;
             }
         }
@@ -107,26 +117,7 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
         emit BountyBalanceChange(amount, BountyAccountChange.Negative);
     }
 
-    //permissioned OWNER ONLY
-    function _setBountyCurrencyId(uint256 currencyId) internal {
-        LibMembers.Bounty storage _bounty = LibMembers.getBounty();
-
-        _bounty.currencyId = currencyId;
-    }
-
-    function _setBountyMaxBalance(uint256 maxBalance) internal {
-        LibMembers.Bounty storage _bounty = LibMembers.getBounty();
-        _bounty.maxBalance = maxBalance;
-    }
-
-    function _setBountyAddress(address _bountyAddress) internal {
-        require(_bountyAddress != address(0), "Bounty address cannot equal the zero address.");
-        LibMembers.Bounty storage _bounty = LibMembers.getBounty();
-
-        _bounty.bountyAddress = _bountyAddress;
-    }
-
-    function _rankHistory(address user, uint96 depth) internal view  returns (LibMembers.MemberRank[] memory rankHistory_){
+    function _rankHistory(address user, uint96 depth) internal view returns (LibMembers.MemberRank[] memory rankHistory_) {
         LibMembers.rankHistory(user, depth);
     }
 

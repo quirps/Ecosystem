@@ -5,6 +5,10 @@ import "../libraries/LibMemberRegistry.sol";
 import "../libraries/verification/MemberRegistryVerification.sol";
 
 contract iMemberRegistry is Context {
+    uint32 public immutable verificationTime;
+    constructor (uint32 _verificationTime) {
+        verificationTime = _verificationTime;
+    }
     /// @dev Emitted when a recovery action is initiated or finalized
     /// @param username The username associated with the action
     /// @param userAddress The user's address
@@ -16,10 +20,6 @@ contract iMemberRegistry is Context {
     /// @param userAddress The user's address
     event UserRegistered(string username, address userAddress);
 
-    function _initializor(uint96 _verificationTime) internal {
-        LibMemberRegistry.MemberRegistry_Storage storage ls = LibMemberRegistry.MemberRegistryStorage();
-        ls.verificationTime = _verificationTime;
-    }
 
     //delete userAddress parameter and replace with msgSender() function
     function _verifyUsername(
@@ -47,7 +47,7 @@ contract iMemberRegistry is Context {
 
         LibMemberRegistry.Recovery memory _userVerification = ls.usernameToRecoveryAddress[username];
         if (msgSender() != _userVerification.userNewAddress) {
-            ls.usernameToRecoveryAddress[username] = LibMemberRegistry.Recovery(msgSender(), uint96(block.timestamp) + ls.verificationTime);
+            ls.usernameToRecoveryAddress[username] = LibMemberRegistry.Recovery(msgSender(), uint96(block.timestamp) + verificationTime);
             emit RecoveryAction(username, msgSender(), LibMemberRegistry.RecoveryStatus.Initiated);
         }
     }

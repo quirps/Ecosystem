@@ -9,7 +9,7 @@ import "../internals/ERC1155/iERC1155Transfer.sol";
 
 
 contract MockERC20 is Ownable, iERC1155Transfer {
-    
+    uint256 public constant primaryCurrencyId = 0; 
 
     function setName(string memory _name) external {
         LibERC20._setName(_name);
@@ -18,9 +18,7 @@ contract MockERC20 is Ownable, iERC1155Transfer {
         LibERC20._setSymbol(_symbol);
     }
 
-    function getPrimaryCurrencyId() external{
-        LibERC20._getPrimaryCurrencyId();
-    }
+
     //ERC20
     function name() public view returns (string memory) {
         return LibERC20.getName();
@@ -42,7 +40,7 @@ contract MockERC20 is Ownable, iERC1155Transfer {
     }
 
     function balanceOf(address account) public view returns (uint256) {
-        return LibERC1155.getBalance( LibERC20.primaryCurrencyId, account);
+        return LibERC1155.getBalance(primaryCurrencyId, account);
     }
 
     function allowance(address owner, address spender) public view returns (uint256) {
@@ -53,18 +51,18 @@ contract MockERC20 is Ownable, iERC1155Transfer {
     }
 
     function transfer(address recipient, uint256 amount) public returns (bool) {
-        _safeTransferFrom(msg.sender, recipient, LibERC20.primaryCurrencyId, amount, "");
+        _safeTransferFrom(msg.sender, recipient, primaryCurrencyId, amount, "");
         return true;
     }
 
-    function approve(address spender, uint256 amount) public returns (bool) {
+    function approve(address spender, uint256 amount) public pure returns (bool) {
         // ERC1155 does not have an approve function by default.
         // If your ERC1155 contract implements it, use it here.
         // Otherwise, you will need to implement an approval system in this contract.
         return false; // Replace with appropriate approve logic
     }
 
-    function transferFrom(address sender, address recipient, uint256 amount) public returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount) public pure returns (bool) {
         // ERC1155 does not have a transferFrom function by default. 
         // If your ERC1155 contract implements it, use it here.
         // Otherwise, you will need to implement transferFrom functionality in this contract.

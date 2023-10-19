@@ -45,3 +45,9 @@ contract EventFactory is iEventFactory {
         _refundTicketsWithProof(eventId, ticketIds, lowerBound, upperBound, merkleProof);
     }
 }
+
+/**
+    facet per event architecture. 
+    Would need to generate a new interface object, check for collisions,
+    clean up when done (can't pollute 2^32 too much)
+ */
