@@ -12,7 +12,7 @@ import "../internals/iFreezeOwner.sol";
 ///      given freeze duration at minimum
 
 
-contract FreezeOwner is iFreezeOwner{
+contract FreezeOwner is iFreezeOwner  {
     // event Init(uint256 indexed _a, address indexed _b, address _c);
     // function init(uint256 _amount, address _test, address _receiver, address _tokenLeadContract) external {
     //     LibFreeze.FreezeStorage storage fs = LibFreeze.freezeStorage();

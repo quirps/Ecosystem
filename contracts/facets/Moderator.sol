@@ -9,7 +9,7 @@ pragma solidity ^0.8.6;
  * Same system as member rank is used, RankLabel mapped to well ordered set.
  */
 import "../libraries/LibModerator.sol";
-contract Moderator{
+contract Moderator {
     /**
      * Just create a ranked list, address associated with number.
      * Moderators should only need to be referencable via current ecosystem, 

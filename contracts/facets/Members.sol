@@ -1,4 +1,4 @@
-pragma solidity ^0.8.6;
+pragma solidity ^0.8.9;
 pragma experimental ABIEncoderV2;
 
 import "./ERC1155Transfer.sol";
@@ -8,7 +8,7 @@ import "../interfaces/IMembers.sol";
 
 contract Members is IMembers, iMembers {
 
-    constructor(address _bountyAddress, uint256 _currencyId, uint256 _maxBalance) iMembers(bountyAddress, _currencyId,  _maxBalance) {}
+    constructor( uint256 _currencyId, uint256 _maxBalance, address _bountyAddress, uint256 _upRate, uint256 _downRate) iMembers( _currencyId,  _maxBalance, _bountyAddress, _upRate, _downRate) {}
     function getUserRankHistory(address user, uint64 depth) external returns (LibMembers.MemberRank[] memory rank_) {
         rank_ = _rankHistory(user, depth);
         //rank_ = LibMembers.rankHistory(user, depth);
@@ -35,21 +35,8 @@ contract Members is IMembers, iMembers {
         _removeBountyBalance(amount);
     }
 
-    //permissioned OWNER ONLY
-    function setBountyCurrencyId(uint256 currencyId) external {
-        _setBountyCurrencyId(currencyId);
-    }
-
-    function setBountyMaxBalance(uint256 maxBalance) external {
-        _setBountyMaxBalance(maxBalance);
-    }
-
-    function setBountyAddress(address _bountyAddress) external {
-        _setBountyAddress(_bountyAddress);
-    }
-
-    function getBounty() external view returns (LibMembers.Bounty memory bounty_) {
-        bounty_ = LibMembers.getBounty();
+    function getBounty() external view returns (Bounty memory bounty_) {
+        bounty_ = _getBounty();
     }
     /**
      * Implement an optimized version of erc1155 specific for bounties? Or unoptimized

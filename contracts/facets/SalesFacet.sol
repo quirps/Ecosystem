@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 import "../libraries/LibSales.sol";
 import "../internals/iSales.sol";
 
-contract Sales is iSales{
+contract Sales is iSales {
     function createSale(uint256 saleId, LibSales.Sale memory saleData, uint256 predecessorSaleId) external{
         _createSale(saleId, saleData, predecessorSaleId);
     }

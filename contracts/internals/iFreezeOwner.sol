@@ -11,7 +11,7 @@ import "../internals/iFreezeOwner.sol";
 ///      given freeze duration at minimum
 
 
-contract iFreezeOwner{
+contract iFreezeOwner {
     event FrozenOwner(address indexed _owner, uint256 indexed duration);
     event UnFrozenOwner(address indexed _owner);
 

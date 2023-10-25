@@ -23,7 +23,7 @@ import "../interfaces/IFreezeGlobal.sol";
 /// onlyOwner must be added to freeze init module
 /// Once freeze OWNER is added, Constructor takes in (address,signature) pairs that consist of onlyOwner modifiers
 /// Easier fix to OWNER is just set owner to zero address, then after time enable _owner (old owner) to reclaim ownership
-contract FreezeGlobal is IFreezeGlobal(){
+contract FreezeGlobal is IFreezeGlobal()  {
 
     address public immutable facetAddress;
     constructor(){

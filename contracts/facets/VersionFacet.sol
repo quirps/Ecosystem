@@ -38,7 +38,7 @@ Registry offers an on-chain way to verify what's going to be added to an ecosyst
  */
 
 
-contract VersionFacet{
+contract VersionFacet {
     uint32 mainVersion; 
     uint32 optimizationVersion;
 

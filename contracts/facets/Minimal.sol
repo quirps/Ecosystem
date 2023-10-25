@@ -1,7 +1,7 @@
 pragma solidity ^0.8.9;
 
 import "../internals/iMinimalFacet.sol";
-contract Minimal is iMinimal{
+contract Minimal is iMinimal {
     function setData(uint256 tokenId, address user, uint256 data) external{
         _setData(tokenId, user, data);
     }

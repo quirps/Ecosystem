@@ -37,7 +37,7 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
     event BountyEvent(address receiver, uint256 bountyUp, uint256 bountyUpRate, uint256 bountiesDown, uint256 bountyDownRate);
     event BountyBalanceChange(uint256 amount, BountyAccountChange direction);
 
-    constructor(address _bountyAddress, uint256 _currencyId, uint256 _maxBalance, uint256 _upRate, uint256 _downRate) {
+    constructor(uint256 _currencyId, uint256 _maxBalance, address _bountyAddress,  uint256 _upRate, uint256 _downRate) {
         _bountyAddress != address(0);
         bountyAddress = _bountyAddress;
         currencyId = _currencyId;
@@ -46,7 +46,9 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
         downRate = _downRate;
     }
 
-    function getBounty() internal view returns (Bounty memory bounty_) {}
+    function _getBounty() internal view returns (Bounty memory bounty_) {
+        bounty_ = Bounty(currencyId, maxBalance, bountyAddress, upRate, downRate);
+    }
 
     //
     //MODERATOR
@@ -82,13 +84,13 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
             }
         }
 
-        LibMembers.Bounty storage _bounty = LibMembers.getBounty();
+        Bounty memory _bounty = _getBounty();
         uint256 _bountyUpRate = _bounty.upRate;
         uint256 _bountyDownRate = _bounty.downRate;
         uint256 bounty = bountiesUp * _bountyUpRate + bountiesDown * _bountyDownRate;
         _safeTransferFrom(_bounty.bountyAddress, msgSender(), _bounty.currencyId, bounty, "");
 
-        emit Bounty(msgSender(), bountiesUp, _bounty.upRate, bountiesDown, _bounty.downRate);
+        emit BountyEvent(msgSender(), bountiesUp, _bounty.upRate, bountiesDown, _bounty.downRate);
     }
 
     /**
@@ -96,7 +98,7 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
      */
 
     function _addBountyBalance(uint256 amount) internal {
-        LibMembers.Bounty storage _bounty = LibMembers.getBounty();
+        Bounty memory _bounty = _getBounty();
         uint256 bountyBalance;
         uint256 newAmount;
 
@@ -111,7 +113,7 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
     }
 
     function _removeBountyBalance(uint256 amount) internal {
-        LibMembers.Bounty storage _bounty = LibMembers.getBounty();
+        Bounty memory _bounty = _getBounty();
 
         _safeTransferFrom(_bounty.bountyAddress, LibDiamond.contractOwner(), _bounty.currencyId, amount, "");
         emit BountyBalanceChange(amount, BountyAccountChange.Negative);

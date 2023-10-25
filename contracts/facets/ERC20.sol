@@ -9,8 +9,10 @@ import "../internals/ERC1155/iERC1155Transfer.sol";
 
 
 contract MockERC20 is Ownable, iERC1155Transfer {
-    uint256 public constant primaryCurrencyId = 0; 
-
+    uint256 public immutable primaryCurrencyId; 
+    constructor( uint256 _primaryCurrencyId){
+        primaryCurrencyId = _primaryCurrencyId;
+    }
     function setName(string memory _name) external {
         LibERC20._setName(_name);
     }
