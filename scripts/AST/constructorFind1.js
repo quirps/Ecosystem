@@ -67,3 +67,8 @@ const folderPath = '/home/joe/Documents/EcoSystem1/contracts/facets'; // replace
 findInheritedContracts(folderPath).then(res => {
     console.log(res);
 });
+
+/**
+ * What do we want to do with constructor parameters exactly? All constructor parameters should be marked 
+ * as optimizable or not. You
+ */
