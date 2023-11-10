@@ -88,12 +88,6 @@ library LibFreeze {
                 } 
             }
         }
-        //resize bytes4[] array
-        // bytes4[] memory _freezeCachedSelectorsResized = new bytes4[](_arrayIndex);
-        // for(uint i; i < _arrayIndex; i++){
-        //     _freezeCachedSelectorsResized[i] = _freezeCachedSelectors[i];
-        // }
-        // fs.freezeCachedSelectors = _freezeCachedSelectorsResized;
         _expirationTimestamp = block.timestamp + _freezeDuration;
         fs.frozenGlobalExpire = _expirationTimestamp;
         emit GlobalFreeze(_owner,_expirationTimestamp);

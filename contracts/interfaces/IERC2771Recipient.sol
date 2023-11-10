@@ -23,7 +23,7 @@ abstract contract IERC2771Recipient {
      * For a call that came through the Forwarder the real sender is extracted from the last 20 bytes of the `msg.data`.
      * Otherwise simply returns `msg.sender`.
      */
-    function _msgSender() internal virtual view returns (address);
+    function msgSender() internal virtual view returns (address);
 
     /**
      * @notice Use this method in the contract instead of `msg.data` when difference matters (hashing, signature, etc.)
@@ -32,5 +32,5 @@ abstract contract IERC2771Recipient {
      * of the `msg.data` - so this method will strip those 20 bytes off.
      * Otherwise (if the call was made directly and not through the forwarder) simply returns `msg.data`.
      */
-    function _msgData() internal virtual view returns (bytes calldata);
+    function msgData() internal virtual view returns (bytes calldata);
 }

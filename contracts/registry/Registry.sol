@@ -6,6 +6,24 @@ import "../interfaces/IDiamondCut.sol";
 
 import "hardhat/console.sol";
 
+
+/**
+TODO
+Need to add Owner/Global freeze logic as inherited contract
+Need to hardcoded facet <--> constructor dependencies and types
+Would be accomplished better with Diamond
+
+Ultimately have a diamond where the owner can only implement new versions.
+Would need to add new versions, but have logic in main diamond. 
+Upgrades - Get first version (earlier). Step up version upgrades
+What changes do we need to watch out for? Forget localized optimizations for now.
+    1. Consistent constructor inputs as prior. 
+    2. Changing/Adding/Removing relevant facets
+
+For 2, we loop starting at version i + 1  (i is starting version) and go to N (target version)
+We should create an array of DiamondCuts. DiamondCuts must have constructor information too. 
+
+ */
 contract DiamondRegistry {
     // State Variables
     address public owner;

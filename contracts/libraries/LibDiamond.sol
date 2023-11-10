@@ -12,7 +12,7 @@ import { IDiamondCut } from "../interfaces/IDiamondCut.sol";
 library LibDiamond {
     error InitializationFunctionReverted(address _initializationContractAddress, bytes _calldata);
     bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
-
+    
     struct FacetAddressAndPosition {
         address facetAddress;
         uint96 functionSelectorPosition; // position in facetFunctionSelectors.functionSelectors array
