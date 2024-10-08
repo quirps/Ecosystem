@@ -1,9 +1,9 @@
 pragma solidity ^0.8.0;
 
-import "../../libraries/utils/Context.sol";
-import "../../libraries/LibERC1155.sol";
+import "../../../../libraries/utils/Context.sol";
+import "../libraries/LibERC1155.sol";
 import "./iERC1155ContractTransfer.sol";
-import "../../interfaces/IERC1155Transfer.sol";
+import "../interfaces/IERC1155Transfer.sol";
 
 contract iERC1155Transfer is iERC1155ContractTransfer, Context {
     /**

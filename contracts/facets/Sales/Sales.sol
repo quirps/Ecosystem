@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "../libraries/utils/Ownable.sol";
-import "../internals/ERC1155/iERC1155Transfer.sol";
+import "./Tokens/ERC1155/internals/iERC1155Transfer.sol";
 
 /**
  * @title Sales Contract

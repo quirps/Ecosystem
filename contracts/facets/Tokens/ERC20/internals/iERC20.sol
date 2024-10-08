@@ -1,13 +1,13 @@
 pragma solidity ^0.8.6;
 
-import "../internals/ERC1155/iERC1155.sol";
-import "../internals/ERC1155/iERC1155Transfer.sol";
+import "../../ERC1155/internals/iERC1155.sol";
+import "../../ERC1155/internals/iERC1155Transfer.sol"; 
 
-import "../interfaces/IERC1155Transfer.sol";
+import "../../ERC1155/interfaces/IERC1155Transfer.sol";
 
 import "../libraries/LibERC20.sol";
-import "../libraries/utils/Context.sol";
-import "../libraries/LibERC1155.sol";
+import "../../../../libraries/utils/Context.sol";  
+import "../../ERC1155/libraries/LibERC1155.sol";
 
 contract iERC20 is iERC1155, iERC1155Transfer {
     /**

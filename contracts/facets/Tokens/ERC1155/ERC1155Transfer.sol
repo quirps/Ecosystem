@@ -3,15 +3,15 @@
 
 pragma solidity ^0.8.0;
 
-import "../interfaces/IERC1155.sol";
-import "../interfaces/IERC1155Receiver.sol";
-import "../interfaces/IERC1155MetadataURI.sol";
-import "../interfaces/IERC1155Transfer.sol";
-import "../internals/ERC1155/iERC1155.sol";
-import "../libraries//utils/Address.sol";
-import "../libraries/utils/Context.sol";
-import "../libraries/LibERC1155.sol";
-import "../internals/ERC1155/iERC1155Transfer.sol";
+import "./interfaces/IERC1155.sol";
+import "./interfaces/IERC1155Receiver.sol";
+import "./interfaces/IERC1155MetadataURI.sol";
+import "./interfaces/IERC1155Transfer.sol";
+import "./internals/iERC1155.sol";
+import "../../../libraries//utils/Address.sol";
+import "../../../libraries/utils/Context.sol";
+import "./libraries/LibERC1155.sol";
+import "./internals/iERC1155Transfer.sol";
 /**
  * @dev Implementation of the basic standard multi-token.
  * See https://eips.ethereum.org/EIPS/eip-1155

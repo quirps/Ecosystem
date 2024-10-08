@@ -1,7 +1,7 @@
 pragma solidity ^0.8.0;
 
-import "../../interfaces/IERC1155Receiver.sol";
-import "../../libraries/utils/Address.sol";
+import "../interfaces/IERC1155Receiver.sol";
+import "../../../../libraries/utils/Address.sol";
 import "./iERC1155Receiver.sol";
 
 //Safety check for transfers to contracts

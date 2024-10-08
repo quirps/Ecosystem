@@ -1,11 +1,11 @@
 pragma solidity ^0.8.0;
 
-import "../../libraries/LibERC1155.sol";
+import "../libraries/LibERC1155.sol";
 import "./iERC1155ContractTransfer.sol";
-import "../../interfaces/IERC1155Transfer.sol";
-import "../../interfaces/IERC1155Receiver.sol";
-import "../../libraries/utils/Address.sol";
-import "../../libraries/utils/Context.sol";
+import "../interfaces/IERC1155Transfer.sol";
+import "../interfaces/IERC1155Receiver.sol";
+import "../../../../libraries/utils/Address.sol";
+import "../../../../libraries/utils/Context.sol";
 
 contract iERC1155 is iERC1155ContractTransfer, Context {
     using Address for address;

@@ -3,8 +3,8 @@ pragma solidity ^0.8.6;
 pragma experimental ABIEncoderV2;
 
 
-import "../libraries/LibFreeze.sol";
-import "../interfaces/IFreezeGlobal.sol";
+import "../../libraries/LibFreeze.sol";
+import "../../interfaces/IFreezeGlobal.sol";
 /// @title Global and Owner Freezing
 /// @author Quirp
 /// @notice Two Functionalities - Global Freeze: Freezes Diamond completely, aside from this facet
