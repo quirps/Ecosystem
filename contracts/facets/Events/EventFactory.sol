@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../internals/iEventFactory.sol";
-import "../libraries/LibEventFactory.sol";
+import "./_EventFactory.sol";
+import "./IEventFactory.sol";
+import "./LibEventFactory.sol"; 
 
-contract EventFactory is iEventFactory {
+contract EventFactory is IEventFactory, iEventFactory {
      function setMerkleRoot(uint256 eventId, bytes32 root) external onlyOwner {
         _setMerkleRoot(eventId, root);
     }
