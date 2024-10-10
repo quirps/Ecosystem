@@ -1,8 +1,8 @@
 pragma solidity ^0.8.6;
 pragma experimental ABIEncoderV2;
 
-import "../libraries/LibFreeze.sol";
-import "../internals/iFreezeOwner.sol";
+import "./LibFreeze.sol";
+import "./_FreezeOwner.sol";
 /// @title Owner Freezing
 /// @author Quirp
 /// @notice Freezes (removes) the owner for an extended duration.

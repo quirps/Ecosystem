@@ -1,10 +1,10 @@
 pragma solidity ^0.8.9;
 pragma experimental ABIEncoderV2;
 
-import "./ERC1155Transfer.sol";
-import "../internals/iMembers.sol";
-import "../libraries/merkleVerify/MembersVerify.sol";
-import "../interfaces/IMembers.sol";
+import "../Tokens/ERC1155/ERC1155Transfer.sol";
+import "../MemberRankings/_Members.sol";  
+import "../../libraries/merkleVerify/MembersVerify.sol"; 
+import "./IMembers.sol";
 
 contract Members is IMembers, iMembers {
 

@@ -3,14 +3,14 @@ pragma experimental ABIEncoderV2;
 
 import "hardhat/console.sol";
 
-import "./ERC1155/iERC1155Transfer.sol";
-import "../libraries/LibMembers.sol";
-import "../libraries/LibERC1155.sol";
-import "../libraries/LibDiamond.sol";
-import "../libraries/utils/Incrementer.sol";
-import "../libraries/verification/MemberVerification.sol";
-import "../libraries/LibModerator.sol";
-import "./Moderators/ModeratorModifiers.sol";
+import "../Tokens/ERC1155/internals/iERC1155Transfer.sol"; 
+import "../MemberRankings/LibMembers.sol"; 
+import "../Tokens/ERC1155/Libraries/LibERC1155.sol";    
+import "../Diamond/LibDiamond.sol";
+import "../../utils/Incrementer.sol";
+import "../../libraries/verification/MemberVerification.sol";
+import "../Moderator/LibModerator.sol";  
+import "../Moderator/ModeratorModifiers.sol";   
 
 contract iMembers is iERC1155Transfer, ModeratorModifiers {
     //history is to save gas on not having to prove every time

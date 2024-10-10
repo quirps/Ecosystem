@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
-
-import "../libraries/utils/Ownable.sol";
-import "../internals/ERC1155/iERC1155Transfer.sol";
-import "../libraries/LibSales.sol";
+ 
+import "../../libraries/utils/Ownable.sol"; 
+import "../Tokens/ERC1155/internals/iERC1155Transfer.sol";
+import "./LibSales.sol";
 
 contract iSales is Ownable, iERC1155Transfer {
     using LibSales for LibSales.Sale;

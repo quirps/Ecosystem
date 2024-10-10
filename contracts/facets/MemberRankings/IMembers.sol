@@ -1,7 +1,7 @@
 pragma solidity ^0.8.6;
 pragma experimental ABIEncoderV2;
 
-import "../internals/iMembers.sol";
+import "./_Members.sol"; 
 
 /// @title Members Contract Interface
 /// @notice This interface provides a set of functions for managing membership ranks and bounties.

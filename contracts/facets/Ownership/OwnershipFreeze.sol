@@ -2,7 +2,7 @@
 pragma solidity ^0.8.6;
 pragma experimental ABIEncoderV2;
 
-import "../../libraries/LibFreeze.sol";
+import "./LibFreeze.sol";  
 import "../../internals/iFreezeOwner.sol";
 /// @title Owner Freezing
 /// @author Quirp

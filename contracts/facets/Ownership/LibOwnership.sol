@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 library LibOwnership{
 bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.ownership.storage");
 struct OwnershipStorage{
-    address owner;
+    address contractOwner;
 }
 
 function diamondStorage() internal pure returns (OwnershipStorage storage ds) {
@@ -17,7 +17,7 @@ function diamondStorage() internal pure returns (OwnershipStorage storage ds) {
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     function setContractOwner(address _newOwner) internal {
-        DiamondStorage storage ds = diamondStorage();
+        OwnershipStorage storage ds = diamondStorage();
         address previousOwner = ds.contractOwner;
         ds.contractOwner = _newOwner;
         emit OwnershipTransferred(previousOwner, _newOwner);

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../libraries/LibEventFactory.sol";
-import "../libraries/utils/MerkleProof.sol";
+import "./LibEventFactory.sol"; 
+import "../../utils/MerkleProof.sol"; 
 import "../Tokens/ERC1155/interfaces/IERC1155Transfer.sol";
-import "./iOwnership.sol";
-import "../libraries/utils/Context.sol";
+import "../Ownership/_Ownership.sol"; 
+import "../../utils/Context.sol";
 import "../Tokens/ERC1155/internals/iERC1155Transfer.sol"; 
 import "hardhat/console.sol";
 contract iEventFactory is iOwnership, iERC1155Transfer {

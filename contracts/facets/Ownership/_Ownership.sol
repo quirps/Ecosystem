@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../libraries/LibOwnership.sol";
-import "../internals/iERC2771Recipient.sol";
+import "./LibOwnership.sol";
+import "../../ERC2771Recipient.sol";
 
 contract iOwnership is iERC2771Recipient {
     modifier onlyOwner(){

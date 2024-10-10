@@ -2,7 +2,7 @@
 pragma solidity ^0.8.6;
 pragma experimental ABIEncoderV2;
 
-import "../libraries/LibDiamond.sol";
+import "../Diamond/LibDiamond.sol";  
 
 /// @title Global and Owner Freezing
 /// @author Quirp

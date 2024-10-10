@@ -2,8 +2,6 @@
 // solhint-disable no-inline-assembly
 pragma solidity >=0.8.0;
 
-import "../interfaces/IERC2771Recipient.sol";
-import "../internals/iERC2771Recipient.sol";
 
 /**
  * @title The ERC-2771 Recipient Base Abstract Class - Implementation
@@ -14,12 +12,12 @@ import "../internals/iERC2771Recipient.sol";
  *
  * @notice A subclass must use `_msgSender()` instead of `msg.sender`.
  */
-contract ERC2771Recipient is iERC2771Recipient {
-
+contract ERC2771Recipient {
+ 
     /*
      * Forwarder singleton we accept calls from
      */
-    constructor(address _trustedForwarder) iERC2771Recipient(_trustedForwarder){}
+    address _trustedForwarder;
     /**
      * :warning: **Warning** :warning: The Forwarder can have a full control over your Recipient. Only trust verified Forwarder.
      * @notice Method is not a required method to allow Recipients to trust multiple Forwarders. Not recommended yet.
@@ -29,17 +27,17 @@ contract ERC2771Recipient is iERC2771Recipient {
         return _trustedForwarder;
     }
 
-    function _setTrustedForwarder(address _forwarder) internal {
-        _trustedForwarder = _forwarder;
+    function setTrustedForwarder(address _forwarder) internal {
+        _trustedForwarder = _forwarder; 
     }
-
-    /// @inheritdoc IERC2771Recipient
-    function isTrustedForwarder(address forwarder) public  override view returns(bool) {
+ 
+  
+    function isTrustedForwarder(address forwarder) public  view returns(bool) {
         return forwarder == _trustedForwarder;
     }
 
-    /// @inheritdoc IERC2771Recipient
-    function msgSender() internal override virtual view returns (address ret) {
+    
+    function msgSender() internal virtual view returns (address ret) {
         if (msg.data.length >= 20 && isTrustedForwarder(msg.sender)) {
             // At this point we know that the sender is a trusted forwarder,
             // so we trust that the last bytes of msg.data are the verified sender address.
@@ -52,8 +50,8 @@ contract ERC2771Recipient is iERC2771Recipient {
         }
     }
 
-    /// @inheritdoc IERC2771Recipient
-    function msgData() internal override virtual view returns (bytes calldata ret) {
+    
+    function msgData() internal virtual view returns (bytes calldata ret) {
         if (msg.data.length >= 20 && isTrustedForwarder(msg.sender)) {
             return msg.data[0:msg.data.length-20];
         } else {
