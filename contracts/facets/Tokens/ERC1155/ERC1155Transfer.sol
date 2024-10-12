@@ -19,20 +19,20 @@ import "./internals/iERC1155Transfer.sol";
  *
  * _Available since v3.1._
  */
-contract ERC1155Transfer is   Context, iERC1155Transfer {
+contract ERC1155Transfer is    iERC1155Transfer {
     using Address for address;
     /**
      * @dev See {IERC1155-safeTransferFrom}.
      */
     function safeTransferFrom(
         address from,
-        address to,
+        address to, 
         uint256 id,
         uint256 amount,
         bytes memory data
     ) public   {
         require(
-            from == _msgSender() || isApprovedForAll(from, _msgSender()),
+            from == msgSender() || isApprovedForAll(from, msgSender()),
             "ERC1155: caller is not token owner or approved"
         );
         _safeTransferFrom(from, to, id, amount, data);
@@ -49,7 +49,7 @@ contract ERC1155Transfer is   Context, iERC1155Transfer {
         bytes memory data
     ) public  {
         require(
-            from == _msgSender() || isApprovedForAll(from, _msgSender()),
+            from == msgSender() || isApprovedForAll(from, msgSender()),
             "ERC1155: caller is not token owner or approved"
         );
         _safeBatchTransferFrom(from, to, ids, amounts, data);
@@ -59,7 +59,7 @@ contract ERC1155Transfer is   Context, iERC1155Transfer {
      * @dev See {IERC1155-setApprovalForAll}.
      */
     function setApprovalForAll(address operator, bool approved) public  {
-        _setApprovalForAll(_msgSender(), operator, approved);
+        _setApprovalForAll(msgSender(), operator, approved);
     }
 
     /**

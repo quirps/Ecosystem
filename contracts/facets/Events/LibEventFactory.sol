@@ -1,9 +1,9 @@
 // LibEventStorage.sol
 pragma solidity ^0.8.0;
 
-import "../interfaces/IERC1155Transfer.sol";
+import "../Tokens/ERC1155/interfaces/IERC1155Transfer.sol";  
 
-library LibEventFactoryStorage {
+library LibEventFactory {
     bytes32 constant STORAGE_POSITION = keccak256("diamond.storage.EventFactory");
 
     struct TicketDetail {

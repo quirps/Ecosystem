@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../libraries/LibMemberRegistry.sol";
+import "./LibMemberRegistry.sol"; 
 
 /// @title iMemberRegistry Interface
 /// @dev Responsible for validating members on a particular platform off-chain

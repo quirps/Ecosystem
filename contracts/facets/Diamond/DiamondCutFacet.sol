@@ -9,12 +9,12 @@ pragma solidity ^0.8.0;
 import { IDiamondCut } from "./IDiamondCut.sol"; 
 import { LibDiamond } from "./LibDiamond.sol";
 
-import {LibOwnership} from "../Ownership/LibOwnership.sol";  
+import {iOwnership} from "../Ownership/_Ownership.sol";  
 
 // Remember to add the loupe functions from DiamondLoupeFacet to the diamond.
 // The loupe functions are required by the EIP2535 Diamonds standard
 
-contract DiamondCutFacet is IDiamondCut {
+contract DiamondCutFacet is IDiamondCut, iOwnership {
     /// @notice Add/replace/remove any number of functions and optionally execute
     ///         a function with delegatecall
     /// @param _diamondCut Contains the facet addresses and function selectors
@@ -27,7 +27,7 @@ contract DiamondCutFacet is IDiamondCut {
         bytes calldata _calldata
     ) external override {
 
-        LibOwnership.enforceIsContractOwner();
+        isEcosystemOwnerVerification();
         LibDiamond.diamondCut(_diamondCut, _init, _calldata);
     }
 }

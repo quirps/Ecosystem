@@ -1,5 +1,5 @@
 
-import "../LibMembers.sol";
+import "../../MemberRankings/LibMembers.sol";
 
 
 pragma solidity ^0.8.0;

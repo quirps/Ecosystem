@@ -4,8 +4,9 @@ pragma solidity ^0.8.0;
 import "./_EventFactory.sol";
 import "./IEventFactory.sol";
 import "./LibEventFactory.sol"; 
-
-contract EventFactory is IEventFactory, iEventFactory {
+import { LibOwnership } from "../Ownership/LibOwnership.sol";
+ 
+contract EventFactory is IEventFactory, iEventFactory { 
      function setMerkleRoot(uint256 eventId, bytes32 root) external onlyOwner {
         _setMerkleRoot(eventId, root);
     }
@@ -19,15 +20,18 @@ contract EventFactory is IEventFactory, iEventFactory {
         uint256 _maxEntries,
         string calldata _imageUri,
         uint256[] memory _ticketIds,
-        LibEventFactoryStorage.TicketDetail[] memory _ticketDetails
+        LibEventFactory.TicketDetail[] memory _ticketDetails
     ) external returns (uint256) {
+         isEcosystemOwnerVerification();
        return _createEvent(_startTime, _endTime, _minEntries, _maxEntries, _imageUri, _ticketIds, _ticketDetails);
     }
      function deactivateEvent(uint256 eventId, bytes32 root) external {
+        isEcosystemOwnerVerification();
         _deactivateEvent(eventId, root);
      }
 
     function extendEvent(uint256 eventId, uint32 addedTime) external {
+         isEcosystemOwnerVerification();
         _extendEvent(eventId, addedTime);
     }
 

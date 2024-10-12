@@ -1,33 +1,33 @@
 pragma solidity ^0.8.0;
 
 
-library LibOwnership{
-bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.ownership.storage");
+
+library LibOwnership {
+bytes32 constant OWNERSHIP_STORAGE_POSITION = keccak256("diamond.ownership.storage");
 struct OwnershipStorage{
-    address contractOwner;
+    address ecosystemOwner;
 }
 
-function diamondStorage() internal pure returns (OwnershipStorage storage ds) {
-        bytes32 position = DIAMOND_STORAGE_POSITION;
+function ownershipStorage() internal pure returns (OwnershipStorage storage os) {
+        bytes32 position = OWNERSHIP_STORAGE_POSITION;
         assembly {
-            ds.slot := position
+            os.slot := position 
         }
     }
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    function setContractOwner(address _newOwner) internal {
-        OwnershipStorage storage ds = diamondStorage();
-        address previousOwner = ds.contractOwner;
-        ds.contractOwner = _newOwner;
-        emit OwnershipTransferred(previousOwner, _newOwner);
+    function _setEcosystemOwner(address _newEcosystemOwner) internal {
+        OwnershipStorage storage os = ownershipStorage();
+        address previousOwner = os.ecosystemOwner;
+        os.ecosystemOwner = _newEcosystemOwner;
+        emit OwnershipTransferred(previousOwner, _newEcosystemOwner);
     }
 
-    function contractOwner() internal view returns (address contractOwner_) {
-        contractOwner_ = diamondStorage().contractOwner;
+    function _ecosystemOwner() internal view returns (address ecosystemOwner_) {
+        ecosystemOwner_ = ownershipStorage().ecosystemOwner;
     }
 
-    function enforceIsContractOwner() internal view {
-        require(msg.sender == diamondStorage().contractOwner, "LibDiamond: Must be contract owner");
-    }
-}
+    
+    
+} 

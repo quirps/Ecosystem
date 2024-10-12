@@ -2,13 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "./LibEventFactory.sol"; 
-import "../../utils/MerkleProof.sol"; 
+import "../../libraries/utils/MerkleProof.sol"; 
 import "../Tokens/ERC1155/interfaces/IERC1155Transfer.sol";
 import "../Ownership/_Ownership.sol"; 
-import "../../utils/Context.sol";
+import {LibOwnership} from "../Ownership/LibOwnership.sol";
 import "../Tokens/ERC1155/internals/iERC1155Transfer.sol"; 
 import "hardhat/console.sol";
-contract iEventFactory is iOwnership, iERC1155Transfer {
+
+contract iEventFactory is iOwnership, iERC1155Transfer { 
 
     /// @dev Emitted when an event is deactivated by the owner.
     /// @param eventId The unique identifier for the event.
@@ -45,14 +46,14 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
         uint256 minEntries,
         uint256 maxEntries,
         string imageUri,
-        LibEventFactoryStorage.EventStatus status
+        LibEventFactory.EventStatus status 
     );
 
     /// @dev Emitted when ticket details for a specific event are defined or updated. Contains arrays of ticket IDs and their corresponding details.
     /// @param eventId The unique identifier for the event.
     /// @param ticketIds An array of unique identifiers for the tickets associated with the event.
     /// @param ticketDetails An array of structures holding details for each ticket corresponding to the IDs in the `ticketIds` parameter.
-    event TicketDetails(uint256 eventId, uint256[] ticketIds, LibEventFactoryStorage.TicketDetail[] ticketDetails);
+    event TicketDetails(uint256 eventId, uint256[] ticketIds, LibEventFactory.TicketDetail[] ticketDetails);
     /**
      * @dev Emitted when an event's duration is extended
      * @param eventId The unique identifier for the event.
@@ -63,26 +64,24 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
     event ImageUriUpdated(uint256 eventId, string imageUri);
     event RefundsEnabled(uint256 eventId, bytes32 merkleRoot);
 
-    modifier onlyOwner() {
-        require(msg.sender == _owner(), "Not owner");
-        _;
-    }
+ 
 
     function _extendEvent(uint256 eventId, uint32 addedTime) internal {
-        LibEventFactoryStorage.EventDetail storage eventDetail = LibEventFactoryStorage.getEventDetail(eventId);
+        LibEventFactory.EventDetail storage eventDetail = LibEventFactory.getEventDetail(eventId);
         eventDetail.endTime += addedTime;
         emit EventExtended(eventId, addedTime);
     }
 
-    function _deactivateEvent(uint256 eventId, bytes32 root) internal onlyOwner {
-        LibEventFactoryStorage.EventDetail storage eventDetail = LibEventFactoryStorage.getEventDetail(eventId);
+    function _deactivateEvent(uint256 eventId, bytes32 root) internal  {
+        
+        LibEventFactory.EventDetail storage eventDetail = LibEventFactory.getEventDetail(eventId);
 
         require(
-            eventDetail.status == LibEventFactoryStorage.EventStatus.Active || eventDetail.status == LibEventFactoryStorage.EventStatus.Pending,
+            eventDetail.status == LibEventFactory.EventStatus.Active || eventDetail.status == LibEventFactory.EventStatus.Pending,
             "Event has already terminated"
         );
 
-        eventDetail.status = LibEventFactoryStorage.EventStatus.Deactivated;
+        eventDetail.status = LibEventFactory.EventStatus.Deactivated;
         emit EventDeactivated(eventId);
 
         if (root != bytes32(0)) {
@@ -91,10 +90,10 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
     }
 
     function _setMerkleRoot(uint256 eventId, bytes32 root) internal {
-        LibEventFactoryStorage.EventDetail storage eventDetail = LibEventFactoryStorage.getEventDetail(eventId);
-        LibEventFactoryStorage.EventStatus _eventStatus = eventDetail.status;
+        LibEventFactory.EventDetail storage eventDetail = LibEventFactory.getEventDetail(eventId);
+        LibEventFactory.EventStatus _eventStatus = eventDetail.status;
         require(
-            _eventStatus == LibEventFactoryStorage.EventStatus.Deactivated || _eventStatus == LibEventFactoryStorage.EventStatus.Completed,
+            _eventStatus == LibEventFactory.EventStatus.Deactivated || _eventStatus == LibEventFactory.EventStatus.Completed,
             "Event must be finished."
         );
 
@@ -105,13 +104,13 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
     }
 
     function _setImageUri(uint256 eventId, string memory imageUri) internal {
-        LibEventFactoryStorage.EventDetail storage eventDetail = LibEventFactoryStorage.getEventDetail(eventId);
+        LibEventFactory.EventDetail storage eventDetail = LibEventFactory.getEventDetail(eventId);
         require(eventDetail.endTime != 0, "Event does not exist");
         eventDetail.imageUri = imageUri;
         emit ImageUriUpdated(eventId, imageUri);
     }
 
-    // Additional functions such as `_redeemTickets`, `_refundTicketsWithProof`, and `_createEvent` would be implemented here following the existing logic, but leveraging the `LibEventFactoryStorage` library to interact with storage.
+    // Additional functions such as `_redeemTickets`, `_refundTicketsWithProof`, and `_createEvent` would be implemented here following the existing logic, but leveraging the `LibEventFactory` library to interact with storage.
 
     // Assuming the necessary imports and library setup are done at the top of your file
 
@@ -122,24 +121,24 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
         uint256 _maxEntries,
         string memory _imageUri,
         uint256[] memory _ticketIds,
-        LibEventFactoryStorage.TicketDetail[] memory _ticketDetails
+        LibEventFactory.TicketDetail[] memory _ticketDetails
     ) internal returns (uint256) {
-        LibEventFactoryStorage.EventStorage storage es = LibEventFactoryStorage.eventStorage();
+        LibEventFactory.EventStorage storage es = LibEventFactory.eventStorage();
 
         require(_ticketIds.length == _ticketDetails.length, "Must be same length.");
         require(_endTime > block.timestamp - 1, "Must be non-trivial event time window");
         require(_maxEntries > 0,"Must have non-trivial entrant amount");
         uint256 eventId = uint256(keccak256(abi.encodePacked(_startTime, _endTime, _minEntries, _maxEntries, _imageUri, block.timestamp)));
         require(es.events[eventId].endTime == 0, "Event must not exist");
-        LibEventFactoryStorage.EventDetail storage newEvent = es.events[eventId];
+        LibEventFactory.EventDetail storage newEvent = es.events[eventId];
         newEvent.startTime = _startTime;
         newEvent.endTime = _endTime;
         newEvent.minEntries = _minEntries;
         newEvent.maxEntries = _maxEntries;
         newEvent.imageUri = _imageUri;
         newEvent.status = uint32(block.timestamp) < _startTime
-            ? LibEventFactoryStorage.EventStatus.Pending
-            : LibEventFactoryStorage.EventStatus.Active;
+            ? LibEventFactory.EventStatus.Pending
+            : LibEventFactory.EventStatus.Active;
 
         emit EventDetails(eventId, _startTime, _endTime, _minEntries, _maxEntries, _imageUri, newEvent.status);
 
@@ -154,19 +153,19 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
     }
 
     function _redeemTickets(uint256 eventId, uint256[] memory ticketIds, uint256[] memory amounts) internal {
-        LibEventFactoryStorage.EventDetail storage eventDetail = LibEventFactoryStorage.getEventDetail(eventId);
-        LibEventFactoryStorage.EventStatus _status = eventDetail.status;
+        LibEventFactory.EventDetail storage eventDetail = LibEventFactory.getEventDetail(eventId);
+        LibEventFactory.EventStatus _status = eventDetail.status;
 
         require(block.timestamp >= eventDetail.startTime && block.timestamp <= eventDetail.endTime, "Event not active");
         require(ticketIds.length == amounts.length, "Mismatched ticketIds and amounts lengths");
 
-        if (_status == LibEventFactoryStorage.EventStatus.Pending) {
-            eventDetail.status = LibEventFactoryStorage.EventStatus.Active;
+        if (_status == LibEventFactory.EventStatus.Pending) {
+            eventDetail.status = LibEventFactory.EventStatus.Active;
             emit EventActivated(eventId);
         }
 
         for (uint i = 0; i < ticketIds.length; i++) {
-            LibEventFactoryStorage.TicketDetail storage ticketDetail = LibEventFactoryStorage.getTicketDetail(eventId, ticketIds[i]);
+            LibEventFactory.TicketDetail storage ticketDetail = LibEventFactory.getTicketDetail(eventId, ticketIds[i]);
             require(eventDetail.currentEntries + 1 <= eventDetail.maxEntries, "Exceeding max entries");
             require(amounts[i] >= ticketDetail.minAmount && amounts[i] <= ticketDetail.maxAmount, "Invalid ticket amount");
             console.log("address(this)");
@@ -188,7 +187,7 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
         address upperBound,
         bytes32[] calldata merkleProof
     ) internal {
-        LibEventFactoryStorage.EventDetail storage eventDetail = LibEventFactoryStorage.getEventDetail(eventId);
+        LibEventFactory.EventDetail storage eventDetail = LibEventFactory.getEventDetail(eventId);
 
         require(validateNonInclusion(eventId, lowerBound, upperBound, merkleProof), "Proof was invalid");
 
@@ -211,7 +210,7 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
         address upperBound,
         bytes32[] calldata merkleProof
     ) internal view returns (bool) {
-        LibEventFactoryStorage.EventDetail storage eventDetail = LibEventFactoryStorage.getEventDetail(eventId);
+        LibEventFactory.EventDetail storage eventDetail = LibEventFactory.getEventDetail(eventId);
 
         // Ensure sender is within bounds
         require(

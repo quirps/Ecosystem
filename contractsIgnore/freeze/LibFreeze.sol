@@ -3,7 +3,10 @@ pragma solidity ^0.8.6;
 pragma experimental ABIEncoderV2;
 
 import "../Diamond/LibDiamond.sol";
+import "./LibOwnership.sol";
+import {ERC2771Recipient} from  "../../ERC2771Recipient.sol"; 
 library LibFreeze { 
+
     bytes32 constant FREEZE_STORAGE_POSITION = keccak256("diamond.standard.freeze.storage");
     bytes4 constant FREEZE_GLOBAL = 0x49fc7319;
     bytes4 constant UNFREEZE_GLOBAL = 0x65a34d41;
@@ -34,10 +37,6 @@ library LibFreeze {
         }
     }
 
-    function isContractOwner(address _owner) internal view {
-        require(msg.sender == _owner, "Must be owner of contract.");
-    }
-
     //FreezeOwner
     //==================================
 
@@ -64,14 +63,16 @@ library LibFreeze {
     
     function freezeGlobal(uint256 _freezeDuration, address _facetAddress ) internal  {
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        LibOwnership.OwnershipStorage storage os = LibOwnership.ownershipStorage();   
+
         FreezeStorage storage fs = freezeStorage();
         uint16 _maxFreezeSelectors = 65535; 
         address _owner;
         uint256 _expirationTimestamp;
         address[] memory facetAddresses;
         // bytes4[] memory _freezeCachedSelectors = new bytes4[](_maxFreezeSelectors);
-        _owner = ds.contractOwner;
-        isContractOwner(_owner);
+        _owner = os.contractOwner;
+        LibOwnership.isContractOwner(_owner);
 
         facetAddresses = ds.facetAddresses;
 
@@ -97,9 +98,11 @@ library LibFreeze {
     function unFreezeGlobal( address _facetAddress) internal {
         FreezeStorage storage fs = freezeStorage();
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        LibOwnership.OwnershipStorage storage os = LibOwnership.ownershipStorage();   
+
         //bytes4[] memory _cachedSelectors = fs.freezeCachedSelectors;
-        address _owner = ds.contractOwner;
-        isContractOwner(_owner);
+        address _owner = os.contractOwner;
+        LibOwnership.isContractOwner(_owner);
         require(!isFrozenGlobal(),"Freeze duration hasn't expired yet.");
 
         address[] memory facetAddresses = ds.facetAddresses;
@@ -118,11 +121,13 @@ library LibFreeze {
 
     function extendFreezeGlobal(uint256 _freezeDuration) internal {
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        LibOwnership.OwnershipStorage storage os = LibOwnership.ownershipStorage();   
+
         FreezeStorage storage fs = freezeStorage();
-        address _owner = ds.contractOwner;
+        address _owner = os.contractOwner;
         uint256 _expireTimestamp;
         require(!isFrozenGlobal(),"Freeze duration hasn't expired yet.");
-        isContractOwner(_owner);
+        LibOwnership.isContractOwner(_owner);
         _expireTimestamp = fs.frozenGlobalExpire + _freezeDuration;
         
         fs.frozenGlobalExpire = _expireTimestamp;

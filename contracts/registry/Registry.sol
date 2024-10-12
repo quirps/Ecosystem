@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../interfaces/IDiamondDeploy.sol";
-import "../interfaces/IDiamondCut.sol";
+import "../deploy/IDiamondDeploy.sol"; 
+import "../facets/Diamond/IDiamondCut.sol"; 
 
 import "hardhat/console.sol";
 

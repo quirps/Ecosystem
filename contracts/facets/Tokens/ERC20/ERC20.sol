@@ -1,24 +1,27 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../libraries/utils/Context.sol";
-import "../libraries/utils/Ownable.sol";
-import "../libraries/LibERC20.sol";
-import "../libraries/LibDiamond.sol";
-import "../libraries/LibERC1155.sol";
-import "../internals/ERC1155/iERC1155Transfer.sol";
+import "../../../libraries/utils/Context.sol";
+import "../../../libraries/utils/Ownable.sol"; 
+import "./libraries/LibERC20.sol"; 
+import "../../Ownership/LibOwnership.sol";  
+import "../ERC1155/libraries/LibERC1155.sol";
+import "../ERC1155/internals/iERC1155Transfer.sol";
+ 
+import {iOwnership} from "../../Ownership/_Ownership.sol";
 
-
-contract ERC20 is Context,  iERC1155Transfer {
+contract ERC20 is  iOwnership, iERC1155Transfer {
     uint256 public immutable primaryCurrencyId; 
 
     constructor( uint256 _primaryCurrencyId){
         primaryCurrencyId = _primaryCurrencyId;
     }
-    function setName(string memory _name) LibDiamond.onlyOwner external {
+    function setName(string memory _name)  external {
+        isEcosystemOwnerVerification(); 
         LibERC20._setName(_name);
     }
-    function setSymbol(string memory _symbol) onlyOwner external{
+    function setSymbol(string memory _symbol)  external{
+        isEcosystemOwnerVerification();
         LibERC20._setSymbol(_symbol);
     }
 

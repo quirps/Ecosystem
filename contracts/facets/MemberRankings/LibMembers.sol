@@ -1,6 +1,6 @@
 pragma solidity ^0.8.6;
 
-import "./utils/Incrementer.sol";
+import "../../libraries/utils/Incrementer.sol"; 
 
 /**
     user rank history keys are designed to be unique by following the program of

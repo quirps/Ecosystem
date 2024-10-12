@@ -1,6 +1,6 @@
 pragma solidity ^0.8.6;
 
-import "../interfaces/IERC1155Transfer.sol";
+import "../facets/Tokens/ERC1155/interfaces/IERC1155Transfer.sol";
 
 
 contract TestERC1155Operator{

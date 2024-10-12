@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {LibEventFactory} from "./LibEventFactory.sol"; 
 /// @title IEventFacet
 /// @dev Interface for the event management facet
-interface IEventFacet {
+interface IEventFactory {
     /// @notice Sets the Merkle root for the specified event.
     /// @dev Only callable by the owner or authorized addresses.
     /// @param eventId The ID of the event to set the Merkle root for.
@@ -41,7 +42,9 @@ interface IEventFacet {
         uint32 _endTime,
         uint256 _minEntries,
         uint256 _maxEntries,
-        string calldata _imageUri
+        string calldata _imageUri,
+        uint256[] memory _ticketIds,
+        LibEventFactory.TicketDetail[] memory _ticketDetails
     ) external returns (uint256);
 
     /// @notice Allows the redemption of multiple tickets for an event
@@ -52,8 +55,15 @@ interface IEventFacet {
     function redeemTickets(uint256 eventId, uint256[] calldata ticketIds, uint256[] calldata amounts) external;
 
     /// @notice Allows the refund of tickets
-    /// @dev Batch process to refund multiple tickets at once
+    /// @dev Batch process to refund multiple tickets at once. We refund a user
+          ///   if they can prove their addre
     /// @param eventId The ID of the event
     /// @param ticketIds The IDs of the tickets to be refunded
-    function refundTickets(uint256 eventId, uint256[] calldata ticketIds) external;
+    /// @param lowerBound Lower bound address 
+    /// @param upperBound upper bound address 
+    /// @param merkleProof Lower bound address 
+
+    function refundTicketsWithProof(uint256 eventId, uint256[] calldata ticketIds, address lowerBound, 
+        address upperBound, 
+        bytes32[] calldata merkleProof) external;
 }

@@ -1,8 +1,9 @@
 pragma solidity ^0.8.0;
 
-import "../libraries/utils/Context.sol";
-import "../libraries/LibMemberRegistry.sol";
-import "../libraries/verification/MemberRegistryVerification.sol";
+import "../../libraries/utils/Context.sol"; 
+import "./LibMemberRegistry.sol"; 
+import "./verification/MemberRegistryVerification.sol"; 
+ 
 
 contract iMemberRegistry is Context {
     uint32 public immutable verificationTime;

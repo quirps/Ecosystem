@@ -2,21 +2,22 @@ pragma solidity ^0.8.9;
 pragma experimental ABIEncoderV2;
 
 import "hardhat/console.sol";
-
+  
 import "../Tokens/ERC1155/internals/iERC1155Transfer.sol"; 
 import "../MemberRankings/LibMembers.sol"; 
-import "../Tokens/ERC1155/Libraries/LibERC1155.sol";    
+import "../Tokens/ERC1155/libraries/LibERC1155.sol";    
 import "../Diamond/LibDiamond.sol";
-import "../../utils/Incrementer.sol";
-import "../../libraries/verification/MemberVerification.sol";
+import "../../libraries/utils/Incrementer.sol"; 
+import "../MemberRegistry/verification/MemberVerification.sol";
 import "../Moderator/LibModerator.sol";  
 import "../Moderator/ModeratorModifiers.sol";   
+import {iOwnership} from "../Ownership/_Ownership.sol"; 
 
-contract iMembers is iERC1155Transfer, ModeratorModifiers {
+contract iMembers is iERC1155Transfer, ModeratorModifiers, iOwnership { 
     //history is to save gas on not having to prove every time
     using Incrementer for bytes28;
     using Incrementer for bytes8;
-
+ 
     address public immutable bountyAddress;
     uint256 public immutable currencyId;
     uint256 public immutable maxBalance;
@@ -115,7 +116,7 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers {
     function _removeBountyBalance(uint256 amount) internal {
         Bounty memory _bounty = _getBounty();
 
-        _safeTransferFrom(_bounty.bountyAddress, LibDiamond.contractOwner(), _bounty.currencyId, amount, "");
+        _safeTransferFrom(_bounty.bountyAddress, _ecosystemOwner() , _bounty.currencyId, amount, "");
         emit BountyBalanceChange(amount, BountyAccountChange.Negative);
     }
 

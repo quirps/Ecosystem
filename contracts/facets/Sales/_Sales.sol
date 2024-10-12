@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
  
-import "../../libraries/utils/Ownable.sol"; 
+import "../Ownership/_Ownership.sol"; 
 import "../Tokens/ERC1155/internals/iERC1155Transfer.sol";
 import "./LibSales.sol";
 
-contract iSales is Ownable, iERC1155Transfer {
+contract iSales is  iOwnership, iERC1155Transfer {
     using LibSales for LibSales.Sale;
 
     event SaleCreated(uint256 saleId);
     event ItemPurchased(uint256 saleId, address buyer, uint256 numBundles);
 
-    function _createTieredSales(LibSales.Sale[] calldata salesData) internal onlyOwner {
+    function _createTieredSales(LibSales.Sale[] calldata salesData) internal {
         LibSales.SalesStorage storage ss = LibSales.salesStorage();
 
         for (uint256 i = 0; i < salesData.length; i++) {
@@ -31,12 +31,12 @@ contract iSales is Ownable, iERC1155Transfer {
         LibSales.Sale memory sale = LibSales.getSale(saleId);
         uint256 totalPrice = sale.paymentAmount * numBundles;
 
-        _safeTransferFrom(msg.sender, owner(), sale.paymentTokenId, totalPrice, "");
+        _safeTransferFrom(msg.sender, _ecosystemOwner(), sale.paymentTokenId, totalPrice, "");
 
         for (uint i = 0; i < sale.itemIds.length; i++) {
             uint256 itemId = sale.itemIds[i];
             uint256 itemAmount = sale.itemAmounts[i] * numBundles;
-            _safeTransferFrom(owner(), msg.sender, itemId, itemAmount, "");
+            _safeTransferFrom( _ecosystemOwner(), msg.sender, itemId, itemAmount, "");
         }
 
         LibSales.setSaleStats(saleId, msg.sender, numBundles);

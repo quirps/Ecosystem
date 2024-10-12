@@ -8,7 +8,7 @@ pragma solidity ^0.8.6;
  * 
  * Same system as member rank is used, RankLabel mapped to well ordered set.
  */
-import "../libraries/LibModerator.sol";
+import "./LibModerator.sol";
 contract Moderator {
     /**
      * Just create a ranked list, address associated with number.

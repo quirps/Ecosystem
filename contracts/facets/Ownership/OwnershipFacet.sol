@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import { IERC173 } from "../../interfaces/IERC173.sol";
-import "./_Ownership.sol"; 
+import {iOwnership} from "./_Ownership.sol"; 
 
-contract OwnershipFacet is IERC173, iOwnership {
-    function transferOwnership(address _newOwner) external override {
-        _transferOwnership(_newOwner);
+contract OwnershipFacet is iOwnership {
+    function setEcosystemOwner(address _newOwner) external {
+        _setEcosystemOwner(_newOwner);  
     }
 
-    function owner() external override view returns (address owner_) {
-        owner_ = _owner();
+    function ecosystemOwner() external   view returns (address owner_) {
+        owner_ = _ecosystemOwner(); 
     }
 }

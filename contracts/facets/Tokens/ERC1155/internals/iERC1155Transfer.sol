@@ -1,11 +1,11 @@
 pragma solidity ^0.8.0;
 
-import "../../../../libraries/utils/Context.sol";
+import {iERC2771Recipient} from "../../../ERC2771Recipient/_ERC2771Recipient.sol";    
 import "../libraries/LibERC1155.sol";
 import "./iERC1155ContractTransfer.sol";
 import "../interfaces/IERC1155Transfer.sol";
 
-contract iERC1155Transfer is iERC1155ContractTransfer, Context {
+contract iERC1155Transfer is iERC1155ContractTransfer, iERC2771Recipient {
     /**
      * @dev Emitted when `account` grants or revokes permission to `operator` to transfer their tokens, according to
      * `approved`.
@@ -20,7 +20,7 @@ contract iERC1155Transfer is iERC1155ContractTransfer, Context {
     function _safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes memory data) internal {
         require(to != address(0), "ERC1155: transfer to the zero address");
         LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
-        address operator = _msgSender();
+        address operator = msgSender(); 
         uint256[] memory ids = LibERC1155._asSingletonArray(id);
         uint256[] memory amounts = LibERC1155._asSingletonArray(amount);
 
@@ -49,7 +49,7 @@ contract iERC1155Transfer is iERC1155ContractTransfer, Context {
         require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
         require(to != address(0), "ERC1155: transfer to the zero address");
         LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
-        address operator = _msgSender();
+        address operator = msgSender();
 
         for (uint256 i = 0; i < ids.length; ++i) {
             uint256 id = ids[i];

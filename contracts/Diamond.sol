@@ -8,16 +8,16 @@ pragma solidity ^0.8.0;
 * Implementation of a diamond.
 /******************************************************************************/
 
-import { LibDiamond } from "./Facets/Diamond/LibDiamond.sol";
-import { IDiamondCut } from "./Facets/Diamond/IDiamondCut.sol";
+import { LibDiamond } from "./facets/Diamond/LibDiamond.sol";
+import { IDiamondCut } from "./facets/Diamond/IDiamondCut.sol";
 
-import {LibOwnership} from "./Facets/Ownership/LibOwnership.sol"; 
+import {iOwnership} from "./facets/Ownership/_Ownership.sol"; 
 
 import "hardhat/console.sol";
-contract Diamond {    
+contract Diamond is iOwnership {    
 
     constructor(address _contractOwner, address _diamondCutFacet) payable {        
-        LibOwnership.setContractOwner(_contractOwner);
+        _setEcosystemOwner(_contractOwner); 
 
         // Add the diamondCut external function from the diamondCutFacet
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);

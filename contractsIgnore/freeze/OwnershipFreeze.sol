@@ -3,7 +3,8 @@ pragma solidity ^0.8.6;
 pragma experimental ABIEncoderV2;
 
 import "./LibFreeze.sol";  
-import "../../internals/iFreezeOwner.sol";
+import "./_FreezeOwner.sol";
+import {iOwnership} from "./_Ownership.sol";
 /// @title Owner Freezing
 /// @author Quirp
 /// @notice Freezes (removes) the owner for an extended duration.
@@ -12,7 +13,7 @@ import "../../internals/iFreezeOwner.sol";
 ///      given freeze duration at minimum
 
 
-contract OwnershipFreeze is iFreezeOwner  {
+contract OwnershipFreeze is iOwnership, iFreezeOwner  {
     // event Init(uint256 indexed _a, address indexed _b, address _c);
     // function init(uint256 _amount, address _test, address _receiver, address _tokenLeadContract) external {
     //     LibFreeze.FreezeStorage storage fs = LibFreeze.freezeStorage();
@@ -26,19 +27,19 @@ contract OwnershipFreeze is iFreezeOwner  {
     ///                        in an ownerless state
 
     function freezeOwner(uint256 _freezeDuration) external {
-        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
         LibFreeze.FreezeStorage storage fs = LibFreeze.freezeStorage();
-        address _contractOwner = ds.contractOwner;
-
-        LibFreeze.isContractOwner(_contractOwner);
         
+        //verifies current owner then sets
+        iOwnership._setOwner( address(0) );
+
+        address _ecosystemOwner = _owner(); 
         address _frozenOwner = fs.frozenOwner;
 
         uint256 _expireTimestamp = block.timestamp + _freezeDuration;
         fs.frozenOwnerExpire = _expireTimestamp;
-        emit FrozenOwner(_contractOwner, _expireTimestamp);
-        fs.frozenOwner = _contractOwner;
-        ds.contractOwner = address(0);
+        emit FrozenOwner(_ecosystemOwner, _expireTimestamp);
+        fs.frozenOwner = _ecosystemOwner;
+        iOwnership._setOwner( address(0) );
     }
     function unFreezeOwner() external {
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
@@ -47,7 +48,7 @@ contract OwnershipFreeze is iFreezeOwner  {
         LibFreeze.enforceFrozenOwner(_frozenOwner);
         LibFreeze.enforeFreezeDurationExpire();
 
-        ds.contractOwner = _frozenOwner;
+        ds.ecosystemOwner = _frozenOwner;
         fs.frozenOwner = address(0);
 
         emit UnFrozenOwner(_frozenOwner);

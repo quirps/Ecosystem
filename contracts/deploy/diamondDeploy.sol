@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
-import "../interfaces/IDiamondDeploy.sol";
+
+import "./IDiamondDeploy.sol";  
 contract DiamondDeploy is IDiamondDeploy{
     address public diamondCutFacet;
     bytes32 bytecodeHash;
