@@ -49,7 +49,8 @@ library LibMembers {
         uint32 timestamp;
         uint32 rank;
     }
-   
+    
+    type rank is uint32;
 
     function memberStorage() internal pure returns (MembersStorage storage ms_) {
         bytes32 position = MEMBER_STORAGE_POSITION;
