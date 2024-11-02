@@ -13,11 +13,15 @@ interface IMembers {
     /// @return rank_ An array of MemberRank structs representing the user's rank history.
     function getUserRankHistory(address user, uint64 depth) external returns (LibMembers.MemberRank[] memory rank_);
 
+    /// @notice Gets user's latest rank 
+    /// @param user User of the returned rank
+    function getRank(address user) external returns (uint32);
+
     /// @notice Sets the members' ranks in a permissioned manner using Merkle proofs.
     /// @param leaves An array of MerkleLeaf structs containing the members' rank data.
     function setMembersRankPermissioned(LibMembers.Leaf[] memory leaves) external;
 
-    /// @notice Sets the members' ranks using Merkle proofs and flags indicating if the rank should be updated.
+    /// @notice Sets the members' ranks using Merkle proofs and  flags indicating if the rank should be updated.
     
     /// @param leaves An array of MerkleLeaf structs containing the members' rank data.
     function setMembersRanks(uint8 v, bytes32 r, bytes32 s, address owner, uint256 nonce, LibMembers.Leaf memory leaves) external;

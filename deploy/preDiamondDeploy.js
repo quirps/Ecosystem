@@ -26,7 +26,7 @@ async function preDiamondDeploy(facetNames) {
     const deployedStatuses = [];
     for (let facetName of facetNames || FACETS) {
 
-
+        console.log(facetName)
         const Facet = await ethers.getContractFactory(facetName);
         const facet = await Facet.deploy()
 

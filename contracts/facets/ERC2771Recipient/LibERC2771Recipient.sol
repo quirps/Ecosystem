@@ -32,8 +32,7 @@ library LibERC2771Recipient {
   
     function _isTrustedForwarder(address forwarder) public  view returns(bool) {
         ERC2771RecipientStorage storage es =  erc2771RecipientStorage();
-        require(forwarder == es.trustedForwarder, "Must be a trusted forwarder");
-        return true; 
+        return forwarder == es.trustedForwarder;
     }
  
     

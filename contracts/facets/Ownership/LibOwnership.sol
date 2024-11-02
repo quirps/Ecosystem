@@ -17,6 +17,11 @@ function ownershipStorage() internal pure returns (OwnershipStorage storage os) 
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
+    /**
+        Should never be used outside of iOwnership.sol (exception for the initial diamond constructor)
+        @notice Sets the owner of this ecosystem
+        @param _newEcosystemOwner  new ecosystem owner 
+     */
     function _setEcosystemOwner(address _newEcosystemOwner) internal {
         OwnershipStorage storage os = ownershipStorage();
         address previousOwner = os.ecosystemOwner;

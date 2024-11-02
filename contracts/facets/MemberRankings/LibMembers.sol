@@ -79,7 +79,6 @@ library LibMembers {
     function rankHistory(address user, uint96 depth) internal view returns (MemberRank[] memory rankHistory_){
         uint96 _maxIndex =  memberStorage().memberRankHistoryMaxIndex[ user ];
         rankHistory_ = new MemberRank[](depth);
-
         for( uint96 i; i < depth; i++){
             if( _maxIndex - i < 0 ){
                 break;
@@ -87,6 +86,4 @@ library LibMembers {
             rankHistory_[i] =  memberStorage().memberRank[ user ][ _maxIndex - i ];
         }
     }
-
-    
 }

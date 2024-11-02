@@ -1,8 +1,25 @@
 pragma solidity ^0.8.9; 
 
 import {LibMembers} from "../../../MemberRankings/LibMembers.sol"; 
-
 library LibERC1155TransferConstraints{
+    bytes32 constant ERC1155_CONSTRAINT_STORAGE_POSITION = keccak256("diamond.erc1155constraints");
+
+struct ConstraintStorage{
+    mapping(uint256 => uint256) tranfserLimit;
+    mapping(uint256 => LibMembers.rank) minimumMemberRank;
+    mapping(uint256 => uint32) expireTime;
+    mapping(uint64  => uint192) ticketIntervalNonce;
+}
+
+function erc1155ConstraintStorage() internal pure returns (ConstraintStorage storage cs) {
+        bytes32 position = ERC1155_CONSTRAINT_STORAGE_POSITION;
+        assembly {
+            cs.slot := position 
+        }
+    }
+    uint256 constant INTERVAL_SIZE = 2**192; 
+    uint256 constant NUMBER_INTERVALS = 2**64; // max 60 constraints
+    uint8 constant CURRENT_MAX_INTERVALS = 8;
     struct Constraints{
         TransferLimit transferLimit;
         MemberRankDependency memberRankDependency;
@@ -25,5 +42,7 @@ library LibERC1155TransferConstraints{
         uint32 expireTime;
         bool isActive;
     }
-
+    // struct MemberRankTieredDelay{
+    //     LibMembers.rank minimumRank;
+    // }
 }

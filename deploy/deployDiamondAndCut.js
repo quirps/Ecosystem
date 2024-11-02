@@ -10,13 +10,10 @@ const {
 
 
 async function diamondDeployAndCut(facets) {
-    const accounts = await ethers.getSigners()
-    const contractOwner = accounts[0]
-
-
+    
     // deploy Diamond
     const Diamond = await ethers.getContractFactory('Diamond')
-    const diamond = await Diamond.deploy(contractOwner.address, facets[0][0])
+    const diamond = await Diamond.deploy( facets[0][0])
     await diamond.deployed()
     console.log('Diamond deployed:', diamond.address)
 

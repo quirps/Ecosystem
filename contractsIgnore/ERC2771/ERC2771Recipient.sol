@@ -29,7 +29,7 @@ contract ERC2771Recipient is iERC2771Recipient {
     }
 
     function setTrustedForwarder(address _forwarder) internal {
-        _trustedForwarder = _forwarder;
+        _trustedForwarder = _forwarder; 
     }
 
     /// @inheritdoc IERC2771Recipient

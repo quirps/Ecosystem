@@ -47,7 +47,7 @@ contract iSales is  iOwnership, iERC1155Transfer {
     function _createSale(uint256 saleId, LibSales.Sale memory saleData, uint256 predecessorSaleId) internal {
         require(saleData.itemIds.length == saleData.itemAmounts.length, "Mismatched item data");
         require(saleData.endTime > saleData.startTime, "Invalid time range");
-
+        
         saleData.predecessorSaleId = predecessorSaleId;
 
         LibSales.setSale(saleId, saleData);

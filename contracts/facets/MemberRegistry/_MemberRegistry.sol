@@ -1,15 +1,13 @@
 pragma solidity ^0.8.0;
 
-import "../../libraries/utils/Context.sol"; 
+import {iOwnership} from "../Ownership/_Ownership.sol";
 import "./LibMemberRegistry.sol"; 
 import "./verification/MemberRegistryVerification.sol"; 
  
 
-contract iMemberRegistry is Context {
-    uint32 public immutable verificationTime;
-    constructor (uint32 _verificationTime) {
-        verificationTime = _verificationTime;
-    }
+contract iMemberRegistry is iOwnership { 
+    uint32 public constant verificationTime = 1209600; //2 weeks
+   
     /// @dev Emitted when a recovery action is initiated or finalized
     /// @param username The username associated with the action
     /// @param userAddress The user's address
@@ -64,7 +62,6 @@ contract iMemberRegistry is Context {
 
     function _cancelVerify(string memory username) internal {
         LibMemberRegistry.MemberRegistry_Storage storage ls = LibMemberRegistry.MemberRegistryStorage();
-
         address registeredAddress = ls.usernameToAddress[username];
         if (msgSender() == registeredAddress) {
             ls.usernameToRecoveryAddress[username] = LibMemberRegistry.Recovery(address(0), 0);

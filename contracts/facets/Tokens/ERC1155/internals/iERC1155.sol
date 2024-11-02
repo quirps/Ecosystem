@@ -5,9 +5,11 @@ import "./iERC1155ContractTransfer.sol";
 import "../interfaces/IERC1155Transfer.sol";
 import "../interfaces/IERC1155Receiver.sol";
 import "../../../../libraries/utils/Address.sol";
-import "../../../../libraries/utils/Context.sol";
 
-contract iERC1155 is iERC1155ContractTransfer, Context {
+import {iOwnership} from "../../../Ownership/_Ownership.sol";
+
+
+contract iERC1155 is iERC1155ContractTransfer, iOwnership {
     using Address for address;
 
     /**
@@ -49,7 +51,7 @@ contract iERC1155 is iERC1155ContractTransfer, Context {
         require(to != address(0), "ERC1155: mint to the zero address");
 
         LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
-        address operator = _msgSender();
+        address operator = msgSender();
         uint256[] memory ids = LibERC1155._asSingletonArray(id);
         uint256[] memory amounts = LibERC1155._asSingletonArray(amount);
 
@@ -77,7 +79,7 @@ contract iERC1155 is iERC1155ContractTransfer, Context {
         uint256 _totalSupply;
         LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
 
-        address operator = _msgSender();
+        address operator = msgSender();
 
         for (uint256 i = 0; i < ids.length; i++) {
             es.balance[ids[i]][to] += amounts[i];
@@ -104,7 +106,7 @@ contract iERC1155 is iERC1155ContractTransfer, Context {
 
         LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
 
-        address operator = _msgSender();
+        address operator = msgSender();
         uint256[] memory ids = LibERC1155._asSingletonArray(id);
         uint256[] memory amounts = LibERC1155._asSingletonArray(amount);
 
@@ -133,7 +135,7 @@ contract iERC1155 is iERC1155ContractTransfer, Context {
         require(ids.length == amounts.length, "ERC1155: ids and amounts length mismatch");
 
         LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
-        address operator = _msgSender();
+        address operator = msgSender();
 
         uint256 _totalAmount;
         for (uint256 i = 0; i < ids.length; i++) {

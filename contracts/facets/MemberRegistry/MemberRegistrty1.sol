@@ -1,11 +1,11 @@
 pragma solidity ^0.8.0;
 
-import "../../libraries/utils/Context.sol"; 
+
 import "./_MemberRegistry.sol";  
 import "./verification/MemberRegistryVerification.sol";
 
-contract MemberRegistry is Context, iMemberRegistry {
-    constructor (uint32 _recoveryTime) iMemberRegistry(_recoveryTime) {    }
+contract MemberRegistry is  iMemberRegistry { 
+    
     //delete userAddress parameter and replace with msgSender() function
     function verifyUsername(
         string memory username,

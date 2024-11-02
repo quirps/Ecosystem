@@ -18,7 +18,7 @@ interface IERC1155Transfer{
      * acceptance magic value.
      */
     function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes calldata data) external;
-
+    
     /**
      * @dev xref:ROOT:erc1155.adoc#batch-operations[Batched] version of {safeTransferFrom}.
      *

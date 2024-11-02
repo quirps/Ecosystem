@@ -11,13 +11,14 @@ pragma solidity ^0.8.0;
 import { LibDiamond } from "./facets/Diamond/LibDiamond.sol";
 import { IDiamondCut } from "./facets/Diamond/IDiamondCut.sol";
 
-import {iOwnership} from "./facets/Ownership/_Ownership.sol"; 
+import {LibOwnership} from "./facets/Ownership/LibOwnership.sol"; 
+import {iOwnership} from "./facets/Ownership/_Ownership.sol";  
 
 import "hardhat/console.sol";
-contract Diamond is iOwnership {    
+contract Diamond is iOwnership{    
 
-    constructor(address _contractOwner, address _diamondCutFacet) payable {        
-        _setEcosystemOwner(_contractOwner); 
+    constructor( address _diamondCutFacet) payable {        
+        LibOwnership._setEcosystemOwner(msgSender()); 
 
         // Add the diamondCut external function from the diamondCutFacet
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);

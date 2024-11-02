@@ -35,20 +35,23 @@
                 ]
               },
               {
+                "name": "Debug Hardhat Tests",
                 "type": "node",
                 "request": "launch",
-                "name": "Run Current File with Hardhat",
-                "program": "${workspaceFolder}/node_modules/.bin/hardhat",
+                "cwd": "${workspaceFolder}",
+                "program": "${workspaceFolder}/node_modules/hardhat/internal/cli/cli.js",
                 "args": [
-                  "run",
-                  "${file}"
+                    "run",
+                    "--network",
+                    "hardhat", // Change this to the desired network if needed
+                    "${relativeFile}" // This will run the currently opened test file
                 ],
+                
                 "console": "integratedTerminal",
-                "internalConsoleOptions": "neverOpen",
-                "skipFiles": [
-                  "<node_internals>/**"
-                ]
-              }
+                "internalConsoleOptions": "neverOpen"
+            },
+            
+            
     ]
 }
 

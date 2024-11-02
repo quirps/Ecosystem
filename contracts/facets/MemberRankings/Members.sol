@@ -6,14 +6,18 @@ import "../MemberRankings/_Members.sol";
 import "../../libraries/merkleVerify/MembersVerify.sol"; 
 import "./IMembers.sol";
 
-contract Members is IMembers, iMembers {
+contract Members is IMembers, iMembers { 
 
-    constructor( uint256 _currencyId, uint256 _maxBalance, address _bountyAddress, uint256 _upRate, uint256 _downRate) iMembers( _currencyId,  _maxBalance, _bountyAddress, _upRate, _downRate) {}
+    function setBountyConfig( uint256 _maxBalance, address _bountyAddress, uint256 _upRate, uint256 _downRate) external {
+        _setBountyConfig(_maxBalance, _bountyAddress, _upRate, _downRate);
+    }
     function getUserRankHistory(address user, uint64 depth) external returns (LibMembers.MemberRank[] memory rank_) {
         rank_ = _rankHistory(user, depth);
         //rank_ = LibMembers.rankHistory(user, depth);
     }
-
+    function getRank(address user) external returns (uint32 rank_){
+        rank_ = _getRank(user);
+    }
     //
     function setMembersRankPermissioned(LibMembers.Leaf[] memory leaves) external {
         _setMembersRankPermissioned(leaves);

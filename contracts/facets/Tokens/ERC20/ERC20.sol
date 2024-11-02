@@ -11,16 +11,14 @@ import "../ERC1155/internals/iERC1155Transfer.sol";
 import {iOwnership} from "../../Ownership/_Ownership.sol";
 
 contract ERC20 is  iOwnership, iERC1155Transfer {
-    uint256 public immutable primaryCurrencyId; 
+    uint256 public constant PRIMARY_CURRENCY_ID = 0; 
 
-    constructor( uint256 _primaryCurrencyId){
-        primaryCurrencyId = _primaryCurrencyId;
-    }
-    function setName(string memory _name)  external {
+    
+    function setName(string memory _name)  public {
         isEcosystemOwnerVerification(); 
         LibERC20._setName(_name);
     }
-    function setSymbol(string memory _symbol)  external{
+    function setSymbol(string memory _symbol) public{
         isEcosystemOwnerVerification();
         LibERC20._setSymbol(_symbol);
     }
@@ -47,7 +45,7 @@ contract ERC20 is  iOwnership, iERC1155Transfer {
     }
 
     function balanceOf(address account) external view returns (uint256) {
-        return LibERC1155.getBalance(primaryCurrencyId, account);
+        return LibERC1155.getBalance(PRIMARY_CURRENCY_ID, account);
     }
 
     function allowance(address owner, address spender) external view returns (uint256) {
@@ -56,7 +54,7 @@ contract ERC20 is  iOwnership, iERC1155Transfer {
     }
 
     function transfer(address recipient, uint256 amount) external returns (bool) {
-        _safeTransferFrom(msgSender(), recipient, primaryCurrencyId, amount, "");
+        _safeTransferFrom(msgSender(), recipient, PRIMARY_CURRENCY_ID, amount, "");
         return true;
     }
    
@@ -65,8 +63,11 @@ contract ERC20 is  iOwnership, iERC1155Transfer {
         return true; 
     }
 
+    function approvePermit(address owner, address spender, uint256 amount) internal returns (bool){
+        _setApprovalForAll(owner, spender, amount != 0);
+    }
     function transferFrom(address sender, address recipient, uint256 amount) external  returns (bool) {
-        _safeTransferFrom(sender, recipient, primaryCurrencyId, amount, "");
+        _safeTransferFrom(sender, recipient, PRIMARY_CURRENCY_ID, amount, "");
         return false; // Replace with appropriate transferFrom logic
     }
 }

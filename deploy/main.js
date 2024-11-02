@@ -46,6 +46,7 @@ async function main(facetNames, registryOn) {
     diamondAddress = await diamondDeployAndCut(facets)
   }
   const ecosystem = await ethers.getContractAt('Ecosystem', diamondAddress)
+  console.log("finished")
   return ecosystem
 
 

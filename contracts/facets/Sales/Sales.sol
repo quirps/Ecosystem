@@ -4,6 +4,7 @@ import {LibSales} from "./LibSales.sol";
 import {iSales} from "./_Sales.sol"; 
 
 contract Sales is iSales {
+    
     function createSale(uint256 saleId, LibSales.Sale memory saleData, uint256 predecessorSaleId) external{
         _createSale(saleId, saleData, predecessorSaleId);
     }
@@ -14,4 +15,4 @@ contract Sales is iSales {
         _validatePurchase(saleId, numBundles);
     }
     
-}
+}   

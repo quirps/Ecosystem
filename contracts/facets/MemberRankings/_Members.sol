@@ -18,11 +18,11 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers, iOwnership {
     using Incrementer for bytes28;
     using Incrementer for bytes8;
  
-    address public immutable bountyAddress;
-    uint256 public immutable currencyId;
-    uint256 public immutable maxBalance;
-    uint256 public immutable upRate;
-    uint256 public immutable downRate;
+    address public  bountyAddress;
+    uint256 public constant currencyId = 0;
+    uint256 public  maxBalance;
+    uint256 public  upRate;
+    uint256 public  downRate;
     struct Bounty {
         uint256 currencyId;
         uint256 maxBalance;
@@ -38,10 +38,9 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers, iOwnership {
     event BountyEvent(address receiver, uint256 bountyUp, uint256 bountyUpRate, uint256 bountiesDown, uint256 bountyDownRate);
     event BountyBalanceChange(uint256 amount, BountyAccountChange direction);
 
-    constructor(uint256 _currencyId, uint256 _maxBalance, address _bountyAddress,  uint256 _upRate, uint256 _downRate) {
-        _bountyAddress != address(0);
+    function _setBountyConfig( uint256 _maxBalance, address _bountyAddress,  uint256 _upRate, uint256 _downRate) internal {
+        require( _bountyAddress != address(0), "Bounty mustn't be set to the zero address");
         bountyAddress = _bountyAddress;
-        currencyId = _currencyId;
         maxBalance = _maxBalance;
         upRate = _upRate;
         downRate = _downRate;
@@ -122,6 +121,10 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers, iOwnership {
 
     function _rankHistory(address user, uint96 depth) internal view returns (LibMembers.MemberRank[] memory rankHistory_) {
         LibMembers.rankHistory(user, depth);
+    }
+
+    function _getRank(address user) internal view returns(uint32 rank_){
+        rank_ = LibMembers.rankHistory(user,0)[1].rank;
     }
 
     /**
