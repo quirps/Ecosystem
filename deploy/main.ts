@@ -27,8 +27,30 @@ const {
   registryUploadAndDeploy
 } = require("./registryDeploy")
 
+const DEPLOY_FUNCTIONS = {
+    registry,
+    userSetup, 
+    exchange,
+    swapSetup
+} 
 
-async function main(facetNames, registryOn) {
+type ecosystem = {
+  facets : Facet[],
+}
+ type Facet = {
+   name : string,
+   address : string,
+   selector : string
+ }
+ 
+const registry = {
+  isActive
+}
+
+const userSetup = {
+    membershipLevel
+}
+async function main(facetNames, deployFlags) {
   let registryAddress;
   let diamondAddress
   //deploy facets and diamondDeploy contract
@@ -51,7 +73,7 @@ async function main(facetNames, registryOn) {
 
 
 }
-
+  
 
 
 if (require.main === module) {

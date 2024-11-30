@@ -38,5 +38,6 @@ contract TicketCreate is iTransferSetConstraints,  iERC1155 {
 
 
 /**
-    So we need to 
+    So we need to create ids for each ticket. These ids must be in the appropriate range. This range is determined by the ticket type
+    which is defined by iTicketConstraints
  */

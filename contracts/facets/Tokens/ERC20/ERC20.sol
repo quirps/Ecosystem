@@ -11,9 +11,6 @@ import "../ERC1155/internals/iERC1155Transfer.sol";
 import {iOwnership} from "../../Ownership/_Ownership.sol";
 
 contract ERC20 is  iOwnership, iERC1155Transfer {
-    uint256 public constant PRIMARY_CURRENCY_ID = 0; 
-
-    
     function setName(string memory _name)  public {
         isEcosystemOwnerVerification(); 
         LibERC20._setName(_name);
@@ -45,7 +42,7 @@ contract ERC20 is  iOwnership, iERC1155Transfer {
     }
 
     function balanceOf(address account) external view returns (uint256) {
-        return LibERC1155.getBalance(PRIMARY_CURRENCY_ID, account);
+        return LibERC1155.getBalance(LibERC20.PRIMARY_CURRENCY_ID, account);
     }
 
     function allowance(address owner, address spender) external view returns (uint256) {
@@ -54,7 +51,7 @@ contract ERC20 is  iOwnership, iERC1155Transfer {
     }
 
     function transfer(address recipient, uint256 amount) external returns (bool) {
-        _safeTransferFrom(msgSender(), recipient, PRIMARY_CURRENCY_ID, amount, "");
+        _safeTransferFrom(msgSender(), recipient, LibERC20.PRIMARY_CURRENCY_ID, amount, "");
         return true;
     }
    
@@ -67,7 +64,7 @@ contract ERC20 is  iOwnership, iERC1155Transfer {
         _setApprovalForAll(owner, spender, amount != 0);
     }
     function transferFrom(address sender, address recipient, uint256 amount) external  returns (bool) {
-        _safeTransferFrom(sender, recipient, PRIMARY_CURRENCY_ID, amount, "");
+        _safeTransferFrom(sender, recipient, LibERC20.PRIMARY_CURRENCY_ID, amount, "");
         return false; // Replace with appropriate transferFrom logic
     }
 }

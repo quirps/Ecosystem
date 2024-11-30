@@ -47,6 +47,7 @@ contract VersionFacet {
      * address and bytecode signature respectively. This enables enable dev's to
      * easily verify diamond state. 
      */
-    function versionCheck()external{}
+    function getVersion()external{}
+    function isEcosystem() external pure returns (bool) { return true;}
 
 }
