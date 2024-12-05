@@ -12,9 +12,7 @@ function getSelectors (contract) {
     }
     return acc
   }, [])
-  selectors.contract = contract
-  selectors.remove = remove
-  selectors.get = get
+  
   return selectors
 }
 
@@ -79,7 +77,7 @@ function selectorCollsion(facets) {
   let seen = new Map();
 
   for (let facet of facets) {
-      let strings = facet[1];
+      let strings = facet.facetCut.functionSelectors;
       for (let str of strings) {
           if (seen.has(str)) {
               return [seen.get(str), facet[2], str]; // Return the initial array, the collision array, and the colliding string

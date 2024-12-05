@@ -1,34 +1,36 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
+import "../facets/Diamond/IDiamondCut.sol";
 import "./IDiamondDeploy.sol";  
-contract DiamondDeploy is IDiamondDeploy{
-    address public diamondCutFacet;
+contract DiamondDeploy {
+    address public registryAddress;
+    bool isRegistrySet = false;
     bytes32 bytecodeHash;
     /// @notice This event is emitted when a new Diamond is deployed
     /// @param bytecode The bytecode of the deployed Diamond contract
     event NewDiamond(bytes bytecode);
-
-    constructor(bytes memory _bytecode, address _diamondCutFacet) {
-        diamondCutFacet = _diamondCutFacet;
+    
+    constructor(bytes memory _bytecode ) { 
         bytecodeHash = keccak256(_bytecode);
-        emit NewDiamond(_bytecode);
     }
 
-    function deploy(bytes memory _bytecode) external returns (address diamond_) {
+    function deploy(address owner, uint256 _salt, bytes calldata _bytecode, IDiamondCut.FacetCut[] memory _facetCuts) external returns (address diamond_) {
+        //require(msg.sender == registryAddress,"Must be initiated from the MassDX registry.");
+        
         // Initialize a variable to hold the deployed address
         address deployedAddress; //fksdf
 
         require(keccak256(_bytecode) == bytecodeHash, "Bytecode must match that of the Diamond associated with this contract.");
         // ABI encode the constructor parameters
-        bytes memory encodedParams = abi.encode(msg.sender, diamondCutFacet);
+        bytes memory encodedParams = abi.encode(owner, msg.sender, _facetCuts); 
 
         // Concatenate the pseudoBytecode and encoded constructor parameters
         bytes memory finalBytecode = abi.encodePacked(_bytecode, encodedParams);
 
         // Use CREATE2 opcode to deploy the contract with static bytecode
         // Generate a unique salt based on msg.sender
-        bytes32 salt = keccak256(abi.encodePacked(msg.sender, diamondCutFacet));
+        bytes32 salt = keccak256(abi.encodePacked(msg.sender, _salt, encodedParams)); 
 
         // The following assembly block deploys the contract using CREATE2 opcode
         assembly {
@@ -38,15 +40,22 @@ contract DiamondDeploy is IDiamondDeploy{
                 mload(finalBytecode), // size of bytecode
                 salt // salt
             )
-
             // Check if contract deployment was successful
             if iszero(extcodesize(deployedAddress)) {
                 revert(0, 0)
             }
         }
+        emit NewDiamond(_bytecode);
 
         return deployedAddress;
     }
+
+    function setRegistry(address _registry) external {
+        require( ! isRegistrySet, "Can only set a registry once.");
+        registryAddress = _registry;
+        isRegistrySet = true;
+    }
+ 
 }
 
 /**

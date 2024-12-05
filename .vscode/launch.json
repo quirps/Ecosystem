@@ -50,7 +50,25 @@
                 "console": "integratedTerminal",
                 "internalConsoleOptions": "neverOpen"
             },
-            
+            {
+              "name": "Run Hardhat Script with ts-node",
+              "type": "node",
+              "request": "launch",
+              "skipFiles": ["<node_internals>/**"],
+              "program": "${workspaceFolder}/node_modules/ts-node/dist/bin.js",
+              "args": [
+                "${workspaceFolder}/${relativeFile}"
+              ],
+           
+              // "env": {
+              //   "HARDHAT_NETWORK": "localhost"  // Optional: specify the Hardhat network
+              // },
+              //"preLaunchTask": "npm: build",  // Optional: use this if you need to run a build step before
+              // "outFiles": [
+              //   "${workspaceFolder}/dist/**/*.js"  // Optional: if you have compiled JS files
+              // ],
+              "sourceMaps": true  // Enable source maps for debugging TypeScript code
+            }
             
     ]
 }

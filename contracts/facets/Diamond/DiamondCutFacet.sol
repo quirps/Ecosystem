@@ -26,8 +26,27 @@ contract DiamondCutFacet is IDiamondCut, iOwnership {
         address _init,
         bytes calldata _calldata
     ) external override {
-
-        isEcosystemOwnerVerification();
+        isEffectiveOwner();
         LibDiamond.diamondCut(_diamondCut, _init, _calldata);
+    }
+    
+    /**
+     * @notice Initiate a migration away from the massDX ecosystem versions. 
+     * There is a 3 day minimum required timespan
+     */
+    function initiateMigration() external {
+        isEcosystemOwnerVerification();
+
+        _initiateMigration();
+    }
+
+    /**
+     * @notice If an ongoing migration exists and hasn't surpassed the 3 day 
+     * minimum wait time, then the migration will be cancelled.
+     */
+    function cancelMigration() external {
+        isEcosystemOwnerVerification();
+
+        _cancelMigration();
     }
 }

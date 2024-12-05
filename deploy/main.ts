@@ -1,90 +1,49 @@
-/**
- * deploys facets & diamondDeploy
- * deploys registryAddress 
- * deploys diamond and cuts facets
- * initializes
- * actions
- * 
- * Meant for backend and testing.
- * New flow required for frontend
- */
-
-const {
-  ethers
-} = require('hardhat')
-const {
-  getSelectors
-} = require('../scripts/libraries/diamond')
-
-const {
-  preDiamondDeploy
-} = require("./preDiamondDeploy")
-const {
-  diamondDeployAndCut
-} = require("./deployDiamondAndCut")
-const {
-  registryDeploy,
-  registryUploadAndDeploy
-} = require("./registryDeploy")
-
-const DEPLOY_FUNCTIONS = {
-    registry,
-    userSetup, 
-    exchange,
-    swapSetup
-} 
-
-type ecosystem = {
-  facets : Facet[],
-}
- type Facet = {
-   name : string,
-   address : string,
-   selector : string
- }
- 
-const registry = {
-  isActive
-}
-
-const userSetup = {
-    membershipLevel
-}
-async function main(facetNames, deployFlags) {
-  let registryAddress;
-  let diamondAddress
-  //deploy facets and diamondDeploy contract
-  const [diamondDeployAddress, facets] = await preDiamondDeploy(facetNames);
-  if (registryOn) {
-    registryAddress = await registryDeploy();
-    let version = [
-      1,
-      diamondDeployAddress,
-      [],
-      facets.slice(1)
-    ]
-    diamondAddress = await registryUploadAndDeploy(registryAddress, version)
-  } else {
-    diamondAddress = await diamondDeployAndCut(facets)
-  }
-  const ecosystem = await ethers.getContractAt('Ecosystem', diamondAddress)
-  console.log("finished")
-  return ecosystem
 
 
-}
+
+const VERSION : string = "0.0.0";
+const ECOSYSTEM_NAME : string = "TEST";
+
+const {ecosystemDeploy} = require('./ecosystem/ecosystemDeploy')
+async function main( ) {
   
 
 
+  const  { ecosystems }  = await ecosystemDeploy(VERSION, ECOSYSTEM_NAME)
+  //deploy exchange
+
+  
+  console.log("Done")
+}
+  
+
+main()
 if (require.main === module) {
-  main("", false)
-    .then(() => process.exit(0))
-    .catch(error => {
-      console.error(error)
-      process.exit(1)
-    })
+  // main("", false)
+  //   .then(() => process.exit(0))
+  //   .catch(error => {
+  //     console.error(error)
+  //     process.exit(1)
+  //   })
 }
-//main()
-module.exports = {
-  main
-}
+
+/**
+ * What's done: 
+ * Facet Deployment
+ * Registry Deployment 
+ * DiamondDeploy Deployment 
+ * 
+ * Successful Ecosystem Deployment from registry. 
+ * 
+ * Next? 
+ *  Deploy Exchange
+ *  Generate User Config
+ *    Tokens
+ *    Membership Levels
+ *    Tickets
+ *    Swap Orders
+ *  Generate Swap Orders
+ * 
+ *    
+ *    
+ */

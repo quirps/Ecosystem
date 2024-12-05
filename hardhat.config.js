@@ -6,8 +6,9 @@ const path = require('path');
 //require("hardhat-gas-reporter");
 require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-diamond-abi");
+require("./diamondABItest");
 
-const {FACETS} = require('./deploy/constants')
+const { facets : FACETS} = require('./deploy/ecosystem/versions/0.0.0.ts')
 //require("hardhat-tracer");
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -37,7 +38,6 @@ module.exports = {
      let startIndex = fullyQualifiedName.indexOf(':') 
      let currentContract = fullyQualifiedName.substr(startIndex + 1)
      if ( FACETS.includes(currentContract) && fullyQualifiedName.includes('contracts/facets') ){
-      console.log(3)
      }
       // 'contracts/facets/DiamondLoupeFacet.sol:DiamondLoupeFacet'
       // console.log(abiElement.name)
@@ -107,8 +107,8 @@ module.exports = {
         }
       ],
       //blockGasLimit: 10000000
-      gas: 333333329900000,  // 12 million
-      blockGasLimit : 3333333299000003
+      gas: 900719925474099,  // 12 million
+      blockGasLimit : 900719925474099
     }
   }
 }

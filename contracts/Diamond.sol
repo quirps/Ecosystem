@@ -17,19 +17,10 @@ import {iOwnership} from "./facets/Ownership/_Ownership.sol";
 import "hardhat/console.sol";
 contract Diamond is iOwnership{    
 
-    constructor( address _diamondCutFacet) payable {        
-        LibOwnership._setEcosystemOwner(msgSender()); 
-
-        // Add the diamondCut external function from the diamondCutFacet
-        IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
-        bytes4[] memory functionSelectors = new bytes4[](1);
-        functionSelectors[0] = IDiamondCut.diamondCut.selector;
-        cut[0] = IDiamondCut.FacetCut({
-            facetAddress: _diamondCutFacet, 
-            action: IDiamondCut.FacetCutAction.Add, 
-            functionSelectors: functionSelectors
-        });
-        LibDiamond.diamondCut(cut, address(0), "");        
+    constructor(address _owner, address _registry, IDiamondCut.FacetCut[] memory _cuts) payable {    
+        LibOwnership._setRegistry( _registry );    
+        LibOwnership._setEcosystemOwner( _owner ); 
+        LibDiamond.diamondCut(_cuts, address(0), "");        
     }
 
     // Find facet for function that is called and execute the
@@ -45,7 +36,7 @@ contract Diamond is iOwnership{
         console.logBytes4(msg.sig);
         address facet = ds.selectorToFacetAndPosition[msg.sig].facetAddress;
         require(facet != address(0), "Diamond: Function does not exist");
-        // Execute external function from facet using delegatecall and return any value.
+        // Execute external function from facet using    delegatecall and return any value.
         assembly {
             // copy function selector and any arguments
             calldatacopy(0, 0, calldatasize())

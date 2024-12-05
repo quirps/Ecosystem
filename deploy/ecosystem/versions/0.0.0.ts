@@ -1,4 +1,4 @@
-const FACETS = [
+const facets = [
     'DiamondCutFacet', 'DiamondInit', 'DiamondLoupeFacet', 'ERC1155', 'ERC1155Transfer','ERC1155Receiver','ERC20', 'MemberRegistry',
     'Members', 'Moderator', 'OwnershipFacet', 'EventFactory'
 ]
@@ -8,7 +8,7 @@ const INITALIZE = [
     ['Members','intialization()'],
     
 ]
-module.exports = {FACETS}
+module.exports = {facets}
 
 //How to communicate intialization information, to whom or what?
 //User should be communicated that certain items are required/needed for certain features to work

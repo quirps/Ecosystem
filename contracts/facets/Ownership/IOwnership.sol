@@ -5,4 +5,6 @@ interface IOwnership {
     function setEcosystemOwner(address _newOwner) external;
 
     function ecosystemOwner() external   view returns (address owner_);
+
+    function isEcosystemOwnerVerify(address _tenativeOwner) external view;
 }
