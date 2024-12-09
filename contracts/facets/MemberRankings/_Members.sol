@@ -63,7 +63,7 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers, iOwnership {
         __changeMemberRanks(_leaf);
     }
 
-    function __changeMemberRanks(LibMembers.Leaf[] memory leaves) private {
+    function __changeMemberRanks(LibMembers.Leaf[] memory leaves) internal {
         LibMembers.MembersStorage storage ms = LibMembers.memberStorage();
         uint128 bountiesUp;
         uint128 bountiesDown;

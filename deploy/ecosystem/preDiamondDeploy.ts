@@ -10,10 +10,16 @@ const {
  
 const {getFacetNames} = require('./versions')
 
-import type {Facet, FacetCut} from "./types"
+import type {Facet, FacetCut, EthereumAddress } from "../../types/web3" 
+import { FacetCutAction  } from "../../types/web3" 
 
-import type { Ecosystem } from "../../types/ethers-contracts"
-const { FacetCutAction} = require('./types')
+
+import type { Ecosystem } from "../../types/ethers-contracts/Ecosystem"
+import type { EcosystemRegistry } from "../../types/ethers-contracts/registry/Registry.sol/EcosystemRegistry"
+import type { IDiamondCut } from "../../types/ethers-contracts/facets/Diamond/IDiamondCut"
+import type { EcosystemConfig } from "../../types/deploy/userConfig"
+ 
+import type {Signer} from "ethers"
 //Import a class for registry
 // uint240 versionNumber,
 // address diamondAddress,
@@ -77,7 +83,7 @@ export async function facetDeploy(version : string) {
  * @returns An object containing:
  *   - registry: The deployed DiamondRegistry contract instance.
  */
-export async function registryDeploy(version : string, ecosystemName : string , facets : Facet[] ) {
+export async function registryDeploy( ) {
     let diamondAddress;
 
     let diamondBytecode = (await ethers.getContractFactory('Diamond')).bytecode
@@ -86,22 +92,14 @@ export async function registryDeploy(version : string, ecosystemName : string , 
     const diamondDeploy = await DiamondDeploy.deploy(diamondBytecode);
 
     //registryDeploy 
-    let Registry = await ethers.getContractFactory('DiamondRegistry')
+    let Registry = await ethers.getContractFactory('EcosystemRegistry')
     let registry = await  Registry.deploy(diamondDeploy.address);
     await registry.deployed();
 
     //set registry address
     await diamondDeploy.setRegistry(registry.address);
 
-    const versionBytes = ethers.utils.formatBytes32String(version);
-
-    const facetCuts : FacetCut[] = facets.map((facet) => ({
-        facetAddress: facet.facetCut.facetAddress,
-        action: facet.facetCut.action,
-        functionSelectors: facet.facetCut.functionSelectors
-    }));
-
-    await registry.uploadVersion(versionBytes, facetCuts);
+    
 
     // let Diamond = await ethers.getContractFactory('Diamond');
     // let diamond = await Diamond.deploy(registry.address, registry.address, facetCuts);
@@ -134,26 +132,41 @@ export async function registryDeploy(version : string, ecosystemName : string , 
  * @returns A deployed ecosystem contract instance with a cumullative ABI of all the facets.
  */
 export async function deployEcosystems(
-    version: string,
-    registry: any,
-    diamondAddress: string,
-    ecosystemName: string
+    ecosystemConfig : EcosystemConfig,
+    registry : EcosystemRegistry,
+    owner : Signer
 ): Promise<Ecosystem> {
-    const salt = 34242424244;
+    const salt : number= 34242424244;
     let ecosystem : Ecosystem;
+    let diamondAddress : string; 
     let diamondBytecode = (await ethers.getContractFactory('Diamond')).bytecode;
 
-    const versionBytes = ethers.utils.formatBytes32String(version);
+    const { version, name } = ecosystemConfig
+    const versionBytes = ethers.utils.formatBytes32String( version );
 
-    diamondAddress = await registry.callStatic.deployVersion(versionBytes, ecosystemName, salt, diamondBytecode);
+    //connect owner for deploy of ecosystem
+    const registryWithSigner = registry.connect(owner);
+
+    diamondAddress  = await registryWithSigner.callStatic.deployVersion(versionBytes, name, salt, diamondBytecode);
     console.log(diamondAddress)
-    await registry.deployVersion(versionBytes, ecosystemName, salt, diamondBytecode, {gasLimit: 10000000});
+    await registryWithSigner.deployVersion(versionBytes, name, salt, diamondBytecode, {gasLimit: 10000000});
 
     ecosystem = await ethers.getContractAt('Ecosystem', diamondAddress);
 
     return ecosystem;
 }
 
+export async function registryUploadVersion(  facets : Facet[], registry : EcosystemRegistry, version : string){
+    const versionBytes = ethers.utils.formatBytes32String(version);
+
+    const facetCuts : IDiamondCut.FacetCutStruct[] = facets.map((facet) => ({
+        facetAddress: facet.facetCut.facetAddress,
+        action: facet.facetCut.action,
+        functionSelectors: facet.facetCut.functionSelectors
+    }));
+
+    await registry.uploadVersion(versionBytes, facetCuts);
+}
 
 
 

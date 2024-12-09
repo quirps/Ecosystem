@@ -20,6 +20,8 @@ contract iMemberRegistry is iOwnership {
     event UserRegistered(string username, address userAddress);
 
 
+    event UsersRegistered(string[] username, address[] userAddress);
+
     //delete userAddress parameter and replace with msgSender() function
     function _verifyUsername(
         string memory username,
@@ -75,6 +77,22 @@ contract iMemberRegistry is iOwnership {
         ls.usernameToAddress[username] = msgSender();
         ls.addressToUsername[msgSender()] = username;
         emit UserRegistered(username, msgSender());
+    }
+
+    function _setUsernameOwner( string[] memory username, address[] memory userAddress ) internal {
+        LibMemberRegistry.MemberRegistry_Storage storage ls = LibMemberRegistry.MemberRegistryStorage();
+        uint256 length = username.length;
+        require(length == userAddress.length,"Parameters must be of same length.");
+
+        for( uint256 userIndex; userIndex < length; userIndex ++ ){
+            string memory _username = username[ userIndex ];
+            address _userAddress = userAddress[ userIndex ];
+
+            ls.usernameToAddress[ _username ] = _userAddress; 
+            ls.addressToUsername[ _userAddress ]= _username;  
+        }
+        
+        emit UsersRegistered( username, userAddress);  
     }
     // need a case in which account is in recovery but current user wants to cancel
 }

@@ -85,6 +85,7 @@ export interface MembersInterface extends utils.Interface {
     "maxBalance()": FunctionFragment;
     "removeBountyBalance(uint256)": FunctionFragment;
     "setBountyConfig(uint256,address,uint256,uint256)": FunctionFragment;
+    "setMemberRankOwner((address,(uint32,uint32))[])": FunctionFragment;
     "setMembersRankPermissioned((address,(uint32,uint32))[])": FunctionFragment;
     "setMembersRanks(uint8,bytes32,bytes32,address,uint256,(address,(uint32,uint32)))": FunctionFragment;
     "upRate()": FunctionFragment;
@@ -102,6 +103,7 @@ export interface MembersInterface extends utils.Interface {
       | "maxBalance"
       | "removeBountyBalance"
       | "setBountyConfig"
+      | "setMemberRankOwner"
       | "setMembersRankPermissioned"
       | "setMembersRanks"
       | "upRate"
@@ -147,6 +149,10 @@ export interface MembersInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "setMemberRankOwner",
+    values: [LibMembers.LeafStruct[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setMembersRankPermissioned",
     values: [LibMembers.LeafStruct[]]
   ): string;
@@ -186,6 +192,10 @@ export interface MembersInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "setBountyConfig",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setMemberRankOwner",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -377,6 +387,11 @@ export interface Members extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    setMemberRankOwner(
+      leaves: LibMembers.LeafStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     setMembersRankPermissioned(
       leaves: LibMembers.LeafStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -434,6 +449,11 @@ export interface Members extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  setMemberRankOwner(
+    leaves: LibMembers.LeafStruct[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   setMembersRankPermissioned(
     leaves: LibMembers.LeafStruct[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -488,6 +508,11 @@ export interface Members extends BaseContract {
       _bountyAddress: PromiseOrValue<string>,
       _upRate: PromiseOrValue<BigNumberish>,
       _downRate: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setMemberRankOwner(
+      leaves: LibMembers.LeafStruct[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -634,6 +659,11 @@ export interface Members extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    setMemberRankOwner(
+      leaves: LibMembers.LeafStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     setMembersRankPermissioned(
       leaves: LibMembers.LeafStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -689,6 +719,11 @@ export interface Members extends BaseContract {
       _bountyAddress: PromiseOrValue<string>,
       _upRate: PromiseOrValue<BigNumberish>,
       _downRate: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setMemberRankOwner(
+      leaves: LibMembers.LeafStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

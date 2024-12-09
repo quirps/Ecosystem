@@ -5,7 +5,7 @@ import "../facets/Tokens/ERC1155/ERC1155Receiver.sol";
 import { IERC1155 } from "../facets/Tokens/ERC1155/interfaces/IERC1155.sol";
 import { IERC1155MetadataURI } from "../facets/Tokens/ERC1155/interfaces/IERC1155MetadataURI.sol";
 import { iERC1155Transfer } from "../facets/Tokens/ERC1155/internals/iERC1155Transfer.sol";
-contract ERC1155Rewards is  ERC1155Receiver, ERC1155, iERC1155Transfer { 
+contract ERC1155Rewards is  ERC1155Receiver,    iERC1155Transfer { 
     uint64 constant TIME_POOL_TOKEN_DECIMALS = 10**18;
 
     function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {

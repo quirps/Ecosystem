@@ -138,16 +138,19 @@ export interface EcosystemInterface extends utils.Interface {
     "maxBalance()": FunctionFragment;
     "removeBountyBalance(uint256)": FunctionFragment;
     "setBountyConfig(uint256,address,uint256,uint256)": FunctionFragment;
+    "setMemberRankOwner((address,(uint32,uint32))[])": FunctionFragment;
     "setMembersRankPermissioned((address,(uint32,uint32))[])": FunctionFragment;
     "setMembersRanks(uint8,bytes32,bytes32,address,uint256,(address,(uint32,uint32)))": FunctionFragment;
     "upRate()": FunctionFragment;
     "cancelVerify(string)": FunctionFragment;
     "finalizeRecovery(string)": FunctionFragment;
+    "setUsernameOwner(string)": FunctionFragment;
     "verificationTime()": FunctionFragment;
     "verifyUsername(string,uint8,bytes32,bytes32,address,bytes32,uint256,uint256)": FunctionFragment;
     "getModeratorRank(address)": FunctionFragment;
     "setModeratorRank(address,uint8)": FunctionFragment;
     "ecosystemOwner()": FunctionFragment;
+    "isEcosystemOwnerVerify(address)": FunctionFragment;
     "setEcosystemOwner(address)": FunctionFragment;
     "balanceOf(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
@@ -202,16 +205,19 @@ export interface EcosystemInterface extends utils.Interface {
       | "maxBalance"
       | "removeBountyBalance"
       | "setBountyConfig"
+      | "setMemberRankOwner"
       | "setMembersRankPermissioned"
       | "setMembersRanks"
       | "upRate"
       | "cancelVerify"
       | "finalizeRecovery"
+      | "setUsernameOwner"
       | "verificationTime"
       | "verifyUsername"
       | "getModeratorRank"
       | "setModeratorRank"
       | "ecosystemOwner"
+      | "isEcosystemOwnerVerify"
       | "setEcosystemOwner"
       | "balanceOf(address,uint256)"
       | "balanceOf(address)"
@@ -358,6 +364,10 @@ export interface EcosystemInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "setMemberRankOwner",
+    values: [LibMembers.LeafStruct[]]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setMembersRankPermissioned",
     values: [LibMembers.LeafStruct[]]
   ): string;
@@ -379,6 +389,10 @@ export interface EcosystemInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "finalizeRecovery",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setUsernameOwner",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
@@ -409,6 +423,10 @@ export interface EcosystemInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "ecosystemOwner",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isEcosystemOwnerVerify",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "setEcosystemOwner",
@@ -628,6 +646,10 @@ export interface EcosystemInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setMemberRankOwner",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setMembersRankPermissioned",
     data: BytesLike
   ): Result;
@@ -642,6 +664,10 @@ export interface EcosystemInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "finalizeRecovery",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setUsernameOwner",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -662,6 +688,10 @@ export interface EcosystemInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "ecosystemOwner",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isEcosystemOwnerVerify",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -769,6 +799,7 @@ export interface EcosystemInterface extends utils.Interface {
     "BountyEvent(address,uint256,uint256,uint256,uint256)": EventFragment;
     "RecoveryAction(string,address,uint8)": EventFragment;
     "UserRegistered(string,address)": EventFragment;
+    "UsersRegistered(string[],address[])": EventFragment;
     "URI(string,uint256)": EventFragment;
   };
 
@@ -870,6 +901,7 @@ export interface EcosystemInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "BountyEvent"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RecoveryAction"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "UserRegistered"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "UsersRegistered"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "URI"): EventFragment;
 }
 
@@ -1420,6 +1452,17 @@ export type UserRegisteredEvent = TypedEvent<
 
 export type UserRegisteredEventFilter = TypedEventFilter<UserRegisteredEvent>;
 
+export interface UsersRegisteredEventObject {
+  username: string[];
+  userAddress: string[];
+}
+export type UsersRegisteredEvent = TypedEvent<
+  [string[], string[]],
+  UsersRegisteredEventObject
+>;
+
+export type UsersRegisteredEventFilter = TypedEventFilter<UsersRegisteredEvent>;
+
 export interface URIEventObject {
   value: string;
   id: BigNumber;
@@ -1591,6 +1634,11 @@ export interface Ecosystem extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    setMemberRankOwner(
+      leaves: LibMembers.LeafStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     setMembersRankPermissioned(
       leaves: LibMembers.LeafStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1614,6 +1662,11 @@ export interface Ecosystem extends BaseContract {
     ): Promise<ContractTransaction>;
 
     finalizeRecovery(
+      username: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    setUsernameOwner(
       username: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -1646,6 +1699,11 @@ export interface Ecosystem extends BaseContract {
     ecosystemOwner(
       overrides?: CallOverrides
     ): Promise<[string] & { owner_: string }>;
+
+    isEcosystemOwnerVerify(
+      _tenativeOwner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[void]>;
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
@@ -1920,6 +1978,11 @@ export interface Ecosystem extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  setMemberRankOwner(
+    leaves: LibMembers.LeafStruct[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   setMembersRankPermissioned(
     leaves: LibMembers.LeafStruct[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -1943,6 +2006,11 @@ export interface Ecosystem extends BaseContract {
   ): Promise<ContractTransaction>;
 
   finalizeRecovery(
+    username: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  setUsernameOwner(
     username: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -1973,6 +2041,11 @@ export interface Ecosystem extends BaseContract {
   ): Promise<ContractTransaction>;
 
   ecosystemOwner(overrides?: CallOverrides): Promise<string>;
+
+  isEcosystemOwnerVerify(
+    _tenativeOwner: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<void>;
 
   setEcosystemOwner(
     _newOwner: PromiseOrValue<string>,
@@ -2245,6 +2318,11 @@ export interface Ecosystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setMemberRankOwner(
+      leaves: LibMembers.LeafStruct[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setMembersRankPermissioned(
       leaves: LibMembers.LeafStruct[],
       overrides?: CallOverrides
@@ -2268,6 +2346,11 @@ export interface Ecosystem extends BaseContract {
     ): Promise<void>;
 
     finalizeRecovery(
+      username: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setUsernameOwner(
       username: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -2298,6 +2381,11 @@ export interface Ecosystem extends BaseContract {
     ): Promise<void>;
 
     ecosystemOwner(overrides?: CallOverrides): Promise<string>;
+
+    isEcosystemOwnerVerify(
+      _tenativeOwner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
@@ -2734,6 +2822,15 @@ export interface Ecosystem extends BaseContract {
       userAddress?: null
     ): UserRegisteredEventFilter;
 
+    "UsersRegistered(string[],address[])"(
+      username?: null,
+      userAddress?: null
+    ): UsersRegisteredEventFilter;
+    UsersRegistered(
+      username?: null,
+      userAddress?: null
+    ): UsersRegisteredEventFilter;
+
     "URI(string,uint256)"(
       value?: null,
       id?: PromiseOrValue<BigNumberish> | null
@@ -2866,6 +2963,11 @@ export interface Ecosystem extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    setMemberRankOwner(
+      leaves: LibMembers.LeafStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     setMembersRankPermissioned(
       leaves: LibMembers.LeafStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -2889,6 +2991,11 @@ export interface Ecosystem extends BaseContract {
     ): Promise<BigNumber>;
 
     finalizeRecovery(
+      username: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    setUsernameOwner(
       username: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -2919,6 +3026,11 @@ export interface Ecosystem extends BaseContract {
     ): Promise<BigNumber>;
 
     ecosystemOwner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    isEcosystemOwnerVerify(
+      _tenativeOwner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
@@ -3194,6 +3306,11 @@ export interface Ecosystem extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    setMemberRankOwner(
+      leaves: LibMembers.LeafStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     setMembersRankPermissioned(
       leaves: LibMembers.LeafStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -3217,6 +3334,11 @@ export interface Ecosystem extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     finalizeRecovery(
+      username: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setUsernameOwner(
       username: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
@@ -3247,6 +3369,11 @@ export interface Ecosystem extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     ecosystemOwner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    isEcosystemOwnerVerify(
+      _tenativeOwner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,

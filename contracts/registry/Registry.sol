@@ -24,7 +24,7 @@ For 2, we loop starting at version i + 1  (i is starting version) and go to N (t
 We should create an array of DiamondCuts. DiamondCuts must have constructor information too. 
 
  */ 
-contract DiamondRegistry is iOwnership {
+contract EcosystemRegistry is iOwnership {
     // State Variables
     address public owner;
     mapping(bytes32 => Version) public versions;

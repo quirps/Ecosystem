@@ -1,18 +1,16 @@
 pragma solidity ^0.8.9;
 
 import {IERC20} from "../facets/Tokens/ERC20/interfaces/IERC20.sol";
-import {iOwnership} from "../facets/Ownership/_Ownership.sol";
-
 import { IStake } from "./interfaces/IStake.sol";
 import { IVersion } from "./interfaces/IVersion.sol";
-
+import { IPOCreate } from "./IPO.sol";  
 /**
 We want to allow for IPO purchasing and Internal Swapping 
 (as opposed to swapping with other platforms).
 
  */
  //tokens can be simply ordered, so highest value will be numerator for the ratio, lowest is denominator
-contract Swap is iOwnership{
+contract MassDXSwap is IPOCreate{
     /**
         Sell a given token of type A for a given token of type B from 
         their respective ecosystems. 
@@ -44,6 +42,7 @@ contract Swap is iOwnership{
     //transaction ordering, transaction inclusion. 
 
 
+    function swap(Swap)
 
     //rentrancy guard;
     /**
@@ -58,7 +57,7 @@ contract Swap is iOwnership{
      * ratio defined by inputSwap.amount * PRECISiON / outputSwap.amount
      * @param isOrder if true will create a swap order if any inputSwap.amount is leftover
      */
-    function swap(Swap memory inputSwap, Swap memory outputSwap, uint256[] memory targetOrders, uint256 _stakeId, bool isOrder) external {
+    function swap(Swap memory inputSwap, Swap memory outputSwap, uint256[] memory targetOrders, uint256 _stakeId, bool isOrder) public {
         bool isEcosystem; 
 
         // swap requirements

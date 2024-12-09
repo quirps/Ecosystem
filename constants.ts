@@ -1,0 +1,1 @@
+export const ECOSYSTEM_CURRENCY_ID = 0;

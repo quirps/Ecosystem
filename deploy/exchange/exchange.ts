@@ -1,6 +1,9 @@
 const { ethers } = require('hardhat')
 
-async function deployExchange(){
-    const Exchange = await ethers.getContractFactory('Exchange')
-    const exchange = await Exchange.deploy();
+export async function exchangeDeploy() : Promise<any>{
+    const Exchange = await ethers.getContractFactory('MassDX')
+    const exchange = await Exchange.deploy(ethers.constants.AddressZero);
+    console.log("Exchange deployed successfully")
+    return exchange
 }
+

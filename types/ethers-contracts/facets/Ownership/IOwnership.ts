@@ -25,16 +25,24 @@ import type {
 export interface IOwnershipInterface extends utils.Interface {
   functions: {
     "ecosystemOwner()": FunctionFragment;
+    "isEcosystemOwnerVerify(address)": FunctionFragment;
     "setEcosystemOwner(address)": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic: "ecosystemOwner" | "setEcosystemOwner"
+    nameOrSignatureOrTopic:
+      | "ecosystemOwner"
+      | "isEcosystemOwnerVerify"
+      | "setEcosystemOwner"
   ): FunctionFragment;
 
   encodeFunctionData(
     functionFragment: "ecosystemOwner",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "isEcosystemOwnerVerify",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "setEcosystemOwner",
@@ -43,6 +51,10 @@ export interface IOwnershipInterface extends utils.Interface {
 
   decodeFunctionResult(
     functionFragment: "ecosystemOwner",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "isEcosystemOwnerVerify",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -84,6 +96,11 @@ export interface IOwnership extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string] & { owner_: string }>;
 
+    isEcosystemOwnerVerify(
+      _tenativeOwner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[void]>;
+
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -92,6 +109,11 @@ export interface IOwnership extends BaseContract {
 
   ecosystemOwner(overrides?: CallOverrides): Promise<string>;
 
+  isEcosystemOwnerVerify(
+    _tenativeOwner: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<void>;
+
   setEcosystemOwner(
     _newOwner: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -99,6 +121,11 @@ export interface IOwnership extends BaseContract {
 
   callStatic: {
     ecosystemOwner(overrides?: CallOverrides): Promise<string>;
+
+    isEcosystemOwnerVerify(
+      _tenativeOwner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
@@ -111,6 +138,11 @@ export interface IOwnership extends BaseContract {
   estimateGas: {
     ecosystemOwner(overrides?: CallOverrides): Promise<BigNumber>;
 
+    isEcosystemOwnerVerify(
+      _tenativeOwner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -119,6 +151,11 @@ export interface IOwnership extends BaseContract {
 
   populateTransaction: {
     ecosystemOwner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    isEcosystemOwnerVerify(
+      _tenativeOwner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,

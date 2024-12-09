@@ -3,21 +3,21 @@ pragma solidity ^0.8.9;
 import "./LibTimeManagement.sol";
 import "./LibUnderflow.sol";
 
+import {iOwnership} from "../facets/Ownership/_Ownership.sol";
+
 import "./CleanupUser.sol";
 import "./ERC1155Rewards.sol";
-
+import {IERC1155} from "../facets/Tokens/ERC1155/interfaces/IERC1155.sol";
+import {IERC1155Transfer} from "../facets/Tokens/ERC1155/interfaces/IERC1155Transfer.sol";
 import "hardhat/console.sol";
-contract Context{
-    function msgSender() internal view returns (address){
-        return msg.sender;
-    }
-}
-contract ExchangeRewardPool is  ERC1155Rewards, CleanupUser{
+
+contract ExchangeRewardPool is  iOwnership, CleanupUser{
     using LibTimeManagement for uint32;
     using LibUnderflow for uint8;
 
     uint32 immutable GENESIS_TIMESTAMP;
-    
+    address immutable exchangeRewardERC1155; 
+
     event Staked (uint32 timeStart, LibTimeManagement.StakeDayInterval stakeInterval, uint256 stakeAmouunt, address staker);
     event StakerRewardsCollected(address staker, uint256 amount);
   
@@ -60,8 +60,9 @@ contract ExchangeRewardPool is  ERC1155Rewards, CleanupUser{
     mapping(address => mapping(uint32 => bytes32) ) public  timeSlotActivationBitMap;
 
 
-    constructor(){
+    constructor( address _exchangeRewardERC1155){
         GENESIS_TIMESTAMP = uint32(block.timestamp);
+        exchangeRewardERC1155 = _exchangeRewardERC1155;  
     }
 
     /**
@@ -95,7 +96,7 @@ contract ExchangeRewardPool is  ERC1155Rewards, CleanupUser{
         //add stake 
         timeSlotRewards[ _tokenAddress ][ _timeStart ].stakeSum[_stakeInterval] +=  _uniformStake;
         //burn amount
-        _burn(msgSender(), uint256(uint160(_tokenAddress)), _stakeAmount);
+        IERC1155(exchangeRewardERC1155).burn(msgSender(), uint256(uint160(_tokenAddress)), _stakeAmount);
         
         timePoolStakes[_stakeId] = TimePool( _timeStart, msgSender(), _stakeInterval, _stakeAmount, _tokenAddress, StakeStatus.Staking);
 
@@ -123,13 +124,13 @@ contract ExchangeRewardPool is  ERC1155Rewards, CleanupUser{
         
         require(_endTimeSlot + LibTimeManagement.getDayIntervalSeconds(LibTimeManagement.StakeDayInterval.One) < uint32(block.timestamp),"Stake period is still ongoing");
 
-        RewardsManage storage _timeSlotRewards = timeSlotRewards[ _tokenAddress ][ _startTimeSlot ];
+        RewardsManage storage _timeSlotRewards = timeSlotRewards[ _tokenAddress ][ _startTimeSlot ]; 
         
        
        
         //
         //transfer 
-        _safeTransferFrom(address(this), msgSender(), uint256(uint160(_tokenAddress)), _stakerEarnings, "");
+        IERC1155Transfer(exchangeRewardERC1155).safeTransferFrom(address(this), msgSender(), uint256(uint160(_tokenAddress)), _stakerEarnings, "");
         _stake.status = StakeStatus.Collected;
         emit StakerRewardsCollected(msgSender(), _stakerEarnings);
     }
@@ -356,22 +357,22 @@ contract ExchangeRewardPool is  ERC1155Rewards, CleanupUser{
         bytes32 _updatedBitMap = _outdatedBitMap | bytes32( ( 2 ** (_timeSlotPosition) ) );
         timeSlotActivationBitMap[_tokenAddress][_bitMapTimeSlot] = _updatedBitMap;
     }
-    function updateTimePoolEarnings(uint256 _timePoolFee, uint256 _totalSlotSum) internal {
+    // function updateTimePoolEarnings(uint256 _timePoolFee, uint256 _totalSlotSum) internal {
        
 
-        //Users can unstake anytime they want, but will forfeit their earnings in the current time slot
-        //can use one time interval
-        //we still need to use fixed intervals  due to rewards and sums needed to be updated every 
-        //transacted timeslot 
+    //     //Users can unstake anytime they want, but will forfeit their earnings in the current time slot
+    //     //can use one time interval
+    //     //we still need to use fixed intervals  due to rewards and sums needed to be updated every 
+    //     //transacted timeslot 
 
-        /**
-         So since sums are well defined due to fixed intervals,
-         we simply find the respective timeslot, go to the beginning day of that interval 
-         and loading the sum from each interval. 
-         Only has to be done once per time slot. So transactor would check flag and store it
-         as well. 
-         */
-    }
+    //     /**
+    //      So since sums are well defined due to fixed intervals,
+    //      we simply find the respective timeslot, go to the beginning day of that interval 
+    //      and loading the sum from each interval. 
+    //      Only has to be done once per time slot. So transactor would check flag and store it
+    //      as well. 
+    //      */
+    // }
 
 
 }

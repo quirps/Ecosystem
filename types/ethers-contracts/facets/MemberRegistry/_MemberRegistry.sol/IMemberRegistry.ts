@@ -45,12 +45,14 @@ export interface IMemberRegistryInterface extends utils.Interface {
     "MigrationInitiated(address,uint32)": EventFragment;
     "RecoveryAction(string,address,uint8)": EventFragment;
     "UserRegistered(string,address)": EventFragment;
+    "UsersRegistered(string[],address[])": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "MigrationCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationInitiated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RecoveryAction"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "UserRegistered"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "UsersRegistered"): EventFragment;
 }
 
 export interface MigrationCancelledEventObject {
@@ -99,6 +101,17 @@ export type UserRegisteredEvent = TypedEvent<
 >;
 
 export type UserRegisteredEventFilter = TypedEventFilter<UserRegisteredEvent>;
+
+export interface UsersRegisteredEventObject {
+  username: string[];
+  userAddress: string[];
+}
+export type UsersRegisteredEvent = TypedEvent<
+  [string[], string[]],
+  UsersRegisteredEventObject
+>;
+
+export type UsersRegisteredEventFilter = TypedEventFilter<UsersRegisteredEvent>;
 
 export interface IMemberRegistry extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -174,6 +187,15 @@ export interface IMemberRegistry extends BaseContract {
       username?: null,
       userAddress?: null
     ): UserRegisteredEventFilter;
+
+    "UsersRegistered(string[],address[])"(
+      username?: null,
+      userAddress?: null
+    ): UsersRegisteredEventFilter;
+    UsersRegistered(
+      username?: null,
+      userAddress?: null
+    ): UsersRegisteredEventFilter;
   };
 
   estimateGas: {

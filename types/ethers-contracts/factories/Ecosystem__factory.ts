@@ -1268,6 +1268,43 @@ const _abi = [
         type: "tuple[]",
       },
     ],
+    name: "setMemberRankOwner",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "memberAddress",
+            type: "address",
+          },
+          {
+            components: [
+              {
+                internalType: "uint32",
+                name: "timestamp",
+                type: "uint32",
+              },
+              {
+                internalType: "uint32",
+                name: "rank",
+                type: "uint32",
+              },
+            ],
+            internalType: "struct LibMembers.MemberRank",
+            name: "memberRank",
+            type: "tuple",
+          },
+        ],
+        internalType: "struct LibMembers.Leaf[]",
+        name: "leaves",
+        type: "tuple[]",
+      },
+    ],
     name: "setMembersRankPermissioned",
     outputs: [],
     stateMutability: "nonpayable",
@@ -1446,6 +1483,25 @@ const _abi = [
     type: "event",
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "string[]",
+        name: "username",
+        type: "string[]",
+      },
+      {
+        indexed: false,
+        internalType: "address[]",
+        name: "userAddress",
+        type: "address[]",
+      },
+    ],
+    name: "UsersRegistered",
+    type: "event",
+  },
+  {
     inputs: [
       {
         internalType: "string",
@@ -1467,6 +1523,19 @@ const _abi = [
       },
     ],
     name: "finalizeRecovery",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+    ],
+    name: "setUsernameOwner",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1632,6 +1701,19 @@ const _abi = [
         type: "address",
       },
     ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_tenativeOwner",
+        type: "address",
+      },
+    ],
+    name: "isEcosystemOwnerVerify",
+    outputs: [],
     stateMutability: "view",
     type: "function",
   },

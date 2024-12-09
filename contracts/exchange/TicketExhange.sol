@@ -6,9 +6,9 @@ import {IERC1155} from "../facets/Tokens/ERC1155/interfaces/IERC1155.sol";
 import {IERC20} from "../facets/Tokens/ERC20/interfaces/IERC20.sol";
 import "./ExchangeRewardPool.sol";
  
-
-contract MassDX is  ExchangeRewardPool{
-    address public  massDXProtocol; 
+ 
+contract MassDX is  ExchangeRewardPool{  
+    address public  massDXProtocol;   
  
     // per
     uint24 constant PERCENTAGE_BASE =             1000000; 
@@ -60,7 +60,7 @@ contract MassDX is  ExchangeRewardPool{
         uint256 minimumBid;
     }
 
-    constructor() {
+    constructor( address _exchangeRewardERC1155 ) ExchangeRewardPool( _exchangeRewardERC1155){
         massDXProtocol = msgSender();
     }
     function sellTickets( TotalSale[] memory _tickets) external {
@@ -158,7 +158,7 @@ contract MassDX is  ExchangeRewardPool{
         //scope
         _mintAmount = _totalCost;
         //exchange token addresses are mapped directly to erc1155 reward ids
-        _mint(_ticketSale.sellerAddress,uint256(uint160(_tokenAddress)), _mintAmount,"");
+        IERC1155( exchangeRewardERC1155 ).mint(_ticketSale.sellerAddress,uint256(uint160(_tokenAddress)), _mintAmount,"");
          
         //update sale information
         uint256 _newTicketAmount = _ticketSale.ticketAmount - _ticketAmount;
@@ -175,16 +175,16 @@ contract MassDX is  ExchangeRewardPool{
  
  
     
-    function createAuction() external {
+    // function createAuction() external {
 
-    }
-    function cancelAuction() external{
+    // }
+    // function cancelAuction() external{
 
-    }
+    // }
 
-    function bid() external {
+    // function bid() external {
 
-    }
+    // }
     
 }
 

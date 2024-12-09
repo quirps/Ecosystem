@@ -31,6 +31,7 @@ export interface MemberRegistryInterface extends utils.Interface {
   functions: {
     "cancelVerify(string)": FunctionFragment;
     "finalizeRecovery(string)": FunctionFragment;
+    "setUsernameOwner(string)": FunctionFragment;
     "verificationTime()": FunctionFragment;
     "verifyUsername(string,uint8,bytes32,bytes32,address,bytes32,uint256,uint256)": FunctionFragment;
   };
@@ -39,6 +40,7 @@ export interface MemberRegistryInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "cancelVerify"
       | "finalizeRecovery"
+      | "setUsernameOwner"
       | "verificationTime"
       | "verifyUsername"
   ): FunctionFragment;
@@ -49,6 +51,10 @@ export interface MemberRegistryInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "finalizeRecovery",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setUsernameOwner",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
@@ -78,6 +84,10 @@ export interface MemberRegistryInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setUsernameOwner",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "verificationTime",
     data: BytesLike
   ): Result;
@@ -91,12 +101,14 @@ export interface MemberRegistryInterface extends utils.Interface {
     "MigrationInitiated(address,uint32)": EventFragment;
     "RecoveryAction(string,address,uint8)": EventFragment;
     "UserRegistered(string,address)": EventFragment;
+    "UsersRegistered(string[],address[])": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "MigrationCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationInitiated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RecoveryAction"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "UserRegistered"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "UsersRegistered"): EventFragment;
 }
 
 export interface MigrationCancelledEventObject {
@@ -146,6 +158,17 @@ export type UserRegisteredEvent = TypedEvent<
 
 export type UserRegisteredEventFilter = TypedEventFilter<UserRegisteredEvent>;
 
+export interface UsersRegisteredEventObject {
+  username: string[];
+  userAddress: string[];
+}
+export type UsersRegisteredEvent = TypedEvent<
+  [string[], string[]],
+  UsersRegisteredEventObject
+>;
+
+export type UsersRegisteredEventFilter = TypedEventFilter<UsersRegisteredEvent>;
+
 export interface MemberRegistry extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
@@ -183,6 +206,11 @@ export interface MemberRegistry extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    setUsernameOwner(
+      username: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     verificationTime(overrides?: CallOverrides): Promise<[number]>;
 
     verifyUsername(
@@ -208,6 +236,11 @@ export interface MemberRegistry extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  setUsernameOwner(
+    username: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   verificationTime(overrides?: CallOverrides): Promise<number>;
 
   verifyUsername(
@@ -229,6 +262,11 @@ export interface MemberRegistry extends BaseContract {
     ): Promise<void>;
 
     finalizeRecovery(
+      username: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setUsernameOwner(
       username: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
@@ -286,6 +324,15 @@ export interface MemberRegistry extends BaseContract {
       username?: null,
       userAddress?: null
     ): UserRegisteredEventFilter;
+
+    "UsersRegistered(string[],address[])"(
+      username?: null,
+      userAddress?: null
+    ): UsersRegisteredEventFilter;
+    UsersRegistered(
+      username?: null,
+      userAddress?: null
+    ): UsersRegisteredEventFilter;
   };
 
   estimateGas: {
@@ -295,6 +342,11 @@ export interface MemberRegistry extends BaseContract {
     ): Promise<BigNumber>;
 
     finalizeRecovery(
+      username: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    setUsernameOwner(
       username: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -321,6 +373,11 @@ export interface MemberRegistry extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     finalizeRecovery(
+      username: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setUsernameOwner(
       username: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;

@@ -27,14 +27,29 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
+export declare namespace IDiamondCut {
+  export type FacetCutStruct = {
+    facetAddress: PromiseOrValue<string>;
+    action: PromiseOrValue<BigNumberish>;
+    functionSelectors: PromiseOrValue<BytesLike>[];
+  };
+
+  export type FacetCutStructOutput = [string, number, string[]] & {
+    facetAddress: string;
+    action: number;
+    functionSelectors: string[];
+  };
+}
+
 export interface DiamondDeployInterface extends utils.Interface {
   functions: {
-    "deploy(address,uint256,bytes,bytes)": FunctionFragment;
-    "diamondCutFacet()": FunctionFragment;
+    "deploy(address,uint256,bytes,(address,uint8,bytes4[])[])": FunctionFragment;
+    "registryAddress()": FunctionFragment;
+    "setRegistry(address)": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic: "deploy" | "diamondCutFacet"
+    nameOrSignatureOrTopic: "deploy" | "registryAddress" | "setRegistry"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -43,17 +58,25 @@ export interface DiamondDeployInterface extends utils.Interface {
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BytesLike>,
-      PromiseOrValue<BytesLike>
+      IDiamondCut.FacetCutStruct[]
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "diamondCutFacet",
+    functionFragment: "registryAddress",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setRegistry",
+    values: [PromiseOrValue<string>]
   ): string;
 
   decodeFunctionResult(functionFragment: "deploy", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "diamondCutFacet",
+    functionFragment: "registryAddress",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setRegistry",
     data: BytesLike
   ): Result;
 
@@ -102,33 +125,48 @@ export interface DiamondDeploy extends BaseContract {
       owner: PromiseOrValue<string>,
       _salt: PromiseOrValue<BigNumberish>,
       _bytecode: PromiseOrValue<BytesLike>,
-      _arguments: PromiseOrValue<BytesLike>,
+      _facetCuts: IDiamondCut.FacetCutStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    diamondCutFacet(overrides?: CallOverrides): Promise<[string]>;
+    registryAddress(overrides?: CallOverrides): Promise<[string]>;
+
+    setRegistry(
+      _registry: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
   };
 
   deploy(
     owner: PromiseOrValue<string>,
     _salt: PromiseOrValue<BigNumberish>,
     _bytecode: PromiseOrValue<BytesLike>,
-    _arguments: PromiseOrValue<BytesLike>,
+    _facetCuts: IDiamondCut.FacetCutStruct[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  diamondCutFacet(overrides?: CallOverrides): Promise<string>;
+  registryAddress(overrides?: CallOverrides): Promise<string>;
+
+  setRegistry(
+    _registry: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   callStatic: {
     deploy(
       owner: PromiseOrValue<string>,
       _salt: PromiseOrValue<BigNumberish>,
       _bytecode: PromiseOrValue<BytesLike>,
-      _arguments: PromiseOrValue<BytesLike>,
+      _facetCuts: IDiamondCut.FacetCutStruct[],
       overrides?: CallOverrides
     ): Promise<string>;
 
-    diamondCutFacet(overrides?: CallOverrides): Promise<string>;
+    registryAddress(overrides?: CallOverrides): Promise<string>;
+
+    setRegistry(
+      _registry: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
   filters: {
@@ -141,11 +179,16 @@ export interface DiamondDeploy extends BaseContract {
       owner: PromiseOrValue<string>,
       _salt: PromiseOrValue<BigNumberish>,
       _bytecode: PromiseOrValue<BytesLike>,
-      _arguments: PromiseOrValue<BytesLike>,
+      _facetCuts: IDiamondCut.FacetCutStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    diamondCutFacet(overrides?: CallOverrides): Promise<BigNumber>;
+    registryAddress(overrides?: CallOverrides): Promise<BigNumber>;
+
+    setRegistry(
+      _registry: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -153,10 +196,15 @@ export interface DiamondDeploy extends BaseContract {
       owner: PromiseOrValue<string>,
       _salt: PromiseOrValue<BigNumberish>,
       _bytecode: PromiseOrValue<BytesLike>,
-      _arguments: PromiseOrValue<BytesLike>,
+      _facetCuts: IDiamondCut.FacetCutStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    diamondCutFacet(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    registryAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    setRegistry(
+      _registry: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
   };
 }

@@ -27,6 +27,19 @@ const _abi = [
     inputs: [
       {
         internalType: "address",
+        name: "_tenativeOwner",
+        type: "address",
+      },
+    ],
+    name: "isEcosystemOwnerVerify",
+    outputs: [],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
         name: "_newOwner",
         type: "address",
       },
