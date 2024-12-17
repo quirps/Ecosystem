@@ -4,7 +4,7 @@ const {
     ethers
 } = require('hardhat')
 const {
-    selectorCollsion,
+    selectorCollision,
     getSelectors
 } = require("../libraries/diamond")
  
@@ -59,9 +59,9 @@ export async function facetDeploy(version : string) {
     await Promise.all(deployedStatuses) 
 
     //check for facet collisions
-    const collision = selectorCollsion(facets)
+    const collision = await selectorCollision(facets)
     if (collision) {
-        throw Error(`Collsion detected at facet ${collision[0]} and facet ${collision[1]} with selector ${collision[2]} \n `)
+         throw Error(`Collsion detected at facet ${collision[0]} and facet ${collision[1]} with selector ${collision[2]} \n `)
     }
 
 

@@ -73,21 +73,44 @@ function findAddressPositionInFacets (facetAddress, facets) {
   }
 }
 
-function selectorCollsion(facets) {
-  let seen = new Map();
+async function selectorCollision(facets) {
+  let seen = new Map(); // Maps selectors to the facet name where they were first seen
 
-  for (let facet of facets) {
-      let strings = facet.facetCut.functionSelectors;
-      for (let str of strings) {
-          if (seen.has(str)) {
-              return [seen.get(str), facet[2], str]; // Return the initial array, the collision array, and the colliding string
+  for (const facet of facets) {
+      const { name: facetName, facetCut: { functionSelectors } } = facet;
+
+      for (const selector of functionSelectors) {
+          if (seen.has(selector)) {
+              // Retrieve the original facet and function signatures for the colliding selector
+              const originalFacetName = seen.get(selector);
+              const originalSignature = await getFunctionSignature(originalFacetName, selector);
+              const collidingSignature = await getFunctionSignature(facetName, selector);
+
+              return [originalFacetName, facetName, selector, `Collision between ${originalSignature} and ${collidingSignature}`];
           }
-          seen.set(str, facet[2]);
+
+          seen.set(selector, facetName);
       }
   }
 
   return null; // No collisions found
 }
+
+async function getFunctionSignature(facetName, selector) {
+  // Retrieve the ABI of the facet
+  const facetABI = await ethers.getContractFactory(facetName);
+  const iface = facetABI.interface;
+
+  // Match the selector to the function signature
+  for (const [signature, sigSelector] of Object.entries(iface.functions)) {
+      if (iface.getSighash(signature) === selector) {
+          return signature;
+      }
+  }
+
+  return "Unknown function"; // In case the selector isn't found (shouldn't happen)
+}
+
 
 
 exports.getSelectors = getSelectors
@@ -96,4 +119,4 @@ exports.FacetCutAction = FacetCutAction
 exports.remove = remove
 exports.removeSelectors = removeSelectors
 exports.findAddressPositionInFacets = findAddressPositionInFacets
-exports.selectorCollsion = selectorCollsion
+exports.selectorCollision = selectorCollision

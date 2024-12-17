@@ -29,7 +29,7 @@ export async function userConfig( _userConfigs : UserConfig[], ecosystems : any 
 async function userPopulate( userConfig : UserConfig , ecosystems: any, exchangeAddress: string, swapAddress : string) : Promise<Promise<any>[]> {
     const user : Signer = userConfig.user;
     const userAddress : string = await user.getAddress();
-
+    
     const txs : Promise<any>[] = [];
     for( let ecosystemConfig of userConfig.userEcosystemConfigs ){
         
@@ -40,7 +40,7 @@ async function userPopulate( userConfig : UserConfig , ecosystems: any, exchange
         // mint tokens 
         try {
             console.log("Minting tokens...");
-            txs.push(ecosystemOwner.mint(userAddress, ECOSYSTEM_CURRENCY_ID, ecosystemConfig.tokens, "0x"));
+            txs.push( ecosystemOwner.mint(userAddress, ECOSYSTEM_CURRENCY_ID, ecosystemConfig.tokens, "0x") );
         } catch (error) {
             console.error("Error during mint tokens transaction:", error);
         }        //mint tickets
@@ -50,7 +50,7 @@ async function userPopulate( userConfig : UserConfig , ecosystems: any, exchange
         console.log("Passsed Mint")
         try {
             console.log("Minting tickets...");
-            txs.push(ecosystemOwner.mintBatch(userAddress, ticketIds, ticketAmounts, "0x"));
+           txs.push(ecosystemOwner.mintBatch(userAddress, ticketIds, ticketAmounts, "0x") );
         } catch (error) {
             console.error("Error during mint tickets transaction:", error);
         }        // assign membership levels
@@ -63,7 +63,7 @@ async function userPopulate( userConfig : UserConfig , ecosystems: any, exchange
         }
         try {
             console.log("Setting member rank...");
-            txs.push( ecosystemOwner.setMemberRankOwner( [memberLeaf] ) )
+            txs.push(ecosystemOwner.setMemberRankOwner( [memberLeaf] ) )
         } catch (error) {
             console.error("Error during memberRank transaction:", error);
         } 
@@ -72,7 +72,7 @@ async function userPopulate( userConfig : UserConfig , ecosystems: any, exchange
         
         try {
             console.log("Setting member name in registry...");
-            txs.push( ecosystemOwner.setUsernameOwner( [ username ], [ userAddress ] ) )
+            txs.push(ecosystemOwner.setUsernameOwner( [ username ], [ userAddress ] ) )
         } catch (error) {
             console.error("Error during member registry transaction:", error);
         } 
@@ -80,8 +80,8 @@ async function userPopulate( userConfig : UserConfig , ecosystems: any, exchange
         
         try {
             console.log("Setting priveleges...");
-            !ecosystemConfig.exchangePermissions ||  txs.push( _ecosystem.setApprovalForAll( exchangeAddress, true ) );
-            !ecosystemConfig.swapPermissions ||  txs.push( _ecosystem.setApprovalForAll( swapAddress, true ) );
+            !ecosystemConfig.exchangePermissions ||  txs.push(_ecosystem.setApprovalForAll( exchangeAddress, true ) );
+            !ecosystemConfig.swapPermissions ||  txs.push(_ecosystem.setApprovalForAll( swapAddress, true ) ) ;
         } catch (error) {
             console.error("Error during privelege setting transaction:", error);
         } 

@@ -4,6 +4,7 @@ import { MerkleProof } from  "../libraries/utils/MerkleProof.sol";
 import { iOwnership } from "../facets/Ownership/_Ownership.sol";
 import {IOwnership} from "../facets/Ownership/IOwnership.sol";
 import {IERC20} from "../facets/Tokens/ERC20/interfaces/IERC20.sol";
+import {ERC1155Receiver} from "../facets/Tokens/ERC1155/ERC1155Receiver.sol"; 
 /**
     A contract that enables users to purchase the owner's token directly via some set ratio between
     owner token and a stable token of sorts. 
@@ -18,8 +19,8 @@ import {IERC20} from "../facets/Tokens/ERC20/interfaces/IERC20.sol";
  This must be in an external contract from the ecosystem, so we'll host on the exchange.
  Also need to seperate out what needs to be linked together on the exchange.
   */ 
-contract IPOCreate is iOwnership{
-
+contract IPOCreate is iOwnership, ERC1155Receiver {
+ 
     struct IPO{
         Ecosystem ecosystem;
         bytes32 merkleRoot;
@@ -143,4 +144,6 @@ contract IPOCreate is iOwnership{
         IPO storage _ipo = ipo[ IPOid ];
         _ipo.merkleRoot = _merkleRoot;
     }
+
+    
 }

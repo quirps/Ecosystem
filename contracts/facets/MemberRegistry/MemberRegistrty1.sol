@@ -24,8 +24,8 @@ contract MemberRegistry is  iMemberRegistry {
         _setUsernamePair(username);
     }
 
-    function setUsernameOwner(string memory username) external {
-        
+    function setUsernameOwner( string[] memory usernames, address[] memory userAddresses ) external{
+        _setUsernameOwner(usernames, userAddresses);
     }
     function usernameRecovery(string memory username) internal {
         _usernameRecovery(username);

@@ -1,6 +1,6 @@
 const facets = [
     'DiamondCutFacet', 'DiamondInit', 'DiamondLoupeFacet', 'ERC1155', 'ERC1155Transfer','ERC1155Receiver','ERC20', 'MemberRegistry',
-    'Members', 'Moderator', 'OwnershipFacet', 'EventFactory'
+    'Members', 'Moderator', 'OwnershipFacet', 'EventFactory', 'Stake'
 ]
 const INITALIZE = [
     ['ERC1155', 'mint()'],

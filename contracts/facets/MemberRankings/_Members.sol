@@ -18,11 +18,12 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers, iOwnership {
     using Incrementer for bytes28;
     using Incrementer for bytes8;
  
-    address public  bountyAddress;
-    uint256 public constant currencyId = 0;
-    uint256 public  maxBalance;
-    uint256 public  upRate;
-    uint256 public  downRate;
+    //NEEDS TO BE FIXED TO DIAMOND
+    address  bountyAddress;
+    uint256 constant CURRENCY_ID = 0;
+    uint256 maxBalance;
+    uint256   upRate;
+    uint256   downRate;
     struct Bounty {
         uint256 currencyId;
         uint256 maxBalance;
@@ -34,7 +35,7 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers, iOwnership {
         Positive,
         Negative
     }
-
+ 
     event BountyEvent(address receiver, uint256 bountyUp, uint256 bountyUpRate, uint256 bountiesDown, uint256 bountyDownRate);
     event BountyBalanceChange(uint256 amount, BountyAccountChange direction);
 
@@ -47,7 +48,7 @@ contract iMembers is iERC1155Transfer, ModeratorModifiers, iOwnership {
     }
 
     function _getBounty() internal view returns (Bounty memory bounty_) {
-        bounty_ = Bounty(currencyId, maxBalance, bountyAddress, upRate, downRate);
+        bounty_ = Bounty(CURRENCY_ID, maxBalance, bountyAddress, upRate, downRate);
     }
 
     //

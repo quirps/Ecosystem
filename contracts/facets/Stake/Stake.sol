@@ -24,38 +24,53 @@ contract Stake is iERC1155Transfer, iOwnership, iMembers{
     address constant STAKE_FUNDING_ADDRESS = 0x2D08BDf3c61834F76Decaf6E85ffAecFeF02E605; //address(this), massDX, and whoever else the owner decides has permissions
     address constant STAKE_DEPOSIT_ADDRESS = 0x2D08BDf3c61834F76Decaf6E85ffAecFeF02E605; //address(this), massDX, and whoever else the owner decides has permissions
 
+    uint24 constant GAS_STAKE_FEE_SCALE = 1000000;
+    uint24 constant GAS_STAKE_FEE = 16000000;
+
     struct StakePosition{
-        address staker; // address that eventually gets the money, either directly or through another app
         address holder; // if non-zero, implies an app is implicitly staking for a user and holds their currency in turn
         StakeTier tier;
-        uint256 amount;
         uint32 startTime;
+        bool isVirtual;
+        uint256 amount;
     }
     //address, then stakeId
     mapping( address => mapping(uint256 => StakePosition) ) stakePosition;
     mapping( StakeTier => RewardRate) rewardRate;
+    mapping( address => bool) approvedContracts;
     event StakeRewardAccountFunded(address funder, uint256 amount);
     event RewardsRetrieved(address user, uint256 amount, uint256 reward, uint256 stakeId);
     event RewardRatesChanged(RewardRate[] _rewardRates);
     
     function stakeContract(address staker, uint256 amount, StakeTier tier, uint256 stakeId) public{
+        //require approved contract
         //transfer funds from staker to stake deposit
         _safeTransferFrom(staker, STAKE_DEPOSIT_ADDRESS, LibERC20.PRIMARY_CURRENCY_ID, amount, "");
 
         //stake
         StakePosition storage _stakePosition = stakePosition[ msgSender() ][ stakeId ];
-        require(_stakePosition.staker == address(0),"StakeId already exists, please create a unique stakeId");
-        stakePosition[ msgSender() ][ stakeId ] = StakePosition(staker, msgSender(), tier, amount, uint32(block.timestamp) );
-    }
-    //Can stake a user other than msgSender()
-    function stake(uint256 amount, StakeTier tier, uint256 stakeId) public{
-        _safeTransferFrom(msgSender(), STAKE_DEPOSIT_ADDRESS, LibERC20.PRIMARY_CURRENCY_ID, amount, "");
+        require(_stakePosition.startTime == 0 ,"StakeId already exists, please create a unique stakeId");
 
+        stakePosition[ staker ][ stakeId ] = StakePosition( msgSender(), tier, uint32(block.timestamp), false, amount );
+    }
+
+    function stake(uint256 amount, StakeTier tier, uint256 stakeId) public{
+        stakeContract(msgSender(), amount, tier, stakeId); 
+    }
+
+    /**
+     * Swap orders having this ecosystem token as their output can stake the expected 
+     * outputted tokens and retrieve rewards IF their order is fulfilled. 
+     */
+    function stakeVirtual(address staker, uint256 amount, StakeTier tier, uint256 stakeId) external {
         //stake
         StakePosition storage _stakePosition = stakePosition[ msgSender() ][ stakeId ];
-        require(_stakePosition.staker == address(0),"StakeId already exists, please create a unique stakeId");
-        stakePosition[ msgSender() ][ stakeId ] = StakePosition(msgSender(), msgSender(), tier, amount, uint32(block.timestamp) );
+        require(_stakePosition.startTime == 0 ,"StakeId already exists, please create a unique stakeId");
+
+        stakePosition[ staker ][ stakeId ] = StakePosition( msgSender(), tier, uint32(block.timestamp), true, amount );
+
     }
+
     //batch staking is immune to same block/transaction limitation for a given user
     function batchStake( address[] memory user, uint256[] memory amount, StakeTier[] memory tier, uint256[] memory stakeIds) external{
         for( uint256 stakeIndex; stakeIndex < user.length - 1; stakeIndex++){
@@ -73,28 +88,60 @@ contract Stake is iERC1155Transfer, iOwnership, iMembers{
         emit RewardRatesChanged(_rewardRate);
     }
 
-    function unstake( uint256 amount, uint256 stakeId) external {
-        
-        StakePosition storage _stakePosition = stakePosition[ msgSender() ][ stakeId ];
-        address _staker = _stakePosition.staker;
-        uint256 newAmount = _stakePosition.amount - amount;
+    function unstakeContract( address staker, uint256 amount, uint256 stakeId) public returns (uint256) {
+        StakePosition storage _stakePosition = stakePosition[ staker ][ stakeId ];
+        address _holder = _stakePosition.holder;
+
         
         uint32 elapsedTime = uint32( block.timestamp ) - _stakePosition.startTime;
         require(elapsedTime >= stakeTierDurations(_stakePosition.tier),"Can't unstake rewards until the mininmum duration has passed.");
+        
         //update stake amount
-        _stakePosition.amount = newAmount;
+        _stakePosition.amount -= amount;
       
 
         //calculate rewards
         uint256 reward = calculateReward(amount, _stakePosition.tier, _stakePosition.startTime);
         uint256 totalTransferAmount = reward + amount;
         //send reward to user from STAKE_ACCOUNT
-        _safeTransferFrom( STAKE_FUNDING_ADDRESS, _staker, LibERC20.PRIMARY_CURRENCY_ID, reward, ""); 
-        _safeTransferFrom( STAKE_DEPOSIT_ADDRESS, _staker, LibERC20.PRIMARY_CURRENCY_ID, amount, "");
+        _safeTransferFrom( STAKE_FUNDING_ADDRESS, staker, LibERC20.PRIMARY_CURRENCY_ID, reward, ""); 
+        //send amount to holding contract
+        _safeTransferFrom( STAKE_DEPOSIT_ADDRESS, _holder, LibERC20.PRIMARY_CURRENCY_ID, amount, ""); 
 
-        emit RewardsRetrieved(_staker, amount, reward, stakeId);
+        emit RewardsRetrieved( staker, amount, reward, stakeId);
+        
+        return totalTransferAmount;
+    }
+    
+    function unstake( uint256 amount, uint256 stakeId) external {
+        unstakeContract( msgSender(), amount, stakeId);
     }
 
+    /**
+     * @notice Trusted contracts can stake users placing swap orders into this
+     * ecosystem's token.
+     * @param staker reward transfer address
+     * @param amount amount to be virtually unstaked
+     * @param stakeId unique staking id
+     */
+    function unstakeVirtual( address staker, uint256 amount, uint256 stakeId) external {
+        //require trusted contract
+
+        StakePosition storage _stakePosition = stakePosition[ staker ][ stakeId ];
+
+        _stakePosition.amount -= amount; 
+        
+        uint32 elapsedTime = uint32( block.timestamp ) - _stakePosition.startTime;
+        require(elapsedTime >= stakeTierDurations(_stakePosition.tier),"Can't unstake rewards until the mininmum duration has passed.");
+      
+        //calculate rewards
+        uint256 reward = calculateReward(amount, _stakePosition.tier, _stakePosition.startTime);
+
+        //send reward to user from STAKE_ACCOUNT
+        _safeTransferFrom( STAKE_FUNDING_ADDRESS, staker, LibERC20.PRIMARY_CURRENCY_ID, reward, ""); 
+
+        emit RewardsRetrieved( staker, amount, reward, stakeId);
+    }
     /**
         Retrieves current reward amount from a given stake position. 
         To retrieve the reward, you must unstake after the minimum stake duration. 
@@ -187,4 +234,21 @@ contract Stake is iERC1155Transfer, iOwnership, iMembers{
         _safeTransferFrom(msgSender(), STAKE_FUNDING_ADDRESS, LibERC20.PRIMARY_CURRENCY_ID, amount, "" );
         emit StakeRewardAccountFunded(msgSender(),amount);
     }
+
+    /**
+     * Multiply the target eth by feeScale_. 
+     * 
+     */
+    function getGasStakeFee() external view returns( uint24 feeScale_, uint24 fee_){
+        fee_ = GAS_STAKE_FEE;
+        feeScale_ = GAS_STAKE_FEE_SCALE;
+    }
 }
+/**
+ * 
+ * Change two things.
+ * 1. Implicit staking via swaps is done virtually, meaning a swap order who's output swap is intended for a target ecosystem
+ *    will be staked there IF partial or more of the swap is fulfilled. 
+ * 2. Volume rewarded eth swapping to ecosystem token. Ecosystem can set a fee. 
+ *
+ */

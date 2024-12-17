@@ -6,7 +6,7 @@ import type { EcosystemConfig } from "../types/deploy/userConfig";
 
 const INITIAL_TOKEN_BALANCE : BigInt = BigInt( "10000000000000000000000000000" ) //10**30
 const MAX_TICKET_RANGE : string = '100'
-const NUM_USERS : number = 20;
+export const NUM_USERS : number = 20;
 const tickets = (INITIAL_TOKEN_BALANCE: BigInt): TicketBalance[] => 
     Array.from({ length: parseInt(MAX_TICKET_RANGE) }, (_, i) => ({
         id: BigInt( i + 1 ),

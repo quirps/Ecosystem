@@ -53,6 +53,7 @@ export interface StakeInterface extends utils.Interface {
     "stake(uint256,uint8,uint256)": FunctionFragment;
     "stakeContract(address,uint256,uint8,uint256)": FunctionFragment;
     "unstake(uint256,uint256)": FunctionFragment;
+    "unstakeContract(address,uint256,uint256)": FunctionFragment;
     "upRate()": FunctionFragment;
     "viewMinimumStakeDurationLeft(uint256)": FunctionFragment;
     "viewReward(uint256)": FunctionFragment;
@@ -70,6 +71,7 @@ export interface StakeInterface extends utils.Interface {
       | "stake"
       | "stakeContract"
       | "unstake"
+      | "unstakeContract"
       | "upRate"
       | "viewMinimumStakeDurationLeft"
       | "viewReward"
@@ -126,6 +128,14 @@ export interface StakeInterface extends utils.Interface {
     functionFragment: "unstake",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
+  encodeFunctionData(
+    functionFragment: "unstakeContract",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
   encodeFunctionData(functionFragment: "upRate", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "viewMinimumStakeDurationLeft",
@@ -158,6 +168,10 @@ export interface StakeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "unstake", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "unstakeContract",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "upRate", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "viewMinimumStakeDurationLeft",
@@ -392,6 +406,13 @@ export interface Stake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    unstakeContract(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     upRate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     viewMinimumStakeDurationLeft(
@@ -453,6 +474,13 @@ export interface Stake extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  unstakeContract(
+    staker: PromiseOrValue<string>,
+    amount: PromiseOrValue<BigNumberish>,
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   upRate(overrides?: CallOverrides): Promise<BigNumber>;
 
   viewMinimumStakeDurationLeft(
@@ -509,6 +537,13 @@ export interface Stake extends BaseContract {
     ): Promise<void>;
 
     unstake(
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    unstakeContract(
+      staker: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       stakeId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -688,6 +723,13 @@ export interface Stake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    unstakeContract(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     upRate(overrides?: CallOverrides): Promise<BigNumber>;
 
     viewMinimumStakeDurationLeft(
@@ -745,6 +787,13 @@ export interface Stake extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     unstake(
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    unstakeContract(
+      staker: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       stakeId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }

@@ -13,6 +13,9 @@ import { IDiamondLoupe } from "../facets/Diamond/IDiamondLoupe.sol";
 import { IDiamondCut } from "../facets/Diamond/IDiamondCut.sol";
 import { IERC173 } from "../IERC173.sol";
 import { IERC165 } from "../IERC165.sol";
+import { IStake } from "../facets/Stake/IStake.sol";
+import { IStake } from "../facets/Stake/IStake.sol";
+
 
 // It is expected that this contract is customized if you want to deploy your diamond
 // with data from a deployment script. Use the init function to initialize state variables
@@ -29,6 +32,7 @@ contract DiamondInit {
         ds.supportedInterfaces[type(IDiamondCut).interfaceId] = true;
         ds.supportedInterfaces[type(IDiamondLoupe).interfaceId] = true;
         ds.supportedInterfaces[type(IERC173).interfaceId] = true;
+        ds.supportedInterfaces[type(IStake).interfaceId] = true;
 
         // add your own state variables 
         // EIP-2535 specifies that the `diamondCut` function takes two optional 
