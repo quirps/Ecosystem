@@ -35,50 +35,46 @@ export async function relayDeploy() {
   console.log("Relay deployed to:", relay.address);
 
   // Encode the function call to SimpleTarget
-  const data = simpleTarget.interface.encodeFunctionData("storeData", [DUMMY_INPUT]);
+  //const data = simpleTarget.interface.encodeFunctionData("storeData", [DUMMY_INPUT]);
 
   // Estimate gas off-chain
-  const estimatedGas = await simpleTarget.estimateGas.storeData(DUMMY_INPUT);
+  // const estimatedGas = await simpleTarget.estimateGas.storeData(DUMMY_INPUT);
 
-  console.log("Estimated Gas (off-chain):", estimatedGas.toString());
+  // console.log("Estimated Gas (off-chain):", estimatedGas.toString());
 
-  // Relay the meta-transaction and capture the gas usage on-chain
-  const tx = await relay.relayMetaTransaction(simpleTarget.address, data);
-  const receipt = await tx.wait();
+  // // Relay the meta-transaction and capture the gas usage on-chain
+  // const tx = await relay.relayMetaTransaction(simpleTarget.address, data);
+  // const receipt = await tx.wait();
 
-  // Fetch gasUsed from the on-chain event
-  const event = receipt.events.find((e) => e.event === "MetaTransactionRelayed");
+  // // Fetch gasUsed from the on-chain event
+  // const event = receipt.events.find((e : any) => e.event === "MetaTransactionRelayed");
 
-  const initialGas = event.args.intialGas;
-  console.log(`Initial Gas ${initialGas}`)
-  const finalGas = event.args.finalGas;
-  console.log(`Final Gas ${finalGas}`)
-  const mainGas = initialGas - finalGas;
+  // const initialGas = event.args.intialGas;
+  // console.log(`Initial Gas ${initialGas}`)
+  // const finalGas = event.args.finalGas;
+  // console.log(`Final Gas ${finalGas}`)
+  // const mainGas = initialGas - finalGas;
 
-  console.log(`Main On-Chain Gas Used ${mainGas}`)
-  const preGas = estimatePreGas( data )
-  const postGas = estimatePostGas()
+  // console.log(`Main On-Chain Gas Used ${mainGas}`)
+  // const preGas = estimatePreGas( data )
+  // const postGas = estimatePostGas()
 
-  const gasUsedOnChain = BigInt(preGas) + BigInt(mainGas) + BigInt( postGas) + BigInt(UNKNOWN_LEFTOVER_GAS);
+  // const gasUsedOnChain = BigInt(preGas) + BigInt(mainGas) + BigInt( postGas) + BigInt(UNKNOWN_LEFTOVER_GAS);
 
-  console.log("Gas Used (on-chain):", gasUsedOnChain.toString());
+  // console.log("Gas Used (on-chain):", gasUsedOnChain.toString());
 
-  //Actual gas used 
-  console.log(`Actual gas used - ${receipt.cumulativeGasUsed.toString()}`)
+  // //Actual gas used 
+  // console.log(`Actual gas used - ${receipt.cumulativeGasUsed.toString()}`)
 
-  //Disagreement of on-chain gas calculation vs real value
-  console.log(`Real gas cosnumed vs On-chain estimate ${BigInt(receipt.cumulativeGasUsed) - gasUsedOnChain}`)
+  // //Disagreement of on-chain gas calculation vs real value
+  // console.log(`Real gas cosnumed vs On-chain estimate ${BigInt(receipt.cumulativeGasUsed) - gasUsedOnChain}`)
 
   return {target : simpleTarget, relay, trustedForwarder, paymaster}
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
 
-
-function estimatePreGas(calldata) {
+ 
+function estimatePreGas(calldata : any) {
   if (calldata.startsWith('0x')) {
     calldata = hexStringToByteArray(calldata)
   }
@@ -88,7 +84,7 @@ function estimatePreGas(calldata) {
 
   // Calldata gas cost (4 gas per zero byte, 16 gas per non-zero byte)
   const calldataGas = calldata
-    .reduce((acc, byte) => acc + (byte === 0 ? 4 : 16), 0);
+    .reduce((acc : any, byte : any) => acc + (byte === 0 ? 4 : 16), 0);
   console.log(`Calldata gas amount ${calldataGas}`)
   // Contract call overhead (700 gas)
   const contractCallOverhead = 700;
@@ -117,7 +113,7 @@ function estimatePostGas(eventDataLength = 32) {
   return eventGas + returnDataGas + storageUpdateOverhead;
 }
 
-function hexStringToByteArray(hexString) {
+function hexStringToByteArray(hexString : string) {
   // Remove the '0x' prefix if it exists
   if (hexString.startsWith('0x')) {
     hexString = hexString.slice(2);
@@ -127,7 +123,7 @@ function hexStringToByteArray(hexString) {
   const byteArray = [];
   for (let i = 0; i < hexString.length; i += 2) {
     const byte = parseInt(hexString.substr(i, 2), 16);
-    byteArray.push(byte);
+    byteArray.push( byte );
   }
 
   return byteArray;

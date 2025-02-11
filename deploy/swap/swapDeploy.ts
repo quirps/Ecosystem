@@ -219,8 +219,8 @@ function toUD60x18(value: any) {
 }
 
 
-export async function ethSwapTest (swapContract :any , token1 :string ) {
-
+export async function generateEthSwapPair (swapContract :any , token1 :string ) {
+  let swapInit, swapConsume;
   const ethAmount = BigInt( 1000 ) * BigInt( ethers.constants.WeiPerEther );
   const signers : Signer[] = await ethers.getSigners()
   const [ signer1, signer2 ] = signers.slice(8,10)
@@ -245,14 +245,14 @@ export async function ethSwapTest (swapContract :any , token1 :string ) {
     console.log(token1)
 
     console.log("Create swap order")
-    await _swapSigner1.swap(...ethSwapOrder, { value:ethAmount } );
+    swapInit = _swapSigner1.swap(...ethSwapOrder, { value:ethAmount } );
   
    
   
-    const _swapSigner2 = swapContract.connect ( signers[9] );
+    const _swapSigner2 = swapContract.connect ( signer2 );
     
     const ratio = calculateTargetRatio( BigInt( 1000 ) * BigInt( ethers.constants.WeiPerEther ), ethAmount )
-    const ethSwapOrder2 = [
+    const swapConsumeRaw = [
       {
         token: token1,
         isEther: false,
@@ -268,7 +268,7 @@ export async function ethSwapTest (swapContract :any , token1 :string ) {
       true,
     ];  
     console.log("Consume Swap Order")
-    await _swapSigner2.swap(...ethSwapOrder2 );
+    //swapConsume = _swapSigner2.swap(...ethSwapOrder2 );
     
-    
+    return {swapInit , swapConsumeRaw }
   }

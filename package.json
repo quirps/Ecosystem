@@ -49,8 +49,11 @@
     "typechain": "^8.3.2"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^4.9.2",
+    "bn.js": "^5.1.2",
     "hardhat-diamond-abi": "^3.0.1",
     "package.json": "^2.0.1",
-    "solc": "^0.8.9"
+    "solc": "^0.8.9",
+    "viem": "^2.21.56"
   }
 }

@@ -13,7 +13,6 @@ contract iSales is  iOwnership, iERC1155Transfer {
 
     function _createTieredSales(LibSales.Sale[] calldata salesData) internal {
         LibSales.SalesStorage storage ss = LibSales.salesStorage();
-
         for (uint256 i = 0; i < salesData.length; i++) {
             uint256 predecessorSaleId = (i == 0) ? 0 : ss.salesCounter;
             _createSale(ss.salesCounter + 1, salesData[i], predecessorSaleId);
@@ -42,7 +41,7 @@ contract iSales is  iOwnership, iERC1155Transfer {
         LibSales.setSaleStats(saleId, msg.sender, numBundles);
 
         emit ItemPurchased(saleId, msg.sender, numBundles);
-    }
+    } 
 
     function _createSale(uint256 saleId, LibSales.Sale memory saleData, uint256 predecessorSaleId) internal {
         require(saleData.itemIds.length == saleData.itemAmounts.length, "Mismatched item data");

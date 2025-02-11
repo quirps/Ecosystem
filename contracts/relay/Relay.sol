@@ -3,8 +3,9 @@
 pragma solidity ^0.8.0;
 
 import "./TrustedForwarder.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract Relay {
+contract Relay is ReentrancyGuard{
     TrustedForwarder public trustedForwarder;
 
     event MetaTransactionRelayed(
@@ -19,14 +20,12 @@ contract Relay {
         trustedForwarder = TrustedForwarder(_trustedForwarder);
     }
 
-    function relayMetaTransaction(address target, bytes calldata data) external {
+
+    function relayMetaTransaction(address target, bytes calldata paymasterData, bytes calldata data) nonReentrant() external {
         uint256 initialGas = gasleft();
 
-
-        //paymaster 
-        
         // Forward the transaction to the target contract
-         bool success = trustedForwarder.forward(target, data);
+         bool success = trustedForwarder.forward(target, paymasterData, data);
 
         uint256 executionGasUsed = initialGas - gasleft(); // Execution gas
 
@@ -34,6 +33,9 @@ contract Relay {
 
         // Measure final gas after transaction completion
         uint256 finalGas = gasleft();
+
+
+        //Now get refund. 
 
         // Emit event for off-chain comparison
         emit MetaTransactionRelayed(

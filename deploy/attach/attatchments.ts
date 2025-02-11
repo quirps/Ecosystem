@@ -4,14 +4,17 @@
  */
 const {ethers} = require('hardhat')
 const fs = require('fs')
-const DEPLOY_STATE_PATH = "./deployState.json"
+const path = require('path')
+const DEPLOY_STATE_NAME = "deployState.json"
+const DEPLOY_STATE_PATH = path.join (__dirname,  DEPLOY_STATE_NAME )
 
 export async function Ecosystems(){
     const contractName = "Ecosystem"
-    const addresses = fetchAddress( contractName )
+    const ecosystems : any = fetchAddress( contractName )
     const ecosystemsPromises = []
-    for( let address of addresses){
-        ecosystemsPromises.push( ethers.getContractAt("Ecosystem", address) )
+    let ecosystemKey : string;
+    for( let ecosystemKey  of Object.keys(ecosystems) ){
+        ecosystemsPromises.push( ethers.getContractAt("Ecosystem", ecosystems[ ecosystemKey ] ) )
     }
     return await Promise.all ( ecosystemsPromises ) ;
 }
@@ -72,6 +75,7 @@ function fetchAddress( contractName : string ) : string[] | string {
 
 export function saveDeployState( deployState : object){
     const stringifiedDeployState = JSON.stringify( deployState )
+    console.log(deployState)
     fs.writeFileSync(DEPLOY_STATE_PATH, stringifiedDeployState)
 
     console.log("Deploy state saved!")
@@ -79,7 +83,8 @@ export function saveDeployState( deployState : object){
 
 export function removeDeployState(){
      // Check if the file exists
-     if (fs.existsSync(DEPLOY_STATE_PATH)) {
+    console.log(DEPLOY_STATE_PATH)
+    if (fs.existsSync(DEPLOY_STATE_PATH)) {
         // If it exists, delete the file
         fs.unlinkSync(DEPLOY_STATE_PATH);
         console.log(`File at ${DEPLOY_STATE_PATH} has been deleted.`);

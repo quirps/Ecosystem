@@ -28,6 +28,7 @@ contract TrustedForwarder {
 
     address public relay;
     address public paymaster;
+    
 
     mapping(address => uint256) public nonces; // Nonces for replay protection
 
@@ -49,7 +50,7 @@ contract TrustedForwarder {
     /***
      * Minimal forwarder for testing purposes
      */
-    function forward( address target, bytes memory data) external returns( bool) {
+    function forward( address target, bytes memory paymasterData, bytes memory data) external returns( bool) {
          // Execute the meta-transaction on the target contract
         (bool callSuccess, ) = target.call(data);
         return callSuccess;

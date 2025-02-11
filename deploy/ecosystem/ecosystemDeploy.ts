@@ -50,7 +50,7 @@ export async function ecosystemDeploy( ecosystemConfigs : EcosystemConfig[])  {
 
 
     console.log("finished")
-    return ecosystems
+    return { ecosystems, registry }
 }
 
 // populate token/tickets , ids 0-100 uniformly set to POPULATION_AMOUNT

@@ -48,7 +48,7 @@ contract EcosystemRegistry is iOwnership {
 
     // Events
     event VersionUploaded(bytes32 versionNumber);
-    event EcosystemDeployed(address user, address ecosystem, bytes32 versionNumber);
+    event EcosystemDeployed(address user, address ecosystem, bytes32 versionNumber, string name);
     event VersionUpgraded(bytes32 newVersion, bytes32 oldVersion, address ecosystemOwner);
     //event OptimizedFacets(uint240 versionNumber, bytes30 optimizationId, uint256 optimizationIndex, bytes[] bytecode, bytes[] params);
 
@@ -106,9 +106,9 @@ contract EcosystemRegistry is iOwnership {
         // Step 4: Update the user's ecosystems
         Ecosystem memory newEcosystem = Ecosystem(name, ecosystemAddress_, versionNumber);
         userEcosystems[msg.sender].push(newEcosystem);
- 
+  
         // Emit Event
-        emit EcosystemDeployed(msg.sender, ecosystemAddress_, versionNumber);
+        emit EcosystemDeployed(msg.sender, ecosystemAddress_, versionNumber, name);
     }
 
     // function upgradeVersion(uint240 mainVersion, uint256 ecosystemIndex) external {

@@ -20,7 +20,7 @@ function generateMemberSignature(verifyingContract, chainId, signer, privateKey,
             // Add a verifying contract to make sure you're establishing contracts with the proper entity.
             verifyingContract: verifyingContract,
             // This identifies the latest version.
-            version: '1',
+               version: '1',
         },
     
         // This defines the message you're proposing the user to sign, is dapp-specific, and contains

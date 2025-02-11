@@ -2,7 +2,7 @@ pragma solidity ^0.8.9;
 
 import {LibERC1155TransferConstraints} from "../libraries/LibERC1155TransferConstraints.sol";
 
-contract iTransferSetConstraints {
+contract  iTransferSetConstraints {
     
     function setTransferLimit(uint256 ticketId, LibERC1155TransferConstraints.TransferLimit memory _tranfserLimit) internal {
 

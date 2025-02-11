@@ -1,8 +1,7 @@
 
 /* global ethers task */
-const fs = require('fs');
-const path = require('path');
-const { generateWallets } = require('./scripts/hardhatAccountGenerator.js')
+
+const { getWallets } = require('./scripts/hardhatAccountGenerator.js')
 const NUM_USERS  = 40;
 //require("hardhat-gas-reporter");
 require("@nomicfoundation/hardhat-toolbox");
@@ -55,17 +54,47 @@ module.exports = {
     currency: 'CHF',
     gasPrice: 21
   },
+  defaultNetwork: "localhost",
   networks: {
-    hardhat: {
-      accounts: generateWallets(NUM_USERS, WALLET_BASE_AMOUNT),
-      //blockGasLimit: 10000000
+      hardhat: {
+     accounts: getWallets('hardhat'),
+      //  blockGasLimit: 10000000,
+        gas: 900719925474099,  // 12 million
+        blockGasLimit : 900719925474099,
+      },
+    localhost: {
+      accounts: getWallets('localhost'),
+      // blockGasLimit: 10000000,
+      url: "http://127.0.0.1:8545",
       gas: 900719925474099,  // 12 million
       blockGasLimit : 900719925474099
     }
   }
 }
 
+task("fundwallet", "Send ETH to own test account")
+  .addParam("to", "Address you want to fund")
+  .addOptionalParam("amount", "Amount to send in ether, default 10")
+  .setAction(async (taskArgs, { network, ethers }) => {
 
+    let to = await ethers.utils.getAddress(taskArgs.to);
+    const amount = taskArgs.amount ? taskArgs.amount : "10";
+    const accounts = await ethers.provider.listAccounts();
+    const fromSigner = await ethers.provider.getSigner(accounts[0]);
+    const fromAddress = await fromSigner.getAddress();
+    console.log(`Signer Address - ${fromAddress}`)
+    const txRequest = {
+      from: fromAddress,
+      to,
+      value: ethers.utils.parseUnits(
+        amount,
+        "ether"
+      ).toHexString(),
+    };
+    const txResponse = await fromSigner.sendTransaction(txRequest);
+    await txResponse.wait();
+    console.log(`wallet ${to} funded with ${amount} ETH at transaction ${txResponse.hash}`);
+  });
 //Output AST
 
 // const execSync = require('child_process').execSync;

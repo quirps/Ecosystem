@@ -28,7 +28,9 @@ export async function userConfig( _userConfigs : UserConfig[], ecosystems : any 
  */
 async function userPopulate( userConfig : UserConfig , ecosystems: any, exchangeAddress: string, swapAddress : string) : Promise<Promise<any>[]> {
     const user : Signer = userConfig.user;
+    console.log(user)
     const userAddress : string = await user.getAddress();
+
     
     const txs : Promise<any>[] = [];
     for( let ecosystemConfig of userConfig.userEcosystemConfigs ){
