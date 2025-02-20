@@ -13,7 +13,7 @@ const MAX_TICKET_ID = 100;
 
 // Here we deploy the supporting infrastructure enabling ecosystem deployment
 // and then deploy and populate all ecosystems in the ecosystemConfig parameter
-export async function ecosystemDeploy( ecosystemConfigs : EcosystemConfig[])  {
+export async function ecosystemDeploy( ecosystemConfigs : Partial<EcosystemConfig>[])  {
     //deploy registry and diamondDeploy
     const {registry, diamondAddress} = await registryDeploy();
     const facets : { [ version : string ] : Facet[] }= {};
@@ -21,7 +21,7 @@ export async function ecosystemDeploy( ecosystemConfigs : EcosystemConfig[])  {
 
     for( let _ecosystemConfig of ecosystemConfigs){
         let ecosystem;
-        let _version = _ecosystemConfig.version
+        let _version = _ecosystemConfig.version!!
         //set the configured owner for this ecosystem 
         
         //only need to deploy facets once per version. 
@@ -35,16 +35,17 @@ export async function ecosystemDeploy( ecosystemConfigs : EcosystemConfig[])  {
             //upload version
             await registryUploadVersion( _facets , registry, _version );
         }      
-    
+        console.log(` Registry Address Sepolia - ${registry.address}`)
+        
         ecosystem = await deployEcosystems( _ecosystemConfig, registry, _ecosystemConfig.owner )
-    
+        console.log(`Ecosystem Address Sepolia ${ecosystem.address}`)
         ecosystem.owner = _ecosystemConfig.owner;
         
         
-        //populate ecosystem's tokens/tickets 
-        await mintUniformBatch( ecosystem, ecosystem.owner, MAX_TICKET_ID, MAX_TICKET_AMOUNT)
+        // //populate ecosystem's tokens/tickets 
+        // await mintUniformBatch( ecosystem, ecosystem.owner, MAX_TICKET_ID, MAX_TICKET_AMOUNT)
  
-        ecosystems[ _ecosystemConfig.name ] = ecosystem;
+        // ecosystems[ _ecosystemConfig.name!! ] = ecosystem;
     }
 
 

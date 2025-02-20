@@ -5,7 +5,7 @@
 import { Contract, Signer, utils } from "ethers";
 import type { Provider } from "@ethersproject/providers";
 import type { Ecosystem, EcosystemInterface } from "../Ecosystem";
-
+export type { Ecosytem };
 const _abi = [
   {
     inputs: [

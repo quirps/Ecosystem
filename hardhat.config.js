@@ -5,7 +5,7 @@ const { getWallets } = require('./scripts/hardhatAccountGenerator.js')
 const NUM_USERS  = 40;
 //require("hardhat-gas-reporter");
 require("@nomicfoundation/hardhat-toolbox");
-// require("hardhat-diamond-abi");
+require("hardhat-diamond-abi");
 // require("./diamondABItest");
 
 
@@ -21,22 +21,26 @@ WALLET_BASE_AMOUNT = "10000000000000000000000000000" // 10**30
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
+  typechain: {
+    outDir: "typechain-types",
+    target: "ethers-v5",
+  },
   sources: ["./contracts", "./node_modules/registry/contracts"],
   solidity: '0.8.9',
-  // diamondAbi: {
-  //   // (required) The name of your Diamond ABI
-  //   name: "Ecosystem",
-  //   filter: function (abiElement, index, fullAbi, fullyQualifiedName) {
-  //    let startIndex = fullyQualifiedName.indexOf(':') 
-  //    let currentContract = fullyQualifiedName.substr(startIndex + 1)
-  //    if ( FACETS.includes(currentContract) && fullyQualifiedName.includes('contracts/facets') ){
-  //    }
-  //     // 'contracts/facets/DiamondLoupeFacet.sol:DiamondLoupeFacet'
-  //     // console.log(abiElement.name)
-  //     return FACETS.includes(currentContract) && fullyQualifiedName.includes('contracts/facets');
-  //   },
-  //   strict: false
-  // },
+  diamondAbi: {
+    // (required) The name of your Diamond ABI
+    name: "Ecosystem",
+    filter: function (abiElement, index, fullAbi, fullyQualifiedName) {
+     let startIndex = fullyQualifiedName.indexOf(':') 
+     let currentContract = fullyQualifiedName.substr(startIndex + 1)
+     if ( FACETS.includes(currentContract) && fullyQualifiedName.includes('contracts/facets') ){
+     }
+      // 'contracts/facets/DiamondLoupeFacet.sol:DiamondLoupeFacet'
+      // console.log(abiElement.name)
+      return FACETS.includes(currentContract) && fullyQualifiedName.includes('contracts/facets');
+    },
+    strict: false
+  },
   settings: {
     outputSelection: {
       "*": {
@@ -54,13 +58,17 @@ module.exports = {
     currency: 'CHF',
     gasPrice: 21
   },
-  defaultNetwork: "localhost",
+  defaultNetwork: "sepolia",
   networks: {
       hardhat: {
      accounts: getWallets('hardhat'),
       //  blockGasLimit: 10000000,
         gas: 900719925474099,  // 12 million
         blockGasLimit : 900719925474099,
+      },
+      sepolia: {
+        url: "https://rpc-sepolia.rockx.com",
+        accounts : ["401e06b76938af3a12335038ebc70fd6547a885fe19bceb4ae60d96bd69e9595"]
       },
     localhost: {
       accounts: getWallets('localhost'),

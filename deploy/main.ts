@@ -23,10 +23,10 @@ import type { EcosystemConfig } from "../types/deploy/userConfig";
 const {ethers} = require('hardhat')
 
 async function main() { 
-  console.log("Before")
-  await hre.run("fundwallet", {"to" : "0xa4fbDF500D758aDa4Ca6F9a01FA5b3Dc6566800F",
-                               "amount" : "1000"} )
-  console.log("After")
+  // console.log("Before")
+  // await hre.run("fundwallet", {"to" : "0xa4fbDF500D758aDa4Ca6F9a01FA5b3Dc6566800F",
+  //                              "amount" : "1000"} )
+  // console.log("After")
 
   //remove previous deploy state 
   removeDeployState();

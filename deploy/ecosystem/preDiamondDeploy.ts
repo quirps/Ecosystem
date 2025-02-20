@@ -132,7 +132,7 @@ export async function registryDeploy( ) {
  * @returns A deployed ecosystem contract instance with a cumullative ABI of all the facets.
  */
 export async function deployEcosystems(
-    ecosystemConfig : EcosystemConfig,
+    ecosystemConfig : Partial<EcosystemConfig>,
     registry : EcosystemRegistry,
     owner : Signer
 ): Promise<Ecosystem> {
@@ -147,10 +147,11 @@ export async function deployEcosystems(
     //connect owner for deploy of ecosystem
     const registryWithSigner = registry.connect(owner);
 
-    diamondAddress  = await registryWithSigner.callStatic.deployVersion(versionBytes, name, salt, diamondBytecode);
+    diamondAddress  = await registryWithSigner.callStatic.deployVersion(versionBytes, name!!, salt, diamondBytecode);
     console.log(diamondAddress)
-    await registryWithSigner.deployVersion(versionBytes, name, salt, diamondBytecode, {gasLimit: 10000000});
-
+    const tx = await registryWithSigner.deployVersion(versionBytes, name!!, salt, diamondBytecode, {gasLimit: 10000000});
+    await tx.wait();
+    
     ecosystem = await ethers.getContractAt('Ecosystem', diamondAddress);
 
     return ecosystem;

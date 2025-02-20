@@ -14,10 +14,12 @@ contract ERC20 is  iOwnership, iERC1155Transfer {
     function setName(string memory _name)  public {
         isEcosystemOwnerVerification(); 
         LibERC20._setName(_name);
+        //add event
     }
     function setSymbol(string memory _symbol) public{
         isEcosystemOwnerVerification();
         LibERC20._setSymbol(_symbol);
+        // add event
     }
 
 
