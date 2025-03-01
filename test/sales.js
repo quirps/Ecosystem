@@ -66,7 +66,7 @@ describe("Sales Contract", function () {
         itemAmounts: [1],
         paymentTokenAddress: erc20.address,
       }]);
-      await salesContract.connect(owner).memberRank(addr1.address, 1);
+      await salesContract.connect( owner ).memberRank(addr1.address, 1);
     });
   
     describe("buyItems", function () {

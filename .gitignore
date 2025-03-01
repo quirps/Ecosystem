@@ -5,3 +5,11 @@ cache
 artifacts
 .env
 tags*
+diamondABitTest.js
+deployState.json
+constants.ts 
+.prettierrc
+.prettierignore
+.mocharc.json
+optimizations
+contractsignore

@@ -3,12 +3,13 @@ pragma solidity ^0.8.9;
 import "./LibTimeManagement.sol";
 import "./LibUnderflow.sol";
 
-import {iOwnership} from "../facets/Ownership/_Ownership.sol";
+import { iOwnership } from "../facets/Ownership/_Ownership.sol";
 
 import "./CleanupUser.sol";
 import "./ERC1155Rewards.sol";
-import {IERC1155} from "../facets/Tokens/ERC1155/interfaces/IERC1155.sol";
-import {IERC1155Transfer} from "../facets/Tokens/ERC1155/interfaces/IERC1155Transfer.sol";
+import { IERC20 } from "../facets/Tokens/ERC20/interfaces/IERC20.sol";
+import { IERC1155 } from "../facets/Tokens/ERC1155/interfaces/IERC1155.sol";
+import { IERC1155Transfer } from "../facets/Tokens/ERC1155/interfaces/IERC1155Transfer.sol";
 import "hardhat/console.sol";
 
 contract ExchangeRewardPool is  iOwnership, CleanupUser{
@@ -105,33 +106,39 @@ contract ExchangeRewardPool is  iOwnership, CleanupUser{
     }
    
 
-    // function editDeltaSum(uint32 timeSlot, uint32 numTimeSlots, uint256 poolTokenAmount) internal{
-    //     deltaSum[timeSlot] += poolTokenAmount;
-    //     uint32 endTimeSlot = timeSlot + numTimeSlots * TIME_INTERVAL;
-    //     deltaSum[endTimeSlot] -= poolTokenAmount;
-    // }
+  /**
+   * Sends user their earned rewards.
+   * @param _stakeId stake identifier 
+   */
     function collectReward(uint256 _stakeId) external{
         uint256 _stakerEarnings;
         TimePool storage _stake = timePoolStakes[_stakeId];
         LibTimeManagement.StakeDayInterval _stakeInterval = _stake.stakeInterval;
         address _tokenAddress = _stake.tokenAddress;
-        uint32 _startTimeSlot = _stake.startTimeSlot;
+        uint32 _stakeStartSlot = _stake.startTimeSlot;
+        uint256 _stakeAmount = _stake.amount;
+        address _stakerAddress = _stake.staker;
         
-        uint32 _endTimeSlot = _startTimeSlot + LibTimeManagement.getDayIntervalSeconds(_stakeInterval);
+        uint32 _stakeEndSlot = _stakeStartSlot + LibTimeManagement.getDayIntervalSeconds(_stakeInterval);
 
         require(_stake.status == StakeStatus.Staking, "Musn't have collected rewards yet");
         require(msgSender() == _stake.staker, "Must be the original staker");
         
-        require(_endTimeSlot + LibTimeManagement.getDayIntervalSeconds(LibTimeManagement.StakeDayInterval.One) < uint32(block.timestamp),"Stake period is still ongoing");
+        //add a day due to endSlot being the last day of the interval, yet the slot after would be the when the
+        //interval actually ends
+        require(_stakeEndSlot  + LibTimeManagement.getDayIntervalSeconds( LibTimeManagement.StakeDayInterval.One ) < uint32(block.timestamp),"Stake period is still ongoing");
 
-        RewardsManage storage _timeSlotRewards = timeSlotRewards[ _tokenAddress ][ _startTimeSlot ]; 
+        RewardsManage storage _timeSlotRewards = timeSlotRewards[ _tokenAddress ][ _stakeStartSlot ]; 
         
-       
-       
-        //
-        //transfer 
+        uint256 _reward = calculateReward( _tokenAddress, _stakeInterval, _stakeStartSlot, _stakeAmount);
+
+        _stake.status = StakeStatus.Collected; 
+        //transfer rewards
+        IERC20(_tokenAddress).transferFrom( address(this), _stakerAddress, _reward); 
+        
+        //transfer reward token? should be burned during stake so likely remove this transfer
         IERC1155Transfer(exchangeRewardERC1155).safeTransferFrom(address(this), msgSender(), uint256(uint160(_tokenAddress)), _stakerEarnings, "");
-        _stake.status = StakeStatus.Collected;
+        
         emit StakerRewardsCollected(msgSender(), _stakerEarnings);
     }
 
@@ -145,54 +152,50 @@ contract ExchangeRewardPool is  iOwnership, CleanupUser{
     }
     //_startTimeSlot MUST have reward
     function collectRewardCleanupUser(address _tokenAddress, uint32 _startTimeSlot) public {
-        // RewardsManage storage _timeSlotRewards = timeSlotRewards[ _tokenAddress ][ _startTimeSlot ];
-        // (uint32 _bitFlagTimeSlot, uint8 _timeSlotPosition) = _startTimeSlot.bitFlagRemainder( _minimumIntervalSeconds);
-        // bytes32 _bitMap = timeSlotActivationBitMap[_tokenAddress][ _bitFlagTimeSlot ];
-        
-
-        //get earnings for time slot
-        //get previous earnings for reference
-        //calculate fee
+        // TODO
     }
     
+    /**
+     * We need to check first if the 
+     * @param _tokenAddress 
+     * @param _stakeInterval 
+     * @param _stakeStartTimeSlot 
+     * @param _stakeAmount 
+     */
     function calculateReward(address _tokenAddress, LibTimeManagement.StakeDayInterval _stakeInterval, uint32 _stakeStartTimeSlot, uint256 _stakeAmount) public view  returns (uint256 reward_){
-       
-        (bool _zeroReward, uint32[2] memory _rewardTimeSlots) =  getRewardTimeSlots(_tokenAddress, _stakeInterval, _stakeStartTimeSlot);
+        //retrieve starting timeslots of bitmaps that instersect stake interval time slots (max stake interval is smaller than 256 days, but can exist at a boundary)
+        (bool _zeroReward, uint32 firstActivatedTimeSlot, uint32 lastActivatedTimeSlot) =  getRewardTimeSlots(_tokenAddress, _stakeInterval, _stakeStartTimeSlot);
         console.log("bool value is %s",_zeroReward); 
         if(  _zeroReward){
             return 0;
         }
         
-        (uint256 _beginningRewards, uint256 _finalRewards) = getEarningSumRatios(_tokenAddress, _rewardTimeSlots);
+        (uint256 _beginningRewards, uint256 _finalRewards) = getEarningSumRatios(_tokenAddress, firstActivatedTimeSlot, lastActivatedTimeSlot);
         console.log("final rewards arae %s",_finalRewards);  
 
         reward_ = ( (_finalRewards - _beginningRewards) * _stakeAmount ) / PRECISION_RETAINER;
         
     }
-    function getEarningSumRatios(address _tokenAddress, uint32[2] memory _rewardTimeSlots) internal view returns( uint256 beginningReward_,uint256 finalReward_){
-        beginningReward_ = timeSlotRewards[_tokenAddress][_rewardTimeSlots[0]].totalEarningsPerSum;
-        finalReward_ = timeSlotRewards[_tokenAddress][_rewardTimeSlots[1]].totalEarningsPerSum;
+    function getEarningSumRatios(address _tokenAddress,  uint32 _firstActivatedTimeSlot, uint32 _lastActivatedTimeSlot) internal view returns( uint256 beginningReward_,uint256 finalReward_){
+        beginningReward_ = timeSlotRewards[_tokenAddress][_firstActivatedTimeSlot].totalEarningsPerSum;
+        finalReward_ = timeSlotRewards[_tokenAddress][_lastActivatedTimeSlot].totalEarningsPerSum;
 
     }
     /**
      * @dev ( start -1 ) and end of interval time slots may not have transactions on them hence we need to check the 
      *      last activated timeslots to get reward information. 
      */
-    function getRewardTimeSlots(address _tokenAddress, LibTimeManagement.StakeDayInterval _stakeInterval, uint32 _stakeStartTimeSlot) internal view returns (bool isZeroReward_, uint32[2] memory rewardTimeSlots_){
-        uint32 _finalRewardTimeSlot;
-        uint32 _startRewardTimeSlot;
-
-        _finalRewardTimeSlot =  getFinalActivatedTimeSlot(_tokenAddress, _stakeInterval, _stakeStartTimeSlot );
-        console.log("this is the final reward slot %s",_finalRewardTimeSlot);
-        if( _finalRewardTimeSlot == 0){
-            return (true,[uint32(0),0]);
+    function getRewardTimeSlots(address _tokenAddress, LibTimeManagement.StakeDayInterval _stakeInterval, uint32 _stakeStartTimeSlot) internal view returns (bool isZeroReward_, uint32 firstActivatedTimeSlot_, uint32 finalActivatedTimeSlot_){
+        finalActivatedTimeSlot_ =  getFinalActivatedTimeSlot(_tokenAddress, _stakeInterval, _stakeStartTimeSlot );
+        console.log("this is the final reward slot %s",finalActivatedTimeSlot_);
+        if( finalActivatedTimeSlot_ == 0){
+            return (true, uint32(0), uint32(0) );
         }
         //can have non-zero reward only in very small purchase, just calculate anyway
-        _startRewardTimeSlot = getStartActivatedTimeSlot(_tokenAddress, _stakeStartTimeSlot);
-        console.log(_startRewardTimeSlot);
+        firstActivatedTimeSlot_ = getStartActivatedTimeSlot(_tokenAddress, _stakeStartTimeSlot);
+        console.log(firstActivatedTimeSlot_);
 
-        return(false, [_startRewardTimeSlot,_finalRewardTimeSlot]);
-
+        return (false, firstActivatedTimeSlot_, finalActivatedTimeSlot_);
     }
     /**
      * @param _intervalSize This corresponds to the stake interval size with respect to the denominational interval size 
@@ -210,6 +213,8 @@ contract ExchangeRewardPool is  iOwnership, CleanupUser{
         console.log("start slot is %s",_stakeStartTimeSlot);
         //right now this will work but _intervalDenominationalSize needs to be shortened after recursion by amount of underflow
         //also names need to be changed to make sense after recursion
+
+
         _finalSlot = _stakeStartTimeSlot.getFinalTimeSlot(_stakeInterval);
         console.log("final slot is %s",_finalSlot);
         (_bitMapStartSlot, _finalSlotPosition) = _finalSlot.bitFlagRemainder(LibTimeManagement.StakeDayInterval.One);
@@ -235,6 +240,7 @@ contract ExchangeRewardPool is  iOwnership, CleanupUser{
         }
 
         require(_isUnderflow,"Must be underflowed to reach this point - Critical Error");
+
         //assert underflow
         //If we're here it means one more we underflowed and must check bitmap before the previous
         uint8 _previousFinalPosition = type(uint8).max;
@@ -296,35 +302,38 @@ contract ExchangeRewardPool is  iOwnership, CleanupUser{
      * @dev Responsible for updating time pool rewards related data, including:
      *  bitmap - flags which timeslots contained a transaction 
      *  totalTimeSlotSum - caches the total staked sum in one storage slot
-     *  rollingEarningsRatio - updates the rolling earnings sum ratio in the current 
+     *  rollingEarningsRatio -  updates the rolling earnings sum ratio in the current 
      * time slot and the global variable   
      * @param _tokenAddress token used to purchase ticket
      * @param _timePoolFee the amount of fee added to current time slots earnings  
      */
     function updateRewardsData(address _tokenAddress, uint256 _timePoolFee) internal {
         //updates sum if flag not set, maybe no flag since always non-zero 
+
+        //get current timeslot and it's corresponding rewards
         uint32 _intervalSeconds = LibTimeManagement.getDayIntervalSeconds(LibTimeManagement.StakeDayInterval.One);
-        uint32 _timeSlot = uint32( block.timestamp ) .getCurrentIntervalStartTimeSlot(_intervalSeconds);
-        console.log("timeslot is %s", _timeSlot);
-        RewardsManage storage _timeSlotRewards = timeSlotRewards[_tokenAddress][_timeSlot];
-
-
-        //new sum
+        uint32 _currentTimeSlot = uint32( block.timestamp ) .getCurrentIntervalStartTimeSlot(_intervalSeconds);
+        console.log("timeslot is %s", _currentTimeSlot);
+        RewardsManage storage _timeSlotRewards = timeSlotRewards[ _tokenAddress ][ _currentTimeSlot ];
+        
+        //current total sum for current slot
         uint256 _totalSlotSum = _timeSlotRewards.totalSlotSum;
+
         //if true, implies first transaction in timeslot 
-        //must update sum and the bitmap stating this timeslot was activated
         if( _totalSlotSum == 0){
-            uint256 _cachedSum;
+            //sum all staked amounts from each stake interval
+            uint256 _stakedAmountSum;
             for( uint8 _stakeIntervalIndex; _stakeIntervalIndex <  uint8(type(LibTimeManagement.StakeDayInterval).max); _stakeIntervalIndex ++){
                 uint32 _stakeIntervalSeconds = LibTimeManagement.getDayIntervalSeconds(  _stakeIntervalIndex);
                 uint32 _intervalCurrentStartTimeSlot =  uint32(block.timestamp).getCurrentIntervalStartTimeSlot(_stakeIntervalSeconds);
                 LibTimeManagement.StakeDayInterval _stakeDayInterval = LibTimeManagement.uint8ToStakeDay(_stakeIntervalIndex); 
-                _cachedSum += timeSlotRewards[_tokenAddress][_intervalCurrentStartTimeSlot].stakeSum[  _stakeDayInterval ];
+                _stakedAmountSum += timeSlotRewards[_tokenAddress][_intervalCurrentStartTimeSlot].stakeSum[  _stakeDayInterval ];
             }
-            _cachedSum += CLEANUP_STAKE_AMOUNT;//see CleanupUser contract
-            _totalSlotSum  = _cachedSum;
+            _stakedAmountSum += CLEANUP_STAKE_AMOUNT;//see CleanupUser contract
+            _totalSlotSum  = _stakedAmountSum;
             _timeSlotRewards.totalSlotSum = _totalSlotSum;
-            updateBitMap(_tokenAddress, _timeSlot);
+            //must update sum and the bitmap stating this timeslot was activated
+            updateBitMap(_tokenAddress, _currentTimeSlot);
         }
 
         // update global rolling earnings and timeslot
@@ -334,8 +343,6 @@ contract ExchangeRewardPool is  iOwnership, CleanupUser{
 
         _timeSlotRewards.totalEarningsPerSum = _rollingEarningsSumRatio;
         rollingEarningsSumRatio = _rollingEarningsSumRatio;
-
-        
     }
     /**
      * We keep a bitmap of all timeslots, and flag the timeslots that have one transaction or more.
@@ -349,13 +356,19 @@ contract ExchangeRewardPool is  iOwnership, CleanupUser{
         bytes32 bitMap_ = timeSlotActivationBitMap[_tokenAddress][ _bitFlagTimeSlot ];
         
     }
+    /**
+     * Denotes the timeslot contains a transaction
+     * @param _tokenAddress Address of token used for ticket sale
+     * @param _timeSlot Timeslot that will be now marked for containing a transaction
+     */
     function updateBitMap(address _tokenAddress, uint32 _timeSlot) internal {
-        (uint32 _bitMapTimeSlot, uint8 _timeSlotPosition) =  _timeSlot.bitFlagRemainder(LibTimeManagement.StakeDayInterval.One); 
-        console.log("Bitmap timeslot is %s",_bitMapTimeSlot);
+        //retrieve the starting timeslot of the bitmap containing _timeSlot and the corresponding offset of its corresponding bit
+        ( uint32 _bitMapTimeSlotStartTimestamp, uint8 _timeSlotPosition ) =  _timeSlot.bitFlagRemainder(LibTimeManagement.StakeDayInterval.One); 
+        console.log("Bitmap timeslot is %s",_bitMapTimeSlotStartTimestamp );
         console.log(_timeSlotPosition);
-        bytes32 _outdatedBitMap = timeSlotActivationBitMap[_tokenAddress][_bitMapTimeSlot];
+        bytes32 _outdatedBitMap = timeSlotActivationBitMap[_tokenAddress][ _bitMapTimeSlotStartTimestamp ];
         bytes32 _updatedBitMap = _outdatedBitMap | bytes32( ( 2 ** (_timeSlotPosition) ) );
-        timeSlotActivationBitMap[_tokenAddress][_bitMapTimeSlot] = _updatedBitMap;
+        timeSlotActivationBitMap[_tokenAddress][ _bitMapTimeSlotStartTimestamp ] = _updatedBitMap;
     }
     // function updateTimePoolEarnings(uint256 _timePoolFee, uint256 _totalSlotSum) internal {
        
