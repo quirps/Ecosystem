@@ -16,5 +16,5 @@ contractsignore
 deploy 
 build
 bin
-relay
+
 test
