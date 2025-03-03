@@ -13,3 +13,8 @@ constants.ts
 .mocharc.json
 optimizations
 contractsignore
+deploy 
+build
+bin
+relay
+test

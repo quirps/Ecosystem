@@ -9,13 +9,14 @@ contract TicketCreate is iTransferSetConstraints,  iERC1155 {
     struct TicketMeta{
         string title;
         string description; 
+        string imageBase64Hash;
     } 
 
-    event TicketsCreated(uint256, uint192, TicketMeta);
+    event TicketsCreated(uint256, uint256, TicketMeta);
     /**
         Owner verification at ticketCreate
      */
-    function ticketCreateBatch(uint192[] memory _amount, TicketMeta[] memory _ticketMeta, LibERC1155TransferConstraints.Constraints[] memory  _constraints) external {
+    function ticketCreateBatch(uint256[] memory _amount, TicketMeta[] memory _ticketMeta, LibERC1155TransferConstraints.Constraints[] memory  _constraints) external {
         //check equal lengths
         for( uint256 _constraintIndex; _constraintIndex < _constraints.length; _constraintIndex++){
             ticketCreate( _amount[_constraintIndex],  _ticketMeta[ _constraintIndex ], _constraints[ _constraintIndex ] );
@@ -24,7 +25,7 @@ contract TicketCreate is iTransferSetConstraints,  iERC1155 {
  
     //The order of the Constraint struct matches the order of the if statements
     //and correspond to the constraint bitmap in ascending order. 
-    function ticketCreate(uint192 _amount, TicketMeta memory _ticketMeta, LibERC1155TransferConstraints.Constraints memory _constraints) public {
+    function ticketCreate(uint256 _amount, TicketMeta memory _ticketMeta, LibERC1155TransferConstraints.Constraints memory _constraints) public {
         isEcosystemOwnerVerification(); 
         
         uint256 ticketId = ticketConstraintHandler(_constraints);

@@ -24,6 +24,7 @@ function erc1155ConstraintStorage() internal pure returns (ConstraintStorage sto
         TransferLimit transferLimit;
         MemberRankDependency memberRankDependency;
         Expireable expireable;
+        Royalties royalty;
     }
 
     struct TransferLimit{
@@ -40,6 +41,11 @@ function erc1155ConstraintStorage() internal pure returns (ConstraintStorage sto
     //set min rank as 1 or greater
     struct Expireable{
         uint32 expireTime;
+        bool isActive;
+    }
+
+    struct Royalties {
+        uint24 percentage; //100,000 is 100%
         bool isActive;
     }
     // struct MemberRankTieredDelay{
