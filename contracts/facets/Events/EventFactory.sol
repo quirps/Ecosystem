@@ -18,12 +18,12 @@ contract EventFactory is IEventFactory, iEventFactory {
         uint32 _endTime,
         uint256 _minEntries,
         uint256 _maxEntries,
-        string calldata _imageUri,
+        string calldata _imageUri, 
         uint256[] memory _ticketIds,
-        LibEventFactory.TicketDetail[] memory _ticketDetails
+        uint256 _maxEntriesPerUser
     ) external returns (uint256) {
          isEcosystemOwnerVerification();
-       return _createEvent(_startTime, _endTime, _minEntries, _maxEntries, _imageUri, _ticketIds, _ticketDetails);
+       return _createEvent(_startTime, _endTime, _minEntries, _maxEntries, _imageUri, _ticketIds, _maxEntriesPerUser);
     }
      function deactivateEvent(uint256 eventId, bytes32 root) external {
         isEcosystemOwnerVerification();

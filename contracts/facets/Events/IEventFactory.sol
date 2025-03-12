@@ -42,9 +42,9 @@ interface IEventFactory {
         uint32 _endTime,
         uint256 _minEntries,
         uint256 _maxEntries,
-        string calldata _imageUri,
+        string calldata _imageUri, 
         uint256[] memory _ticketIds,
-        LibEventFactory.TicketDetail[] memory _ticketDetails
+        uint256 _maxEntriesPerUser
     ) external returns (uint256);
 
     /// @notice Allows the redemption of multiple tickets for an event

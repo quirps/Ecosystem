@@ -14,6 +14,7 @@ library LibSales {
         uint256[] itemAmounts;
         uint256 paymentTokenId;
         uint256 paymentAmount;
+        bool isEther;
     }
 
     struct SalesStorage {

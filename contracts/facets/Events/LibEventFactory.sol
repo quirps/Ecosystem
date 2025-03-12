@@ -78,7 +78,7 @@ library LibEventFactory {
 
     function getEventImageUri(uint256 eventId) internal view returns (string memory) {
         EventDetail storage es = getEventDetail(eventId);
-        return es.imageUri;
+        return es.imageUri; 
     }
 
     function getEventStatus(uint256 eventId) internal view returns (EventStatus) {

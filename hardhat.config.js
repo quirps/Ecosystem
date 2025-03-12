@@ -26,7 +26,7 @@ module.exports = {
     target: "ethers-v5",
   },
   sources: ["./contracts", "./node_modules/registry/contracts"],
-  solidity: '0.8.9',
+  solidity: '0.8.19',
   diamondAbi: {
     // (required) The name of your Diamond ABI
     name: "Ecosystem",

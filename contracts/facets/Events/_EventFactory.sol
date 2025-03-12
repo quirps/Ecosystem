@@ -38,6 +38,7 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
     /// @param minEntries The minimum number of entries required for the event.
     /// @param maxEntries The maximum number of entries allowed for the event.
     /// @param imageUri A URI pointing to the event's image resource.
+    /// @param maxEntriesPerUser max entries a user can submit to event
     /// @param status The current status of the event.
     event EventDetails(
         uint256 eventId,
@@ -46,14 +47,15 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
         uint256 minEntries,
         uint256 maxEntries,
         string imageUri,
-        LibEventFactory.EventStatus status 
+        uint256 maxEntriesPerUser,
+        LibEventFactory.EventStatus status
     );
 
     /// @dev Emitted when ticket details for a specific event are defined or updated. Contains arrays of ticket IDs and their corresponding details.
     /// @param eventId The unique identifier for the event.
     /// @param ticketIds An array of unique identifiers for the tickets associated with the event.
     /// @param ticketDetails An array of structures holding details for each ticket corresponding to the IDs in the `ticketIds` parameter.
-    event TicketDetails(uint256 eventId, uint256[] ticketIds, LibEventFactory.TicketDetail[] ticketDetails);
+    event TicketDetails(uint256 eventId, uint256[] ticketIds);
     /**
      * @dev Emitted when an event's duration is extended
      * @param eventId The unique identifier for the event.
@@ -121,11 +123,10 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
         uint256 _maxEntries,
         string memory _imageUri,
         uint256[] memory _ticketIds,
-        LibEventFactory.TicketDetail[] memory _ticketDetails
+        uint256 _maxEntriesPerUser
     ) internal returns (uint256) {
         LibEventFactory.EventStorage storage es = LibEventFactory.eventStorage();
 
-        require(_ticketIds.length == _ticketDetails.length, "Must be same length.");
         require(_endTime > block.timestamp - 1, "Must be non-trivial event time window");
         require(_maxEntries > 0,"Must have non-trivial entrant amount");
         uint256 eventId = uint256(keccak256(abi.encodePacked(_startTime, _endTime, _minEntries, _maxEntries, _imageUri, block.timestamp)));
@@ -140,14 +141,9 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
             ? LibEventFactory.EventStatus.Pending
             : LibEventFactory.EventStatus.Active;
 
-        emit EventDetails(eventId, _startTime, _endTime, _minEntries, _maxEntries, _imageUri, newEvent.status);
+        emit EventDetails(eventId, _startTime, _endTime, _minEntries, _maxEntries, _imageUri, _maxEntriesPerUser, newEvent.status);
 
-        for (uint256 i = 0; i < _ticketIds.length; i++) {
-            require(_ticketDetails[i].maxAmount != 0, "Must have non-trivial maximum ticket amount");
-            newEvent.ticketDetails[_ticketIds[i]] = _ticketDetails[i];
-        }
-
-        emit TicketDetails(eventId, _ticketIds, _ticketDetails);
+        emit TicketDetails(eventId, _ticketIds);
 
         return eventId;
     }

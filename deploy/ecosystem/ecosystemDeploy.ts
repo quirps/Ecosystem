@@ -42,7 +42,7 @@ export async function ecosystemDeploy( ecosystemConfigs : Partial<EcosystemConfi
         ecosystem.owner = _ecosystemConfig.owner;
         
         
-        // //populate ecosystem's tokens/tickets 
+        // populate ecosystem's tokens/tickets 
         // await mintUniformBatch( ecosystem, ecosystem.owner, MAX_TICKET_ID, MAX_TICKET_AMOUNT)
  
         // ecosystems[ _ecosystemConfig.name!! ] = ecosystem;
