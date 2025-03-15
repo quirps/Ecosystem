@@ -7,6 +7,7 @@ contract MetaTransactionVerifierMid {
         address signer;      // Address initiating the transaction
         address target;
         bytes paymasterData;
+        bytes targetData;
         uint256 nonce;     // Prevents replay attacks
         bytes data;        // Arbitrary transaction data
     }
@@ -23,7 +24,7 @@ contract MetaTransactionVerifierMid {
     );
     
     bytes32 private constant META_TRANSACTION_TYPEHASH = keccak256(
-        "MetaTransaction(address signer,address target,bytes paymasterData,uint256 nonce,bytes data)"
+        "MetaTransaction(address signer,address target,bytes paymasterData,bytes targetData,uint256 nonce,bytes data)"
     );
 
     event MetaTransactionExecuted(address indexed signer, bytes data);
@@ -94,6 +95,7 @@ contract MetaTransactionVerifierMid {
                 metaTx.signer,
                 metaTx.target,
                 keccak256(metaTx.paymasterData),
+                keccak256(metaTx.targetData),
                 metaTx.nonce,
                 keccak256(metaTx.data)
             )
