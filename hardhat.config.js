@@ -26,7 +26,7 @@ module.exports = {
     target: "ethers-v5",
   },
   sources: ["./contracts", "./node_modules/registry/contracts"],
-  solidity: '0.8.19',
+  solidity: '0.8.28',
   diamondAbi: {
     // (required) The name of your Diamond ABI
     name: "Ecosystem",
@@ -41,24 +41,28 @@ module.exports = {
     },
     strict: false
   },
-  settings: {
-    outputSelection: {
-      "*": {
-        "*": ["*"],      // This line compiles everything for your contracts
-        "": ["ast"]     // This line outputs the AST for your contracts
+  solidity : {
+    version : "0.8.28",
+    settings: {
+      evmVersion: "cancun",  // Explicitly set to Cancun
+      outputSelection: {
+        "*": {
+          "*": ["*"],      // This line compiles everything for your contracts
+          "": ["ast"]     // This line outputs the AST for your contracts
+        }
+      },
+      optimizer: {
+        enabled: true,
+        runs: 200
       }
     },
-    optimizer: {
-      enabled: true,
-      runs: 80
-    }
   },
   gasReporter: {
     enabled: true,
     currency: 'CHF',
     gasPrice: 21
   },
-  defaultNetwork: "sepolia",
+  defaultNetwork: "hardhat",
   networks: {
       hardhat: {
      accounts: getWallets('hardhat'),

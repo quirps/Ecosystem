@@ -155,13 +155,7 @@ contract ExchangeRewardPool is  iOwnership, CleanupUser{
         // TODO
     }
     
-    /**
-     * We need to check first if the 
-     * @param _tokenAddress 
-     * @param _stakeInterval 
-     * @param _stakeStartTimeSlot 
-     * @param _stakeAmount 
-     */
+
     function calculateReward(address _tokenAddress, LibTimeManagement.StakeDayInterval _stakeInterval, uint32 _stakeStartTimeSlot, uint256 _stakeAmount) public view  returns (uint256 reward_){
         //retrieve starting timeslots of bitmaps that instersect stake interval time slots (max stake interval is smaller than 256 days, but can exist at a boundary)
         (bool _zeroReward, uint32 firstActivatedTimeSlot, uint32 lastActivatedTimeSlot) =  getRewardTimeSlots(_tokenAddress, _stakeInterval, _stakeStartTimeSlot);

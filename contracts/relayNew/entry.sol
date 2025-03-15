@@ -1,133 +1,87 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.9;
+
+import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import { ReentrancyGuardContract } from "../ReentrancyGuard.sol";
 
 interface ITrustedForwarder {
+    struct ForwardRequest {
+        address signer;
+        address target;
+        bytes targetData;
+        uint256 nonce;
+        uint32 deadline;
+    }
+
     function execute(
-        address from,
-        address to,
-        bytes calldata data,
-        uint256 gasLimit
-    ) external payable returns (bool success, bytes memory result);
+        ISwapRouter.ExactOutputSingleParams calldata params,
+        ForwardRequest calldata req
+    ) external returns (bool, bytes memory);
 }
 
-interface IPaymaster {
-    function payForGas(
-        address from,
-        address to,
-        bytes calldata data,
-        uint256 gasLimit,
-        uint256 gasPrice,
-        uint256 gasUsed
-    ) external payable;
-}
-
-/**
- * @title RelayEntrypoint
- * @dev Contract for handling meta-transactions by relaying them to a trusted forwarder after gas cost calculation
- */
-contract RelayEntrypoint {
+contract EntryPoint is ReentrancyGuardContract {
     address public immutable trustedForwarder;
-    address public immutable paymaster;
-    
-    event MetaTxRelayed(
-        address indexed from, 
-        address indexed to, 
-        uint256 gasUsed, 
-        bool success
-    );
+    address public immutable paymasterAddress;
 
-    /**
-     * @param _trustedForwarder Address of the trusted forwarder that will execute the transaction
-     * @param _paymaster Address of the paymaster that will handle gas payment
-     */
-    constructor(address _trustedForwarder, address _paymaster) {
-        require(_trustedForwarder != address(0), "Invalid forwarder address");
-        require(_paymaster != address(0), "Invalid paymaster address");
-        
+    event RelayExecuted(
+        address indexed signer,
+        address indexed target,
+        bool success,
+        uint256 gasUsed,
+        uint256 totalGasUsed
+    );
+    
+    constructor(address _trustedForwarder, address _paymasterAddress) {
         trustedForwarder = _trustedForwarder;
-        paymaster = _paymaster;
+        paymasterAddress = _paymasterAddress;
     }
     
     /**
-     * @dev Relays a meta-transaction through the trusted forwarder
-     * @param from Original sender of the transaction
-     * @param to Destination contract address
-     * @param data Function data to be executed
-     * @param gasLimit Maximum gas to be used for the transaction
-     * @return success Whether the execution was successful
-     * @return result The return data from the execution
+     * @dev Main entry point for the relay
+     * @param paymasterParams Uniswap exactOutputSingleParams for the paymaster. The minimum output amount
+     *                        initially given is the overestimate of constant gas costs and paymaster upperbound
+     *                        The target gas is then added to this. 
+     * @param req The forwarding request 
+     * @param signature signature of the message 
      */
-    function relayTransaction(
-        address from,
-        address to,
-        bytes calldata data,
-        uint256 gasLimit
-    ) external returns (bool success, bytes memory result) {
-        // Calculate actual gas cost
+    function relay(
+        ISwapRouter.ExactOutputSingleParams memory paymasterParams,
+        ITrustedForwarder.ForwardRequest calldata req,
+        address recipient,
+        bytes calldata signature
+            ) external ReentrancyGuard {
+        // Start gas measurement 
         uint256 startGas = gasleft();
         
-        // Execute the transaction through the trusted forwarder
-        (success, result) = ITrustedForwarder(trustedForwarder).execute(
-            from,
-            to,
-            data,
-            gasLimit
+        // Call the trusted forwarder to execute the transaction
+        (bool success, bytes memory result) = trustedForwarder.call(
+            abi.encodeWithSelector(
+                ITrustedForwarder.execute.selector,
+                paymasterParams,
+                req, 
+                recipient,
+                signature
+            )
         );
         
-        // Calculate gas used
+        // Calculate gas used for the forwarded call
         uint256 gasUsed = startGas - gasleft();
         
-        // Call the paymaster to handle the gas payment
-        IPaymaster(paymaster).payForGas{value: 0}(
-            from,
-            to,
-            data,
-            gasLimit,
-            tx.gasprice,
-            gasUsed
+        // Add the additional gas estimate
+        uint256 totalGasUsed = gasUsed; 
+        paymasterParams.amountOut += gasUsed;
+        
+        ISwapRouter( paymasterAddress ).exactOutputSingle( paymasterParams );
+        // Ensure the call was successful
+        require(success, "EntryPoint: Forwarded call failed");
+        
+        // Emit event with gas metrics
+        emit RelayExecuted(
+            req.signer,
+            req.target,
+            success,
+            gasUsed,
+            totalGasUsed
         );
-        
-        emit MetaTxRelayed(from, to, gasUsed, success);
-        
-        return (success, result);
     }
-    
-    /**
-     * @dev Estimates the gas required for executing a transaction
-     * @param to Destination contract address
-     * @param data Function data to be executed
-     * @return gasEstimate Estimated gas amount
-     */
-    function estimateGas(
-        address to,
-        bytes calldata data
-    ) external view returns (uint256 gasEstimate) {
-        uint256 gasBuffer = 50000; // Buffer for additional operations
-        
-        // Try to estimate gas for the call
-        try this.staticEstimateGas(to, data) returns (uint256 estimate) {
-            return estimate + gasBuffer;
-        } catch {
-            return 500000; // Default gas limit if estimation fails
-        }
-    }
-    
-    /**
-     * @dev Helper function for gas estimation
-     */
-    function staticEstimateGas(
-        address to,
-        bytes calldata data
-    ) external view returns (uint256) {
-        (bool success, ) = to.staticcall(data);
-        require(success, "Gas estimation failed");
-        
-        // This is a simplification - actual gas estimation would be more complex
-        return to.code.length * 100 + data.length * 16;
-    }
-    
-    /**
-     * @dev Allows the contract to receive ETH
-     */
-    receive() external payable {}
 }

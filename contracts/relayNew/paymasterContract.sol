@@ -4,21 +4,20 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-
+import { ReentrancyGuardContract } from "../ReentrancyGuard.sol";
 interface IUniswapV3SwapRouter {
-    struct ExactInputSingleParams {
+    struct ExactOutputSingleParams {
         address tokenIn;
         address tokenOut;
         uint24 fee;
         address recipient;
-        uint256 amountIn;
-        uint256 amountOutMinimum;
+        uint256 amountOut;
+        uint256 amountInMaximum;
         uint160 sqrtPriceLimitX96;
         uint256 deadline;
     }
 
-    function exactInputSingle(ExactInputSingleParams calldata params) external returns (uint256 amountOut);
+    function exactOutputSingle(ExactOutputSingleParams calldata params) external returns (uint256 amountIn);
 }
 
 interface IUniswapV3PositionManager {
@@ -85,13 +84,14 @@ interface IStake {
     function stake(address outputToken) external returns (uint256 apy);
 }
 
-contract EthRelayPaymaster is Ownable, ReentrancyGuard {
+contract EthRelayPaymaster is Ownable, ReentrancyGuardContract {
     using SafeERC20 for IERC20;
     
     address public uniswapRouter;
     address public wethAddress;
     address public nftPositionManagerAddress;
-    
+    address public relayEntryPoint;
+
     // Standard fee tiers in Uniswap V3
     uint24 public constant POOL_FEE = 3000; // 0.3%
     
@@ -109,7 +109,8 @@ contract EthRelayPaymaster is Ownable, ReentrancyGuard {
     event StakedAndPooled(address indexed user, address indexed token, uint256 amount, uint256 apy, uint256 tokenId, uint256 liquidityAdded);
     event Withdrawn(address indexed user, address indexed token, uint256 amount, uint256 reward);
     event Deposited(address indexed user, address indexed token, uint256 amount, uint256 additionalLiquidity);
-    
+    event RelayEntryPointSet( address relayEntryPoint );
+
     constructor(address _uniswapRouter, address _weth, address _nftPositionManager) {
         uniswapRouter = _uniswapRouter;
         wethAddress = _weth;
@@ -121,49 +122,71 @@ contract EthRelayPaymaster is Ownable, ReentrancyGuard {
         address tokenOut;
         uint24 fee;
         address recipient;
-        uint256 amountIn;
-        uint256 amountOutMinimum;
+        uint256 amountOut;
+        uint256 amountInMaximum;
         uint160 sqrtPriceLimitX96;
         uint256 deadline;
     }
-    
-    function swapAndUnwrap(Uniswap memory params) external nonReentrant {
+    struct DepositDetials{
+        address tokenAddress;
+        uint256 amount;
+        uint256 ethAmount; 
+        uint256 deadline;
+    }
+
+    struct TransferAmounts {
+        uint256 tokenAmount;
+        uint256 wethAmount;
+    }
+
+    //Prevents any unsuspecting individuals to use this without relay
+    function setEntryPoint( address _relayEntryPoint) external onlyOwner {
+        relayEntryPoint = _relayEntryPoint;
+        emit RelayEntryPointSet ( _relayEntryPoint );
+    }
+
+    function swapAndUnwrap(Uniswap memory params) external ReentrancyGuard {
         require(params.tokenOut == wethAddress, "TokenOut must be WETH");
         require(params.recipient != address(0), "Invalid recipient");
         
         // Transfer tokens from sender to this contract
-        IERC20(params.tokenIn).safeTransferFrom(msg.sender, address(this), params.amountIn);
+        IERC20(params.tokenIn).safeTransferFrom(msg.sender, address(this), params.amountInMaximum);
         
         // Approve router to spend tokens
-        IERC20(params.tokenIn).safeApprove(uniswapRouter, params.amountIn);
+        IERC20(params.tokenIn).safeApprove(uniswapRouter, params.amountInMaximum);
         
         // Execute swap
-        IUniswapV3SwapRouter.ExactInputSingleParams memory swapParams = 
-            IUniswapV3SwapRouter.ExactInputSingleParams({
+        IUniswapV3SwapRouter.ExactOutputSingleParams memory swapParams = 
+            IUniswapV3SwapRouter.ExactOutputSingleParams({
                 tokenIn: params.tokenIn,
                 tokenOut: params.tokenOut,
                 fee: params.fee,
                 recipient: address(this), // Contract receives WETH first
-                amountIn: params.amountIn,
-                amountOutMinimum: params.amountOutMinimum,
+                amountOut: params.amountOut,
+                amountInMaximum: params.amountInMaximum,
                 sqrtPriceLimitX96: params.sqrtPriceLimitX96,
                 deadline: params.deadline
             });
         
-        uint256 amountOut = IUniswapV3SwapRouter(uniswapRouter).exactInputSingle(swapParams);
+        uint256 amountIn = IUniswapV3SwapRouter(uniswapRouter).exactOutputSingle(swapParams);
+        
+        // Return unused tokens to the user
+        if (amountIn < params.amountInMaximum) {
+            IERC20(params.tokenIn).safeTransfer(msg.sender, params.amountInMaximum - amountIn);
+        }
         
         // Unwrap WETH
-        IWETH(wethAddress).withdraw(amountOut);
+        IWETH(wethAddress).withdraw(params.amountOut);
         
         // Send ETH to recipient
-        (bool success, ) = params.recipient.call{value: amountOut}("");
+        (bool success, ) = params.recipient.call{value: params.amountOut}("");
         require(success, "ETH transfer failed");
         
-        emit Swapped(params.recipient, params.tokenIn, params.amountIn, amountOut);
+        emit Swapped(params.recipient, params.tokenIn, amountIn, params.amountOut);
     }
     
     // Combined staking and pooling functionality
-    function stakeAndPool(address tokenAddress, uint256 amount, uint256 ethAmount, uint256 deadline) external payable nonReentrant {
+    function stakeAndPool(address tokenAddress, uint256 amount, uint256 ethAmount, uint256 deadline) external payable ReentrancyGuard {
         require(amount > 0, "Cannot stake 0 tokens");
         require(ethAmount > 0 || msg.value > 0, "ETH amount must be positive");
         
@@ -218,97 +241,142 @@ contract EthRelayPaymaster is Ownable, ReentrancyGuard {
         emit StakedAndPooled(msg.sender, tokenAddress, amount, stakeApy, tokenId, uint256(liquidity));
     }
     
-    function withdrawStake(address tokenAddress, uint256 amount, uint256 deadline) external nonReentrant {
-        require(amount > 0, "Cannot withdraw 0 tokens");
-        require(stakedAmount[msg.sender][tokenAddress] >= amount, "Insufficient staked amount");
-        
-        uint256 tokenId = lpTokenIds[msg.sender][tokenAddress];
-        require(tokenId != 0, "No LP position found");
-        
-        // Get position info
-        (, , address token0, address token1, , , , uint128 liquidity, , , , ) = 
-            IUniswapV3PositionManager(nftPositionManagerAddress).positions(tokenId);
-        
-        // Calculate proportion to withdraw
-        uint256 totalStaked = stakedAmount[msg.sender][tokenAddress];
-        uint128 liquidityToRemove = uint128((uint256(liquidity) * amount) / totalStaked);
-        
-        // Calculate reward
-        uint256 reward = calculateReward(msg.sender, tokenAddress);
-        
-        // Remove liquidity
-        (uint256 amount0, uint256 amount1) = IUniswapV3PositionManager(nftPositionManagerAddress).decreaseLiquidity(
-            tokenId,
-            liquidityToRemove,
-            0, // Allow for slippage
-            0, // Allow for slippage
-            deadline
-        );
-        
-        // Collect tokens
-        IUniswapV3PositionManager(nftPositionManagerAddress).collect(
-            tokenId,
-            address(this),
-            type(uint128).max, // Collect all token0
-            type(uint128).max  // Collect all token1
-        );
-        
-        // Update staking information
-        stakedAmount[msg.sender][tokenAddress] -= amount;
-        stakingStartTime[msg.sender][tokenAddress] = block.timestamp; // Reset staking time for remaining amount
-        
-        // Transfer original token back to user
-        uint256 tokenAmount;
-        uint256 wethAmount;
-        
-        if (token0 == tokenAddress) {
-            tokenAmount = amount0;
-            wethAmount = amount1;
-        } else {
-            tokenAmount = amount1;
-            wethAmount = amount0;
-        }
-        
-        // Transfer tokens back to user
-        IERC20(tokenAddress).safeTransfer(msg.sender, tokenAmount);
-        
-        // Unwrap WETH and send ETH plus reward
-        IWETH(wethAddress).withdraw(wethAmount + reward);
-        (bool success, ) = msg.sender.call{value: wethAmount + reward}("");
-        require(success, "ETH transfer failed");
-        
-        emit Withdrawn(msg.sender, tokenAddress, amount, reward);
-    }
+struct WithdrawInputs {
+    address tokenAddress;
+    uint256 amount;
+    uint256 deadline;
+}
+function withdrawStake(address tokenAddress, uint256 amount, uint256 deadline) external ReentrancyGuard {
+    require(amount > 0, "Cannot withdraw 0 tokens");
+    require(stakedAmount[msg.sender][tokenAddress] >= amount, "Insufficient staked amount");
     
-    function depositAdditional(
-        address tokenAddress, 
-        uint256 amount, 
-        uint256 ethAmount, 
-        uint256 deadline
-    ) external payable nonReentrant {
-        require(amount > 0, "Cannot deposit 0 tokens");
-        require(ethAmount > 0 || msg.value > 0, "ETH amount must be positive");
-        require(stakedAmount[msg.sender][tokenAddress] > 0, "No existing stake found");
+    uint256 tokenId = lpTokenIds[msg.sender][tokenAddress];
+    require(tokenId != 0, "No LP position found");
+    
+    PositionInfo memory pos = unpackPositionManager( tokenId );
+    
+    uint128 liquidityToRemove = uint128((uint256( pos.liquidity) * amount) / stakedAmount[msg.sender][tokenAddress]);
+    uint256 reward = calculateReward(msg.sender, tokenAddress);
+    
+    // Remove and collect liquidity in a single operation
+    (uint256 amount0, uint256 amount1) = IUniswapV3PositionManager(nftPositionManagerAddress).decreaseLiquidity(
+        tokenId, liquidityToRemove, 0, 0, deadline
+    );
+    
+    IUniswapV3PositionManager(nftPositionManagerAddress).collect(
+        tokenId, address(this), type(uint128).max, type(uint128).max
+    );
+    
+    // Update staking information
+    stakedAmount[msg.sender][tokenAddress] -= amount;
+    stakingStartTime[msg.sender][tokenAddress] = block.timestamp;
+    
+    // Determine token and weth amounts based on token ordering
+    (uint256 tokenAmount, uint256 wethAmount) = pos.token0 == tokenAddress ? 
+        (amount0, amount1) : (amount1, amount0);
+    
+    // Transfer tokens and ETH
+    IERC20(tokenAddress).safeTransfer(msg.sender, tokenAmount);
+    IWETH(wethAddress).withdraw(wethAmount + reward);
+    
+    (bool success, ) = msg.sender.call{value: wethAmount + reward}("");
+    require(success, "ETH transfer failed");
+    
+    emit Withdrawn(msg.sender, tokenAddress, amount, reward);
+}
+struct PositionInfo {
+    address token0;
+    address token1;
+    uint128 liquidity;
+}
+function unpackPositionManager(uint256 tokenId) private returns (PositionInfo memory pos) {
+    // Prepare the call data for positions(uint256)
+    bytes memory data = abi.encodeWithSignature("positions(uint256)", tokenId);
+    
+    // Perform a low-level call to the position manager
+    (bool success, bytes memory returnData) = nftPositionManagerAddress.call(data);
+    require(success, "positions call failed");
+    
+    // The positions function returns:
+    // (uint96, address, address, address, uint24, int24, int24, uint128, uint256, uint256, uint128, uint128)
+    // We only need token0, token1, and liquidity.
+    (
+        ,              // skip nonce (uint96)
+        ,              // skip operator (address)
+        pos.token0,    // token0 (address)
+        pos.token1,    // token1 (address)
+        ,              // skip fee (uint24)
+        ,              // skip tickLower (int24)
+        ,              // skip tickUpper (int24)
+        pos.liquidity, // liquidity (uint128)
+        ,              // skip feeGrowthInside0LastX128 (uint256)
+        ,              // skip feeGrowthInside1LastX128 (uint256)
+        ,              // skip tokensOwed0 (uint128)
+        ) = abi.decode(
+            returnData,
+            (uint96, address, address, address, uint24, int24, int24, uint128, uint256, uint256, uint128, uint128)
+        );
         
-        uint256 wethToUse = ethAmount;
+}
+
+
+function removeLiquidityAndCollect(
+    uint256 tokenId,
+    address token0,
+    address tokenAddress,
+    uint128 liquidityToRemove,
+    uint256 deadline
+) internal returns (TransferAmounts memory transferAmounts) {
+    (uint256 amount0, uint256 amount1) = IUniswapV3PositionManager(nftPositionManagerAddress).decreaseLiquidity(
+        tokenId,
+        liquidityToRemove,
+        0,
+        0,
+        deadline
+    );
+
+    IUniswapV3PositionManager(nftPositionManagerAddress).collect(
+        tokenId,
+        address(this),
+        type(uint128).max,
+        type(uint128).max
+    );
+
+    if (token0 == tokenAddress) {
+        transferAmounts.tokenAmount = amount0;
+        transferAmounts.wethAmount = amount1;
+    } else {
+        transferAmounts.tokenAmount = amount1;
+        transferAmounts.wethAmount = amount0;
+    }
+}
+
+    function depositAdditional(
+       DepositDetials memory _depositDetails 
+    ) external payable ReentrancyGuard {
+        require(_depositDetails.amount > 0, "Cannot deposit 0 tokens");
+        require(_depositDetails.ethAmount > 0 || msg.value > 0, "ETH amount must be positive");
+        require(stakedAmount[msg.sender][_depositDetails.tokenAddress] > 0, "No existing stake found");
+        
+        uint256 wethToUse = _depositDetails.ethAmount;
         if (msg.value > 0) {
             wethToUse = msg.value;
             // Convert ETH to WETH
             IWETH(wethAddress).deposit{value: msg.value}();
         } else {
             // Transfer WETH from user if they didn't send ETH
-            IERC20(wethAddress).safeTransferFrom(msg.sender, address(this), ethAmount);
+            IERC20(wethAddress).safeTransferFrom(msg.sender, address(this), _depositDetails.ethAmount);
         }
         
         // Transfer additional tokens from user
-        IERC20(tokenAddress).safeTransferFrom(msg.sender, address(this), amount);
+        IERC20(_depositDetails.tokenAddress).safeTransferFrom(msg.sender, address(this), _depositDetails.amount);
         
-        uint256 tokenId = lpTokenIds[msg.sender][tokenAddress];
+        uint256 tokenId = lpTokenIds[msg.sender][_depositDetails.tokenAddress];
         require(tokenId != 0, "No LP position found");
         
         // Sort tokens
         (address token0, address token1, uint256 amount0, uint256 amount1) = _sortTokens(
-            tokenAddress, wethAddress, amount, wethToUse
+            _depositDetails.tokenAddress, wethAddress, _depositDetails.amount, wethToUse
         );
         
         // Approve NFT position manager to use tokens
@@ -316,8 +384,8 @@ contract EthRelayPaymaster is Ownable, ReentrancyGuard {
         IERC20(token1).safeApprove(nftPositionManagerAddress, amount1);
         
         // Calculate current rewards before adding to stake
-        uint256 reward = calculateReward(msg.sender, tokenAddress);
-        uint256 currentApyRate = apyRate[msg.sender][tokenAddress];
+        uint256 reward = calculateReward(msg.sender, _depositDetails.tokenAddress);
+        uint256 currentApyRate = apyRate[msg.sender][_depositDetails.tokenAddress];
         
         // TODO: Implement adding liquidity to existing position
         // For simplicity in this example, we'll just assume creating a new position
@@ -334,22 +402,22 @@ contract EthRelayPaymaster is Ownable, ReentrancyGuard {
             amount0Min: 0, // Allow for slippage
             amount1Min: 0, // Allow for slippage
             recipient: address(this), // Contract holds the NFT
-            deadline: deadline
+            deadline: _depositDetails.deadline
         });
         
         (uint256 newTokenId, uint128 liquidityAdded, , ) = IUniswapV3PositionManager(nftPositionManagerAddress).mint(params);
         
         // Update staking information
-        stakedAmount[msg.sender][tokenAddress] += amount;
-        stakingStartTime[msg.sender][tokenAddress] = block.timestamp; // Reset staking time
+        stakedAmount[msg.sender][_depositDetails.tokenAddress] += _depositDetails.amount;
+        stakingStartTime[msg.sender][_depositDetails.tokenAddress] = block.timestamp; // Reset staking time
         
         // Keep the same APY rate
-        apyRate[msg.sender][tokenAddress] = currentApyRate;
+        apyRate[msg.sender][_depositDetails.tokenAddress] = currentApyRate;
         
         // Update token ID (this is a simplification - in production, you'd track multiple positions)
-        lpTokenIds[msg.sender][tokenAddress] = newTokenId;
+        lpTokenIds[msg.sender][_depositDetails.tokenAddress] = newTokenId;
         
-        emit Deposited(msg.sender, tokenAddress, amount, uint256(liquidityAdded));
+        emit Deposited(msg.sender, _depositDetails.tokenAddress, _depositDetails.amount, uint256(liquidityAdded));
     }
     
     function calculateReward(address user, address tokenAddress) public view returns (uint256) {

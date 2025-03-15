@@ -54,7 +54,6 @@ contract iEventFactory is iOwnership, iERC1155Transfer {
     /// @dev Emitted when ticket details for a specific event are defined or updated. Contains arrays of ticket IDs and their corresponding details.
     /// @param eventId The unique identifier for the event.
     /// @param ticketIds An array of unique identifiers for the tickets associated with the event.
-    /// @param ticketDetails An array of structures holding details for each ticket corresponding to the IDs in the `ticketIds` parameter.
     event TicketDetails(uint256 eventId, uint256[] ticketIds);
     /**
      * @dev Emitted when an event's duration is extended
