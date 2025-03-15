@@ -5,6 +5,7 @@ contract MetaTransactionVerifierMid {
     // Struct for our meta transaction
     struct MetaTransaction {
         address signer;      // Address initiating the transaction
+        address target;
         uint256 nonce;     // Prevents replay attacks
         bytes data;        // Arbitrary transaction data
     }
@@ -21,7 +22,7 @@ contract MetaTransactionVerifierMid {
     );
     
     bytes32 private constant META_TRANSACTION_TYPEHASH = keccak256(
-        "MetaTransaction(address signer,uint256 nonce,bytes data)"
+        "MetaTransaction(address signer,address target,uint256 nonce,bytes data)"
     );
 
     event MetaTransactionExecuted(address indexed signer, bytes data);
@@ -90,6 +91,7 @@ contract MetaTransactionVerifierMid {
             abi.encode(
                 META_TRANSACTION_TYPEHASH,
                 metaTx.signer,
+                metaTx.target,
                 metaTx.nonce,
                 keccak256(metaTx.data)
             )
