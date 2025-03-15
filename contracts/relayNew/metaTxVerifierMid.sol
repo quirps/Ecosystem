@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 contract MetaTransactionVerifierMid {
     // Struct for our meta transaction
     struct MetaTransaction {
-        address from;      // Address initiating the transaction
+        address signer;      // Address initiating the transaction
         uint256 nonce;     // Prevents replay attacks
         bytes data;        // Arbitrary transaction data
     }
@@ -21,10 +21,10 @@ contract MetaTransactionVerifierMid {
     );
     
     bytes32 private constant META_TRANSACTION_TYPEHASH = keccak256(
-        "MetaTransaction(address from,uint256 nonce,bytes data)"
+        "MetaTransaction(address signer,uint256 nonce,bytes data)"
     );
 
-    event MetaTransactionExecuted(address indexed from, bytes data);
+    event MetaTransactionExecuted(address indexed signer, bytes data);
 
     constructor() {
         DOMAIN_SEPARATOR = keccak256(
@@ -51,16 +51,16 @@ contract MetaTransactionVerifierMid {
         address signer = recoverSigner(metaTx, signature);
         
         // Ensure the signer matches the from address in the meta transaction
-        require(signer == metaTx.from, "Signer and from address mismatch");
+        require(signer == metaTx.signer, "Signer and from address mismatch");
         
         // Verify and increment nonce to prevent replay attacks
-        require(nonces[metaTx.from] == metaTx.nonce, "Invalid nonce");
-        nonces[metaTx.from]++;
+        require(nonces[metaTx.signer] == metaTx.nonce, "Invalid nonce");
+        nonces[metaTx.signer]++;
         
         // Execute transaction logic here
         // This is where you would handle the actual transaction data
         
-        emit MetaTransactionExecuted(metaTx.from, metaTx.data);
+        emit MetaTransactionExecuted(metaTx.signer, metaTx.data);
         
         return true;
     }
@@ -89,7 +89,7 @@ contract MetaTransactionVerifierMid {
         return keccak256(
             abi.encode(
                 META_TRANSACTION_TYPEHASH,
-                metaTx.from,
+                metaTx.signer,
                 metaTx.nonce,
                 keccak256(metaTx.data)
             )
