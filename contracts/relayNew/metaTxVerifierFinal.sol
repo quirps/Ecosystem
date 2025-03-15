@@ -6,13 +6,17 @@ contract MetaTransactionVerifier2 {
     struct MetaTransaction {
         address signer;      // Address initiating the transaction
         address target;     // Prevents replay attacks
-        bytes paymasterData;        // Arbitrary transaction data
+        ExactSingleOutputParams paymasterData;        // Arbitrary transaction data
         bytes targetData;
         uint256 gasLimit;
         uint256 nonce;
         uint32 deadline;
     }
 
+struct ExactSingleOutputParams {
+        address tokenIn;
+
+    }
     // Mapping to track nonces for each user
     mapping(address => uint256) public nonces;
 
@@ -25,10 +29,11 @@ contract MetaTransactionVerifier2 {
     );
     
     bytes32 private constant META_TRANSACTION_TYPEHASH = keccak256(
-        "MetaTransaction(address signer,address target,bytes paymasterData,bytes targetData,uint256 gasLimit,uint256 nonce,uint32 deadline)"
+        "MetaTransaction(address signer,address target,ExactSingleOutputParams paymasterData,bytes targetData,uint256 gasLimit,uint256 nonce,uint32 deadline)ExactSingleOutputParams(address tokenIn)"
     );
-
-    event MetaTransactionExecuted(address indexed from, bytes data);
+    bytes32 private constant PAYMASTER_TYPEHASH =     
+        keccak256("ExactSingleOutputParams(address tokenIn)");
+    event MetaTransactionExecuted(address indexed from);
 
     constructor() {
         DOMAIN_SEPARATOR = keccak256(
@@ -64,7 +69,7 @@ contract MetaTransactionVerifier2 {
         // Execute transaction logic here
         // This is where you would handle the actual transaction data
         
-        emit MetaTransactionExecuted(metaTx.signer, metaTx.paymasterData);
+        emit MetaTransactionExecuted(metaTx.signer); 
         
         return true;
     }
@@ -95,13 +100,23 @@ contract MetaTransactionVerifier2 {
                 META_TRANSACTION_TYPEHASH,
                 metaTx.signer,
                 metaTx.target,
-                keccak256(metaTx.paymasterData), 
+                hashPaymaster(metaTx.paymasterData),  
                 keccak256(metaTx.targetData),
                 metaTx.gasLimit,
                 metaTx.nonce,  
                 metaTx.deadline
             )
         );
+    }
+
+    function hashPaymaster(ExactSingleOutputParams calldata paymaster) internal pure returns (bytes32) {
+        return
+            keccak256(
+                abi.encode(
+                    PAYMASTER_TYPEHASH,
+                    paymaster.tokenIn
+                    )
+            );
     }
 
     /**
