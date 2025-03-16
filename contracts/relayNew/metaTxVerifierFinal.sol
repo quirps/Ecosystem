@@ -6,17 +6,23 @@ contract MetaTransactionVerifier2 {
     struct MetaTransaction {
         address signer;      // Address initiating the transaction
         address target;     // Prevents replay attacks
-        ExactSingleOutputParams paymasterData;        // Arbitrary transaction data
+        ExactOutputSingleParams paymasterData;        // Arbitrary transaction data
         bytes targetData;
         uint256 gasLimit;
         uint256 nonce;
         uint32 deadline;
     }
-
-struct ExactSingleOutputParams {
+  struct ExactOutputSingleParams {
         address tokenIn;
-
+        address tokenOut;
+        uint24 fee;
+        address recipient;
+        uint256 deadline;
+        uint256 amountOut;
+        uint256 amountInMaximum;
+        uint160 sqrtPriceLimitX96;
     }
+
     // Mapping to track nonces for each user
     mapping(address => uint256) public nonces;
 
@@ -29,10 +35,10 @@ struct ExactSingleOutputParams {
     );
     
     bytes32 private constant META_TRANSACTION_TYPEHASH = keccak256(
-        "MetaTransaction(address signer,address target,ExactSingleOutputParams paymasterData,bytes targetData,uint256 gasLimit,uint256 nonce,uint32 deadline)ExactSingleOutputParams(address tokenIn)"
+        "MetaTransaction(address signer,address target,ExactOutputSingleParams paymasterData,bytes targetData,uint256 gasLimit,uint256 nonce,uint32 deadline)ExactOutputSingleParams(address tokenIn,address tokenOut,uint24 fee,address recipient,uint256 deadline,uint256 amountOut,uint256 amountInMaximum,uint160 sqrtPriceLimitX96)"
     );
     bytes32 private constant PAYMASTER_TYPEHASH =     
-        keccak256("ExactSingleOutputParams(address tokenIn)");
+        keccak256("ExactOutputSingleParams(address tokenIn,address tokenOut,uint24 fee,address recipient,uint256 deadline,uint256 amountOut,uint256 amountInMaximum,uint160 sqrtPriceLimitX96)");
     event MetaTransactionExecuted(address indexed from);
 
     constructor() {
@@ -109,12 +115,19 @@ struct ExactSingleOutputParams {
         );
     }
 
-    function hashPaymaster(ExactSingleOutputParams calldata paymaster) internal pure returns (bytes32) {
+    function hashPaymaster(ExactOutputSingleParams calldata paymaster) internal pure returns (bytes32) {
         return
             keccak256(
                 abi.encode(
                     PAYMASTER_TYPEHASH,
-                    paymaster.tokenIn
+                    paymaster.tokenIn,
+                    paymaster.tokenOut,
+                    paymaster.fee,
+                    paymaster.recipient,
+                    paymaster.deadline,
+                    paymaster.amountOut,
+                    paymaster.amountInMaximum,
+                    paymaster.sqrtPriceLimitX96
                     )
             );
     }
