@@ -1,27 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
+import {ISwapRouter} from "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 
-contract MetaTransactionVerifier2 {
+contract MetaTransactionVerifier {
     // Struct for our meta transaction
     struct MetaTransaction {
         address signer;      // Address initiating the transaction
         address target;     // Prevents replay attacks
-        ExactOutputSingleParams paymasterData;        // Arbitrary transaction data
+        address txInitiator;
+        ISwapRouter.ExactOutputSingleParams paymasterData;        // Arbitrary transaction data
         bytes targetData;
         uint256 gasLimit;
         uint256 nonce;
         uint32 deadline;
     }
-  struct ExactOutputSingleParams {
-        address tokenIn;
-        address tokenOut;
-        uint24 fee;
-        address recipient;
-        uint256 deadline;
-        uint256 amountOut;
-        uint256 amountInMaximum;
-        uint160 sqrtPriceLimitX96;
-    }
+
 
     // Mapping to track nonces for each user
     mapping(address => uint256) public nonces;
@@ -35,12 +28,12 @@ contract MetaTransactionVerifier2 {
     );
     
     bytes32 private constant META_TRANSACTION_TYPEHASH = keccak256(
-        "MetaTransaction(address signer,address target,ExactOutputSingleParams paymasterData,bytes targetData,uint256 gasLimit,uint256 nonce,uint32 deadline)ExactOutputSingleParams(address tokenIn,address tokenOut,uint24 fee,address recipient,uint256 deadline,uint256 amountOut,uint256 amountInMaximum,uint160 sqrtPriceLimitX96)"
+        "MetaTransaction(address signer,address target,address txInitiator,ExactOutputSingleParams paymasterData,bytes targetData,uint256 gasLimit,uint256 nonce,uint32 deadline)ExactOutputSingleParams(address tokenIn,address tokenOut,uint24 fee,address recipient,uint256 deadline,uint256 amountOut,uint256 amountInMaximum,uint160 sqrtPriceLimitX96)"
     );
     bytes32 private constant PAYMASTER_TYPEHASH =     
         keccak256("ExactOutputSingleParams(address tokenIn,address tokenOut,uint24 fee,address recipient,uint256 deadline,uint256 amountOut,uint256 amountInMaximum,uint160 sqrtPriceLimitX96)");
     event MetaTransactionExecuted(address indexed from);
-
+    error TargetError( bytes error);
     constructor() {
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
@@ -70,10 +63,17 @@ contract MetaTransactionVerifier2 {
          
         // Verify and increment nonce to prevent replay attacks
         require(nonces[metaTx.signer] == metaTx.nonce, "Invalid nonce");
+
+        require(block.timestamp <= metaTx.deadline, "Transaction expired");
         nonces[metaTx.signer]++;
         
+
+        //modify call data
+        bytes memory modifiedCallData = abi.encodePacked(metaTx.targetData, abi.encode(metaTx.signer));
         // Execute transaction logic here
         // This is where you would handle the actual transaction data
+        (bool success,bytes memory returnData) = metaTx.target.call(modifiedCallData);
+      
         
         emit MetaTransactionExecuted(metaTx.signer); 
         
@@ -106,6 +106,7 @@ contract MetaTransactionVerifier2 {
                 META_TRANSACTION_TYPEHASH,
                 metaTx.signer,
                 metaTx.target,
+                metaTx.txInitiator,
                 hashPaymaster(metaTx.paymasterData),  
                 keccak256(metaTx.targetData),
                 metaTx.gasLimit,
@@ -115,7 +116,7 @@ contract MetaTransactionVerifier2 {
         );
     }
 
-    function hashPaymaster(ExactOutputSingleParams calldata paymaster) internal pure returns (bytes32) {
+    function hashPaymaster(ISwapRouter.ExactOutputSingleParams calldata paymaster) internal pure returns (bytes32) {
         return
             keccak256(
                 abi.encode(
@@ -163,5 +164,11 @@ contract MetaTransactionVerifier2 {
         }
         
         return ecrecover(hash, v, r, s);
+    }
+
+    function getNonce(
+        address user
+    ) public view returns (uint256 nonce_){
+        nonce_ = nonces[ user ];
     }
 }

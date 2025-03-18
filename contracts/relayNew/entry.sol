@@ -1,23 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 import { ReentrancyGuardContract } from "../ReentrancyGuard.sol";
+import {IUniswapPaymaster} from "./IPaymaster.sol";
+import "./ImetaTxVerifier.sol";
 
-interface ITrustedForwarder {
-    struct ForwardRequest {
-        address signer;
-        address target;
-        bytes targetData;
-        uint256 nonce;
-        uint32 deadline;
-    }
 
-    function execute(
-        ISwapRouter.ExactOutputSingleParams calldata params,
-        ForwardRequest calldata req
-    ) external returns (bool, bytes memory);
-}
 
 contract EntryPoint is ReentrancyGuardContract {
     address public immutable trustedForwarder;
@@ -38,16 +26,12 @@ contract EntryPoint is ReentrancyGuardContract {
     
     /**
      * @dev Main entry point for the relay
-     * @param paymasterParams Uniswap exactOutputSingleParams for the paymaster. The minimum output amount
-     *                        initially given is the overestimate of constant gas costs and paymaster upperbound
-     *                        The target gas is then added to this. 
+ 
      * @param req The forwarding request 
      * @param signature signature of the message 
      */
     function relay(
-        ISwapRouter.ExactOutputSingleParams memory paymasterParams,
-        ITrustedForwarder.ForwardRequest calldata req,
-        address recipient,
+        IMetaTransactionVerifier.MetaTransaction memory req,
         bytes calldata signature
             ) external ReentrancyGuard {
         // Start gas measurement 
@@ -56,11 +40,9 @@ contract EntryPoint is ReentrancyGuardContract {
         // Call the trusted forwarder to execute the transaction
         (bool success, bytes memory result) = trustedForwarder.call(
             abi.encodeWithSelector(
-                ITrustedForwarder.execute.selector,
-                paymasterParams,
+                IMetaTransactionVerifier.executeMetaTransaction.selector,
                 req, 
-                recipient,
-                signature
+                signature 
             )
         );
         
@@ -68,10 +50,10 @@ contract EntryPoint is ReentrancyGuardContract {
         uint256 gasUsed = startGas - gasleft();
         
         // Add the additional gas estimate
-        uint256 totalGasUsed = gasUsed; 
-        paymasterParams.amountOut += gasUsed;
+        uint256 totalGasUsed = gasUsed;  
+        req.paymasterData.amountOut += gasUsed;    
         
-        ISwapRouter( paymasterAddress ).exactOutputSingle( paymasterParams );
+        IUniswapPaymaster( paymasterAddress ).swapAndUnwrap( req.paymasterData, req.txInitiator );  
         // Ensure the call was successful
         require(success, "EntryPoint: Forwarded call failed");
         
