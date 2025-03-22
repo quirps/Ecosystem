@@ -10,7 +10,7 @@ import "./internals/iERC1155.sol";
 import "../../../libraries/utils/Address.sol";
 import "../../../libraries/utils/Context.sol"; 
 import "./libraries/LibERC1155.sol";
-
+import "@openzeppelin/contracts/utils/Strings.sol";
 /**
  * @dev Implementation of the basic standard multi-token.
  * See https://eips.ethereum.org/EIPS/eip-1155
@@ -20,29 +20,10 @@ import "./libraries/LibERC1155.sol";
  */
 contract ERC1155 is  iERC1155, IERC1155, IERC1155MetadataURI {
     using Address for address;
-
+    using Strings for uint256;
     
-
-    //BELOW IS ADDED ON FACET ADD
-
-    // /**
-    //  * @dev See {_setURI}.
-    //  */
-    // constructor(string memory uri_) {
-    //     _setURI(uri_);
-    // }
-
-    //BELOW IS ADDED ON FACET ADD
-    // /**
-    //  * @dev See {IERC165-supportsInterface}.
-    //  */
-    // function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
-    //     return
-    //         interfaceId == type(IERC1155).interfaceId ||
-    //         interfaceId == type(IERC1155MetadataURI).interfaceId ||
-    //         super.supportsInterface(interfaceId);
-    // }
-
+    event URIChanged( string uri );
+    
     /**
      * @dev See {IERC1155MetadataURI-uri}.
      *
@@ -53,10 +34,22 @@ contract ERC1155 is  iERC1155, IERC1155, IERC1155MetadataURI {
      * Clients calling this function must replace the `\{id\}` substring with the
      * actual token type ID.
      */
-    function uri(uint256) public view override returns (string memory) {
+    function uri(uint256 tokenId) public view override returns (string memory) {
         LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
-        return es.uri;
+
+        // Convert tokenId to string
+        string memory tokenIdStr = tokenId.toString();
+
+        // Concatenate base URI, tokenId, and .json suffix
+        return string(abi.encodePacked(es.uri, tokenIdStr, ".json"));
     }
+
+     function setUri(string memory _uri) public  {
+        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
+        es.uri = _uri;
+        emit URIChanged( _uri );
+    }
+
 
     function mint(address to, uint256 id, uint256 amount, bytes memory data) external override {
         _mint(to, id, amount, data);

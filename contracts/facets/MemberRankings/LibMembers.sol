@@ -14,7 +14,7 @@ library LibMembers {
     using Incrementer for bytes8;
     bytes32 constant MEMBER_STORAGE_POSITION = keccak256("diamond.standard.members.storage");
     struct MembersStorage {
-        mapping( address => mapping(uint96 => MemberRank) ) memberRank;
+        mapping( address => mapping(uint96 => MemberRank) ) memberRank; // rank history 
         mapping(address => uint96) memberRankHistoryMaxIndex;
         uint256 recoveryNonce;
         uint32 maxRank;
@@ -68,7 +68,10 @@ library LibMembers {
 
     }
 
-
+    function permissionedChangeRank( Leaf memory _leaf) internal {
+        MembersStorage storage ms = memberStorage();
+        
+    }
   
     /**
      * Retrieves the user's rank history, starting from their current rank and going backwards 

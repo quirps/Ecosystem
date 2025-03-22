@@ -10,16 +10,22 @@ import "../ERC1155/internals/iERC1155Transfer.sol";
  
 import {iOwnership} from "../../Ownership/_Ownership.sol";
 
+event CurrencyNameChanged(string name);
+event CurrencySymbolChanged(string name);
+
 contract ERC20 is  iOwnership, iERC1155Transfer {
-    function setName(string memory _name)  public {
+
+    function setCurrencyNames( string memory _currencyName, string memory _currencySymbol)
+    external {
         isEcosystemOwnerVerification(); 
-        LibERC20._setName(_name);
-        //add event
-    }
-    function setSymbol(string memory _symbol) public{
-        isEcosystemOwnerVerification();
-        LibERC20._setSymbol(_symbol);
-        // add event
+        if( bytes(_currencyName).length != 0){
+            LibERC20._setName(_currencyName);
+            emit CurrencyNameChanged( _currencyName );
+        }
+        if( bytes(_currencySymbol).length != 0){ 
+            LibERC20._setSymbol(_currencySymbol);
+            emit CurrencySymbolChanged( _currencySymbol );
+        }
     }
 
 
