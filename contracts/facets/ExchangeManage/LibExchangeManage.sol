@@ -1,6 +1,6 @@
 pragma solidity ^0.8.28;
 
-import { LibMembers } from "../LibMembers.sol";
+import { LibMemberLevel } from "../MemberLevel/LibMemberLevel.sol";  
 /**
     user rank history keys are designed to be unique by following the program of
     using 8 bytes for the total history length ~1E19 for the highest order 8 bytes 
@@ -23,7 +23,7 @@ library LibExchangeManage {
 
     function _addExchange(address _exchange) internal {
         ExchangeManageStorage storage ems = memberStorage();
-
+        
         ems.exchanges.push(_exchange);
     }
 

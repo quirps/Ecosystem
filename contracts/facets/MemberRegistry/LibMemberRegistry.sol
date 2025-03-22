@@ -1,7 +1,7 @@
 pragma solidity ^0.8.6;
 
 library LibMemberRegistry {
-    bytes32 constant MemberRegistry_STORAGE_POSITION = keccak256("diamond.standard.MemberRegistry.storage");
+    bytes32 constant MEMBER_REGISTRY_STORAGE_POSITION = keccak256("diamond.standard.MemberRegistry.storage");
 
     struct Recovery {
         address userNewAddress;
@@ -17,18 +17,23 @@ library LibMemberRegistry {
         Finalized,
         Cancelled
     }
+    struct Leaf {
+        string username;
+        address userAddress;
+    }
 
-    struct MemberRegistry_Storage {
+    struct MemberRegistryStorage {
         mapping(address => string) addressToUsername;
         mapping(string => address) usernameToAddress;
         mapping(string => Recovery) usernameToRecoveryAddress;
-        mapping(address => uint256) nonces;
-    }
-
-    function MemberRegistryStorage() internal pure returns (MemberRegistry_Storage storage es) {
-        bytes32 MemberRegistry_STORAGE_POSITION = MemberRegistry_STORAGE_POSITION;
+        mapping(address => uint256) nonces;  
+        bytes32 registryMerkleRoot;
+    }    
+   
+    function memberRegistryStorage() internal pure returns (MemberRegistryStorage storage es) {
+        bytes32 storagePosition = MEMBER_REGISTRY_STORAGE_POSITION;
         assembly {
-            es.slot := MemberRegistry_STORAGE_POSITION
+            es.slot := storagePosition 
         }
     }
 }

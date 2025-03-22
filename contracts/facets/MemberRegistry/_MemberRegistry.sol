@@ -2,7 +2,6 @@ pragma solidity ^0.8.0;
 
 import {iOwnership} from "../Ownership/_Ownership.sol";
 import "./LibMemberRegistry.sol"; 
-import "./verification/MemberRegistryVerification.sol"; 
  
 
 contract iMemberRegistry is iOwnership { 
@@ -21,30 +20,55 @@ contract iMemberRegistry is iOwnership {
 
 
     event UsersRegistered(string[] username, address[] userAddress);
+        /**
+     * @dev Verifies Merkle proof and sets user's level
+     * @param _leaf Level to assign to the user
+     * @param _merkleProof Array of hashed data to verify proof
+     */  
+    function verifyAndUsername(LibMemberRegistry.Leaf memory _leaf, bytes32[] calldata _merkleProof) external {
+        // Create leaf from msg.sender and level
+        LibMemberRegistry.MemberRegistryStorage storage mrs = LibMemberRegistry.memberRegistryStorage(); 
 
-    //delete userAddress parameter and replace with msgSender() function
-    function _verifyUsername(
-        string memory username,
-        uint8 v,
-        bytes32 r,
-        bytes32 s,
-        address owner,
-        bytes32 merkleRoot,
-        uint256 nonce,
-        uint256 deadline
-    ) internal {
-        MemberRegistryVerification.executeMyFunctionFromSignature(v, r, s, owner, merkleRoot, nonce, deadline);
-        LibMemberRegistry.MemberRegistry_Storage storage ls = LibMemberRegistry.MemberRegistryStorage();
+        bytes32 leaf = keccak256(abi.encodePacked( _leaf.username, _leaf.userAddress));
+        
+        require(_verifyMerkleProof(_merkleProof, mrs.registryMerkleRoot, leaf), "Invalid Merkle proof");
+          
+        //set username address relation 
+        mrs.addressToUsername[ _leaf.userAddress ] = _leaf.username; 
+        mrs.usernameToAddress[ _leaf.username ] = _leaf.userAddress;
 
-        ls.usernameToAddress[username] == address(0) ? _setUsernamePair(username) : _usernameRecovery(username);
+        emit UserRegistered( _leaf.username, _leaf.userAddress);
     }
+
+       /**
+     * @dev Helper function to verify Merkle proofs
+     */
+    function _verifyMerkleProof(bytes32[] calldata proof, bytes32 root, bytes32 leaf) internal pure returns (bool) {
+        bytes32 computedHash = leaf;
+        
+        for (uint256 i = 0; i < proof.length; i++) {
+            bytes32 proofElement = proof[i];
+            
+            if (computedHash <= proofElement) {
+                // Hash(current computed hash + current element of the proof)
+                computedHash = keccak256(abi.encodePacked(computedHash, proofElement));
+            } else {
+                // Hash(current element of the proof + current computed hash)
+                computedHash = keccak256(abi.encodePacked(proofElement, computedHash));
+            }
+        }
+        
+        // Check if the computed hash equals the root of the Merkle tree
+        return computedHash == root;
+    }
+ 
 
     function _setUsernamePair(string memory username) internal {
         _setUsernameAddressPair(username);
     }
 
     function _usernameRecovery(string memory username) internal {
-        LibMemberRegistry.MemberRegistry_Storage storage ls = LibMemberRegistry.MemberRegistryStorage();
+        LibMemberRegistry.MemberRegistryStorage storage ls = LibMemberRegistry.memberRegistryStorage(); 
 
         LibMemberRegistry.Recovery memory _userVerification = ls.usernameToRecoveryAddress[username];
         if (msgSender() != _userVerification.userNewAddress) {
@@ -54,7 +78,7 @@ contract iMemberRegistry is iOwnership {
     }
 
     function _finalizeRecovery(string memory username) internal {
-        LibMemberRegistry.MemberRegistry_Storage storage ls = LibMemberRegistry.MemberRegistryStorage();
+        LibMemberRegistry.MemberRegistryStorage storage ls = LibMemberRegistry.memberRegistryStorage();
         LibMemberRegistry.Recovery memory _userVerification = ls.usernameToRecoveryAddress[username];
         if (_userVerification.recoveryTimestamp < uint96(block.timestamp) && msgSender() == _userVerification.userNewAddress) {
             _setUsernameAddressPair(username);
@@ -63,31 +87,31 @@ contract iMemberRegistry is iOwnership {
     }
 
     function _cancelVerify(string memory username) internal {
-        LibMemberRegistry.MemberRegistry_Storage storage ls = LibMemberRegistry.MemberRegistryStorage();
+        LibMemberRegistry.MemberRegistryStorage storage ls = LibMemberRegistry.memberRegistryStorage();
         address registeredAddress = ls.usernameToAddress[username];
         if (msgSender() == registeredAddress) {
             ls.usernameToRecoveryAddress[username] = LibMemberRegistry.Recovery(address(0), 0);
             emit RecoveryAction(username, msgSender(), LibMemberRegistry.RecoveryStatus.Cancelled);
         }
-    }
+    } 
 
     function _setUsernameAddressPair(string memory username) internal {
-        LibMemberRegistry.MemberRegistry_Storage storage ls = LibMemberRegistry.MemberRegistryStorage();
+        LibMemberRegistry.MemberRegistryStorage storage ls = LibMemberRegistry.memberRegistryStorage();
 
         ls.usernameToAddress[username] = msgSender();
-        ls.addressToUsername[msgSender()] = username;
+        ls.addressToUsername[msgSender()] = username; 
         emit UserRegistered(username, msgSender());
     }
 
     function _setUsernameOwner( string[] memory username, address[] memory userAddress ) internal {
-        LibMemberRegistry.MemberRegistry_Storage storage ls = LibMemberRegistry.MemberRegistryStorage();
+        LibMemberRegistry.MemberRegistryStorage storage ls = LibMemberRegistry.memberRegistryStorage();
         uint256 length = username.length;
         require(length == userAddress.length,"Parameters must be of same length.");
 
         for( uint256 userIndex; userIndex < length; userIndex ++ ){
             string memory _username = username[ userIndex ];
             address _userAddress = userAddress[ userIndex ];
-
+ 
             ls.usernameToAddress[ _username ] = _userAddress; 
             ls.addressToUsername[ _userAddress ]= _username;  
         }

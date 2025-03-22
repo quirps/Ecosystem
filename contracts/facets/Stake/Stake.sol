@@ -10,7 +10,7 @@ pragma solidity ^0.8.9;
 import {iERC1155Transfer} from "../Tokens/ERC1155/ERC1155Transfer.sol";  
 import {LibERC20} from "../Tokens/ERC20/libraries/LibERC20.sol";  
 import {iOwnership} from "../Ownership/_Ownership.sol";
-import {iMembers} from "../MemberRankings/_Members.sol";
+import {iMembers} from "../MemberLevel/_Members.sol"; 
 
 contract Stake is iERC1155Transfer, iOwnership, iMembers{  
     enum StakeTier {Continious, SevenDay, FourteenDay, TwentyEightDay} 
