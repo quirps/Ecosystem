@@ -13,7 +13,7 @@ import {iOwnership} from "../../Ownership/_Ownership.sol";
 event CurrencyNameChanged(string name);
 event CurrencySymbolChanged(string name);
 
-contract ERC20 is  iOwnership, iERC1155Transfer {
+contract ERC20Ecosystem is iOwnership, iERC1155Transfer {
 
     function setCurrencyNames( string memory _currencyName, string memory _currencySymbol)
     external {

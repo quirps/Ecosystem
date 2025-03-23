@@ -8,7 +8,7 @@ import "./interfaces/IERC1155Receiver.sol";
 /**
  * @dev _Available since v3.1._
  */
-contract ERC1155Receiver is  IERC1155Receiver,iERC1155Receiver  {
+contract ERC1155ReceiverEcosystem is  IERC1155Receiver,iERC1155Receiver  {
 
     function onERC1155Received(
         address operator,
@@ -16,7 +16,7 @@ contract ERC1155Receiver is  IERC1155Receiver,iERC1155Receiver  {
         uint256 id,
         uint256 value,
         bytes calldata data
-    ) external returns (bytes4){
+    ) external pure returns (bytes4){
         return _onERC1155Received();
     }
     function onERC1155BatchReceived(
@@ -25,7 +25,7 @@ contract ERC1155Receiver is  IERC1155Receiver,iERC1155Receiver  {
         uint256[] calldata ids,
         uint256[] calldata values,
         bytes calldata data
-    ) external returns (bytes4){
+    ) external pure returns (bytes4){
         return _onERC1155BatchReceived();
     }
 }

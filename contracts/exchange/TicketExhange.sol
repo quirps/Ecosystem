@@ -1,6 +1,6 @@
 pragma solidity ^0.8.9;
 
-import {ERC1155} from "../facets/Tokens/ERC1155/ERC1155.sol";
+import {ERC1155} from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol"; 
 import {IERC1155Transfer} from "../facets/Tokens/ERC1155/interfaces/IERC1155Transfer.sol";
 import {IERC1155} from "../facets/Tokens/ERC1155/interfaces/IERC1155.sol";
 import {IERC20} from "../facets/Tokens/ERC20/interfaces/IERC20.sol";

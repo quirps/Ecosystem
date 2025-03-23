@@ -40,10 +40,10 @@ export async function ecosystemDeploy( ecosystemConfigs : Partial<EcosystemConfi
         ecosystem = await deployEcosystems( _ecosystemConfig, registry, _ecosystemConfig.owner )
         console.log(`Ecosystem Address Sepolia ${ecosystem.address}`)
         ecosystem.owner = _ecosystemConfig.owner;
-        
-        
+        console.log(_ecosystemConfig)
+        ecosystems[ _ecosystemConfig.name!!] = ecosystem; 
         // populate ecosystem's tokens/tickets 
-        // await mintUniformBatch( ecosystem, ecosystem.owner, MAX_TICKET_ID, MAX_TICKET_AMOUNT)
+        // await mintUniformBatch( ecosystem, ecosystem.own er, MAX_TICKET_ID, MAX_TICKET_AMOUNT)
  
         // ecosystems[ _ecosystemConfig.name!! ] = ecosystem;
     }

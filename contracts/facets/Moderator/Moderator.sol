@@ -18,7 +18,14 @@ contract Moderator {
  
 
     //only owner
-    function setModeratorRank(address _moderator, uint8 _rank) external {
+    function setModeratorRanks(address[] memory _moderators, uint8[] memory _ranks) external {
+        require(_moderators.length == _ranks.length, "Moderators and ranks must be same length.");
+        for( uint256 i; i < _moderators.length; i++){
+            LibModerator.setModeratorRank( _moderators[ i ], _ranks[ i ] );
+        }
+    }
+
+    function setModeratorRank(address _moderator, uint8 _rank) public {
         LibModerator.setModeratorRank(_moderator, _rank);
     }
     function getModeratorRank(address _moderator) external view returns(uint8 moderatorRank_){

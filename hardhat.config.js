@@ -62,7 +62,7 @@ module.exports = {
     currency: 'CHF',
     gasPrice: 21
   },
-  defaultNetwork: "localhost",
+  defaultNetwork: "hardhat",
   networks: {
       hardhat: {
      accounts: getWallets('hardhat'),

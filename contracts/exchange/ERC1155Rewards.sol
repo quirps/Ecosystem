@@ -1,11 +1,11 @@
 pragma solidity ^0.8.9;
 
-import { ERC1155 } from "../facets/Tokens/ERC1155/ERC1155.sol";
+import { ERC1155 } from "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "../facets/Tokens/ERC1155/ERC1155Receiver.sol";
 import { IERC1155 } from "../facets/Tokens/ERC1155/interfaces/IERC1155.sol";
 import { IERC1155MetadataURI } from "../facets/Tokens/ERC1155/interfaces/IERC1155MetadataURI.sol";
 import { iERC1155Transfer } from "../facets/Tokens/ERC1155/internals/iERC1155Transfer.sol";
-contract ERC1155Rewards is  ERC1155Receiver,    iERC1155Transfer { 
+contract ERC1155Rewards is  ERC1155ReceiverEcosystem,    iERC1155Transfer {  
     uint64 constant TIME_POOL_TOKEN_DECIMALS = 10**18;
 
     function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {
@@ -16,4 +16,4 @@ contract ERC1155Rewards is  ERC1155Receiver,    iERC1155Transfer {
             interfaceId == type(IERC1155MetadataURI).interfaceId ;
     }
 }
-    
+     

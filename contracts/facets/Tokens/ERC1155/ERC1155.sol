@@ -18,7 +18,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
  *
  * _Available since v3.1._
  */
-contract ERC1155 is  iERC1155, IERC1155, IERC1155MetadataURI {
+contract ERC1155Ecosystem is  iERC1155, IERC1155, IERC1155MetadataURI {
     using Address for address;
     using Strings for uint256;
     

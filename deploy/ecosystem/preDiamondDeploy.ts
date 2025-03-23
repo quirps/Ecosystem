@@ -46,7 +46,7 @@ export async function facetDeploy(version : string) {
         
         const Facet = await ethers.getContractFactory(facetName);
         const facet = await Facet.deploy()
-
+        console.log(facetName)
         deployedStatuses.push(facet.deployed());
  
         if (facetName == "DiamondCutFacet") {

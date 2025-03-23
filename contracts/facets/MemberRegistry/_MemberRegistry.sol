@@ -25,7 +25,7 @@ contract iMemberRegistry is iOwnership {
      * @param _leaf Level to assign to the user
      * @param _merkleProof Array of hashed data to verify proof
      */  
-    function verifyAndUsername(LibMemberRegistry.Leaf memory _leaf, bytes32[] calldata _merkleProof) external {
+    function _verifyAndUsername(LibMemberRegistry.Leaf memory _leaf, bytes32[] calldata _merkleProof) internal {
         // Create leaf from msg.sender and level
         LibMemberRegistry.MemberRegistryStorage storage mrs = LibMemberRegistry.memberRegistryStorage(); 
 

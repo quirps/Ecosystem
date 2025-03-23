@@ -4,7 +4,7 @@ import { MerkleProof } from  "../libraries/utils/MerkleProof.sol";
 import { iOwnership } from "../facets/Ownership/_Ownership.sol";
 import {IOwnership} from "../facets/Ownership/IOwnership.sol";
 import {IERC20} from "../facets/Tokens/ERC20/interfaces/IERC20.sol";
-import {ERC1155Receiver} from "../facets/Tokens/ERC1155/ERC1155Receiver.sol"; 
+import {ERC1155ReceiverEcosystem} from "../facets/Tokens/ERC1155/ERC1155Receiver.sol"; 
 /**
     A contract that enables users to purchase the owner's token directly via some set ratio between
     owner token and a stable token of sorts. 
@@ -19,23 +19,20 @@ import {ERC1155Receiver} from "../facets/Tokens/ERC1155/ERC1155Receiver.sol";
  This must be in an external contract from the ecosystem, so we'll host on the exchange.
  Also need to seperate out what needs to be linked together on the exchange.
   */ 
-contract IPOCreate is iOwnership, ERC1155Receiver {
+contract IPOCreate is iOwnership, ERC1155ReceiverEcosystem {
  
     struct IPO{
         Ecosystem ecosystem;
         bytes32 merkleRoot;
         uint256 ratio;
-        OutputCurrency outputCurrency;
+        address inputTokenAddress;
         uint32 deadline;
         uint256 maxAmountPerUser; // on-chain purchases
         uint256 totalAmount; //total amount for purchase on chain
         mapping(address => UserReward ) userReward;
     }
 
-    struct OutputCurrency{
-        bool isBaseCurrency;
-        address tokenAddress;
-    }
+
     struct Ecosystem{
         address payable ownerAddress;
         address ecosystemAddress;
@@ -58,7 +55,7 @@ contract IPOCreate is iOwnership, ERC1155Receiver {
     event IPOCreated(uint256 totalAmount, uint256 maxAmountPerUser, uint256 ratio);
     event IPOPurchaseConsumed( address tokenReceiver, uint256 amount, bool isOnChainPurchase);
 
-    function setIPO(uint256 IPOid, bytes32 _merkleRoot, uint256 _totalAmount, uint256 _maxAmountPerUser, uint256 _ratio, uint32 _deadline, Ecosystem memory _ecosystem, OutputCurrency memory _outputCurrency) external {
+    function setIPO(uint256 IPOid, bytes32 _merkleRoot, uint256 _totalAmount, uint256 _maxAmountPerUser, uint256 _ratio, uint32 _deadline, Ecosystem memory _ecosystem, address _inputTokenAddress) external {
         IPO storage _ipo = ipo[ IPOid ];
 
         require( _ipo.deadline != uint32(0), "An IPO already exists for this id.");
@@ -67,7 +64,7 @@ contract IPOCreate is iOwnership, ERC1155Receiver {
         _ipo.ecosystem = _ecosystem;
         _ipo.merkleRoot = _merkleRoot;
         _ipo.ratio = _ratio;
-        _ipo.outputCurrency = _outputCurrency;
+        _ipo.inputTokenAddress = _inputTokenAddress; 
         _ipo.deadline = _deadline;
         _ipo.maxAmountPerUser = _maxAmountPerUser;
         _ipo.totalAmount = _totalAmount;
@@ -120,12 +117,9 @@ contract IPOCreate is iOwnership, ERC1155Receiver {
         uint256 totalSpend = amount * _ipo.ratio;
         //transfer totalSpend to ecosystem owner
         address payable _ownerAddress = _ipo.ecosystem.ownerAddress; 
-        if(_ipo.outputCurrency.isBaseCurrency){
-            _ownerAddress.transfer(totalSpend); 
-        }
-        else {
-            IERC20(_ipo.outputCurrency.tokenAddress).transferFrom(msgSender(), _ownerAddress, totalSpend);
-        }
+
+        IERC20(_ipo.inputTokenAddress).transferFrom(msgSender(), _ownerAddress, totalSpend);
+        
 
         uint256 currentUserTotal = _ipo.userReward[ msgSender() ].userTotalAmount;
         require( _ipo.maxAmountPerUser >= currentUserTotal + amount,"Cannot exceed the max amount of tokens permitted per user.");
