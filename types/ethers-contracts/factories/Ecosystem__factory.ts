@@ -5,7 +5,7 @@
 import { Contract, Signer, utils } from "ethers";
 import type { Provider } from "@ethersproject/providers";
 import type { Ecosystem, EcosystemInterface } from "../Ecosystem";
-export type { Ecosytem };
+
 const _abi = [
   {
     inputs: [
@@ -37,6 +37,48 @@ const _abi = [
     inputs: [],
     name: "MigrationNotInitiated",
     type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "facetAddress",
+            type: "address",
+          },
+          {
+            internalType: "enum IDiamondCut.FacetCutAction",
+            name: "action",
+            type: "uint8",
+          },
+          {
+            internalType: "bytes4[]",
+            name: "functionSelectors",
+            type: "bytes4[]",
+          },
+        ],
+        indexed: false,
+        internalType: "struct IDiamondCut.FacetCut[]",
+        name: "_diamondCut",
+        type: "tuple[]",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "_init",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "bytes",
+        name: "_calldata",
+        type: "bytes",
+      },
+    ],
+    name: "DiamondCut",
+    type: "event",
   },
   {
     anonymous: false,
@@ -286,6 +328,119 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
+        indexed: false,
+        internalType: "address",
+        name: "cancellor",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
+        name: "timeCancelled",
+        type: "uint32",
+      },
+    ],
+    name: "MigrationCancelled",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "initiatior",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
+        name: "timeInitiatied",
+        type: "uint32",
+      },
+    ],
+    name: "MigrationInitiated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "sender",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "salePrice",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "royaltyAmount",
+        type: "uint256",
+      },
+    ],
+    name: "RoyaltyFeeAccessed",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "tokenId",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "salePrice",
+        type: "uint256",
+      },
+    ],
+    name: "royaltyInfo",
+    outputs: [
+      {
+        internalType: "address",
+        name: "receiver",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "royaltyAmount",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "MigrationAlreadyCompleted",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "MigrationAlreadyInitiated",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "MigrationNotInitiated",
+    type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
         indexed: true,
         internalType: "address",
         name: "account",
@@ -371,6 +526,12 @@ const _abi = [
         internalType: "string",
         name: "imageUri",
         type: "string",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "maxEntriesPerUser",
+        type: "uint256",
       },
       {
         indexed: false,
@@ -491,24 +652,6 @@ const _abi = [
         internalType: "uint256[]",
         name: "ticketIds",
         type: "uint256[]",
-      },
-      {
-        components: [
-          {
-            internalType: "uint256",
-            name: "minAmount",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "maxAmount",
-            type: "uint256",
-          },
-        ],
-        indexed: false,
-        internalType: "struct LibEventFactory.TicketDetail[]",
-        name: "ticketDetails",
-        type: "tuple[]",
       },
     ],
     name: "TicketDetails",
@@ -671,21 +814,9 @@ const _abi = [
         type: "uint256[]",
       },
       {
-        components: [
-          {
-            internalType: "uint256",
-            name: "minAmount",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "maxAmount",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct LibEventFactory.TicketDetail[]",
-        name: "_ticketDetails",
-        type: "tuple[]",
+        internalType: "uint256",
+        name: "_maxEntriesPerUser",
+        type: "uint256",
       },
     ],
     name: "createEvent",
@@ -848,23 +979,47 @@ const _abi = [
       {
         indexed: true,
         internalType: "address",
-        name: "account",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "operator",
+        name: "user",
         type: "address",
       },
       {
         indexed: false,
-        internalType: "bool",
-        name: "approved",
-        type: "bool",
+        internalType: "uint32",
+        name: "timestamp",
+        type: "uint32",
       },
     ],
-    name: "ApprovalForAll",
+    name: "MemberBanned",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "memberAddress",
+            type: "address",
+          },
+          {
+            internalType: "uint32",
+            name: "level",
+            type: "uint32",
+          },
+          {
+            internalType: "uint32",
+            name: "timestamp",
+            type: "uint32",
+          },
+        ],
+        indexed: false,
+        internalType: "struct LibMemberLevel.Leaf",
+        name: "leaf",
+        type: "tuple",
+      },
+    ],
+    name: "MemberLevelUpdated",
     type: "event",
   },
   {
@@ -872,55 +1027,12 @@ const _abi = [
     inputs: [
       {
         indexed: false,
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "enum iMembers.BountyAccountChange",
-        name: "direction",
-        type: "uint8",
+        internalType: "bytes32",
+        name: "newRoot",
+        type: "bytes32",
       },
     ],
-    name: "BountyBalanceChange",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: "address",
-        name: "receiver",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "bountyUp",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "bountyUpRate",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "bountiesDown",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "bountyDownRate",
-        type: "uint256",
-      },
-    ],
-    name: "BountyEvent",
+    name: "MerkleRootUpdated",
     type: "event",
   },
   {
@@ -962,427 +1074,124 @@ const _abi = [
     type: "event",
   },
   {
-    anonymous: false,
     inputs: [
       {
-        indexed: true,
         internalType: "address",
-        name: "operator",
+        name: "_user",
         type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "from",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256[]",
-        name: "ids",
-        type: "uint256[]",
-      },
-      {
-        indexed: false,
-        internalType: "uint256[]",
-        name: "values",
-        type: "uint256[]",
       },
     ],
-    name: "TransferBatch",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: "address",
-        name: "operator",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "from",
-        type: "address",
-      },
-      {
-        indexed: true,
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "id",
-        type: "uint256",
-      },
-      {
-        indexed: false,
-        internalType: "uint256",
-        name: "value",
-        type: "uint256",
-      },
-    ],
-    name: "TransferSingle",
-    type: "event",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "addBountyBalance",
+    name: "banMember",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
   },
   {
-    inputs: [],
-    name: "bountyAddress",
-    outputs: [
-      {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "currencyId",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "downRate",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getBounty",
-    outputs: [
+    inputs: [
       {
         components: [
           {
-            internalType: "uint256",
-            name: "currencyId",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "maxBalance",
-            type: "uint256",
-          },
-          {
             internalType: "address",
-            name: "bountyAddress",
+            name: "memberAddress",
             type: "address",
           },
           {
-            internalType: "uint256",
-            name: "upRate",
-            type: "uint256",
+            internalType: "uint32",
+            name: "level",
+            type: "uint32",
           },
-          {
-            internalType: "uint256",
-            name: "downRate",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct iMembers.Bounty",
-        name: "bounty_",
-        type: "tuple",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "user",
-        type: "address",
-      },
-    ],
-    name: "getRank",
-    outputs: [
-      {
-        internalType: "uint32",
-        name: "rank_",
-        type: "uint32",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "user",
-        type: "address",
-      },
-      {
-        internalType: "uint64",
-        name: "depth",
-        type: "uint64",
-      },
-    ],
-    name: "getUserRankHistory",
-    outputs: [
-      {
-        components: [
           {
             internalType: "uint32",
             name: "timestamp",
             type: "uint32",
           },
+        ],
+        internalType: "struct LibMemberLevel.Leaf[]",
+        name: "_leaves",
+        type: "tuple[]",
+      },
+    ],
+    name: "batchSetLevels",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_user",
+        type: "address",
+      },
+    ],
+    name: "getMemberLevel",
+    outputs: [
+      {
+        internalType: "uint32",
+        name: "memberLevel_",
+        type: "uint32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_user",
+        type: "address",
+      },
+    ],
+    name: "getMemberLevelStruct",
+    outputs: [
+      {
+        internalType: "uint32",
+        name: "level",
+        type: "uint32",
+      },
+      {
+        internalType: "uint32",
+        name: "timestamp",
+        type: "uint32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "memberAddress",
+            type: "address",
+          },
           {
             internalType: "uint32",
-            name: "rank",
+            name: "level",
+            type: "uint32",
+          },
+          {
+            internalType: "uint32",
+            name: "timestamp",
             type: "uint32",
           },
         ],
-        internalType: "struct LibMembers.MemberRank[]",
-        name: "rank_",
-        type: "tuple[]",
-      },
-    ],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "maxBalance",
-    outputs: [
-      {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "amount",
-        type: "uint256",
-      },
-    ],
-    name: "removeBountyBalance",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint256",
-        name: "_maxBalance",
-        type: "uint256",
-      },
-      {
-        internalType: "address",
-        name: "_bountyAddress",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "_upRate",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_downRate",
-        type: "uint256",
-      },
-    ],
-    name: "setBountyConfig",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "address",
-            name: "memberAddress",
-            type: "address",
-          },
-          {
-            components: [
-              {
-                internalType: "uint32",
-                name: "timestamp",
-                type: "uint32",
-              },
-              {
-                internalType: "uint32",
-                name: "rank",
-                type: "uint32",
-              },
-            ],
-            internalType: "struct LibMembers.MemberRank",
-            name: "memberRank",
-            type: "tuple",
-          },
-        ],
-        internalType: "struct LibMembers.Leaf[]",
-        name: "leaves",
-        type: "tuple[]",
-      },
-    ],
-    name: "setMemberRankOwner",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        components: [
-          {
-            internalType: "address",
-            name: "memberAddress",
-            type: "address",
-          },
-          {
-            components: [
-              {
-                internalType: "uint32",
-                name: "timestamp",
-                type: "uint32",
-              },
-              {
-                internalType: "uint32",
-                name: "rank",
-                type: "uint32",
-              },
-            ],
-            internalType: "struct LibMembers.MemberRank",
-            name: "memberRank",
-            type: "tuple",
-          },
-        ],
-        internalType: "struct LibMembers.Leaf[]",
-        name: "leaves",
-        type: "tuple[]",
-      },
-    ],
-    name: "setMembersRankPermissioned",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "uint8",
-        name: "v",
-        type: "uint8",
-      },
-      {
-        internalType: "bytes32",
-        name: "r",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "s",
-        type: "bytes32",
-      },
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        internalType: "uint256",
-        name: "nonce",
-        type: "uint256",
-      },
-      {
-        components: [
-          {
-            internalType: "address",
-            name: "memberAddress",
-            type: "address",
-          },
-          {
-            components: [
-              {
-                internalType: "uint32",
-                name: "timestamp",
-                type: "uint32",
-              },
-              {
-                internalType: "uint32",
-                name: "rank",
-                type: "uint32",
-              },
-            ],
-            internalType: "struct LibMembers.MemberRank",
-            name: "memberRank",
-            type: "tuple",
-          },
-        ],
-        internalType: "struct LibMembers.Leaf",
-        name: "leaf",
+        internalType: "struct LibMemberLevel.Leaf",
+        name: "_leaf",
         type: "tuple",
       },
-    ],
-    name: "setMembersRanks",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "upRate",
-    outputs: [
       {
-        internalType: "uint256",
-        name: "",
-        type: "uint256",
+        internalType: "bytes32[]",
+        name: "_merkleProof",
+        type: "bytes32[]",
       },
     ],
-    stateMutability: "view",
+    name: "verifyAndSetLevel",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -1535,7 +1344,51 @@ const _abi = [
         type: "string",
       },
     ],
+    name: "setUsernameAddressPair",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string[]",
+        name: "username",
+        type: "string[]",
+      },
+      {
+        internalType: "address[]",
+        name: "userAddress",
+        type: "address[]",
+      },
+    ],
     name: "setUsernameOwner",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+    ],
+    name: "setUsernamePair",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+    ],
+    name: "usernameRecovery",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1556,47 +1409,29 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "string",
-        name: "username",
-        type: "string",
+        components: [
+          {
+            internalType: "string",
+            name: "username",
+            type: "string",
+          },
+          {
+            internalType: "address",
+            name: "userAddress",
+            type: "address",
+          },
+        ],
+        internalType: "struct LibMemberRegistry.Leaf",
+        name: "_leaf",
+        type: "tuple",
       },
       {
-        internalType: "uint8",
-        name: "v",
-        type: "uint8",
-      },
-      {
-        internalType: "bytes32",
-        name: "r",
-        type: "bytes32",
-      },
-      {
-        internalType: "bytes32",
-        name: "s",
-        type: "bytes32",
-      },
-      {
-        internalType: "address",
-        name: "owner",
-        type: "address",
-      },
-      {
-        internalType: "bytes32",
-        name: "merkleRoot",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "nonce",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "deadline",
-        type: "uint256",
+        internalType: "bytes32[]",
+        name: "_merkleProof",
+        type: "bytes32[]",
       },
     ],
-    name: "verifyUsername",
+    name: "verifyAndUsername",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1634,6 +1469,24 @@ const _abi = [
       },
     ],
     name: "setModeratorRank",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address[]",
+        name: "_moderators",
+        type: "address[]",
+      },
+      {
+        internalType: "uint8[]",
+        name: "_ranks",
+        type: "uint8[]",
+      },
+    ],
+    name: "setModeratorRanks",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1692,6 +1545,25 @@ const _abi = [
     type: "event",
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "previousOwner",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipTransferred",
+    type: "event",
+  },
+  {
     inputs: [],
     name: "ecosystemOwner",
     outputs: [
@@ -1726,6 +1598,1019 @@ const _abi = [
       },
     ],
     name: "setEcosystemOwner",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "MigrationAlreadyCompleted",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "MigrationAlreadyInitiated",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "MigrationNotInitiated",
+    type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "operator",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "bool",
+        name: "approved",
+        type: "bool",
+      },
+    ],
+    name: "ApprovalForAll",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
+        name: "timestamp",
+        type: "uint32",
+      },
+    ],
+    name: "MemberBanned",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "memberAddress",
+            type: "address",
+          },
+          {
+            internalType: "uint32",
+            name: "level",
+            type: "uint32",
+          },
+          {
+            internalType: "uint32",
+            name: "timestamp",
+            type: "uint32",
+          },
+        ],
+        indexed: false,
+        internalType: "struct LibMemberLevel.Leaf",
+        name: "leaf",
+        type: "tuple",
+      },
+    ],
+    name: "MemberLevelUpdated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "newRoot",
+        type: "bytes32",
+      },
+    ],
+    name: "MerkleRootUpdated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "cancellor",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
+        name: "timeCancelled",
+        type: "uint32",
+      },
+    ],
+    name: "MigrationCancelled",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "initiatior",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
+        name: "timeInitiatied",
+        type: "uint32",
+      },
+    ],
+    name: "MigrationInitiated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "uint16",
+            name: "initialRate",
+            type: "uint16",
+          },
+          {
+            internalType: "uint16",
+            name: "rateIncrease",
+            type: "uint16",
+          },
+          {
+            internalType: "uint16",
+            name: "rateIncreaseStopDuration",
+            type: "uint16",
+          },
+        ],
+        indexed: false,
+        internalType: "struct Stake.RewardRate[]",
+        name: "_rewardRates",
+        type: "tuple[]",
+      },
+    ],
+    name: "RewardRatesChanged",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "reward",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "stakeId",
+        type: "uint256",
+      },
+    ],
+    name: "RewardsRetrieved",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "funder",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "StakeRewardAccountFunded",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "operator",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256[]",
+        name: "ids",
+        type: "uint256[]",
+      },
+      {
+        indexed: false,
+        internalType: "uint256[]",
+        name: "values",
+        type: "uint256[]",
+      },
+    ],
+    name: "TransferBatch",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "operator",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "value",
+        type: "uint256",
+      },
+    ],
+    name: "TransferSingle",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address[]",
+        name: "user",
+        type: "address[]",
+      },
+      {
+        internalType: "uint256[]",
+        name: "amount",
+        type: "uint256[]",
+      },
+      {
+        internalType: "enum Stake.StakeTier[]",
+        name: "tier",
+        type: "uint8[]",
+      },
+      {
+        internalType: "uint256[]",
+        name: "stakeIds",
+        type: "uint256[]",
+      },
+    ],
+    name: "batchStake",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+    ],
+    name: "fundStakeAccount",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getGasStakeFee",
+    outputs: [
+      {
+        internalType: "uint24",
+        name: "feeScale_",
+        type: "uint24",
+      },
+      {
+        internalType: "uint24",
+        name: "fee_",
+        type: "uint24",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "enum Stake.StakeTier[]",
+        name: "_stakeTier",
+        type: "uint8[]",
+      },
+      {
+        components: [
+          {
+            internalType: "uint16",
+            name: "initialRate",
+            type: "uint16",
+          },
+          {
+            internalType: "uint16",
+            name: "rateIncrease",
+            type: "uint16",
+          },
+          {
+            internalType: "uint16",
+            name: "rateIncreaseStopDuration",
+            type: "uint16",
+          },
+        ],
+        internalType: "struct Stake.RewardRate[]",
+        name: "_rewardRate",
+        type: "tuple[]",
+      },
+    ],
+    name: "setRewardRates",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "enum Stake.StakeTier",
+        name: "tier",
+        type: "uint8",
+      },
+      {
+        internalType: "uint256",
+        name: "stakeId",
+        type: "uint256",
+      },
+    ],
+    name: "stake",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "staker",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "enum Stake.StakeTier",
+        name: "tier",
+        type: "uint8",
+      },
+      {
+        internalType: "uint256",
+        name: "stakeId",
+        type: "uint256",
+      },
+    ],
+    name: "stakeContract",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "staker",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "enum Stake.StakeTier",
+        name: "tier",
+        type: "uint8",
+      },
+      {
+        internalType: "uint256",
+        name: "stakeId",
+        type: "uint256",
+      },
+    ],
+    name: "stakeVirtual",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "stakeId",
+        type: "uint256",
+      },
+    ],
+    name: "unstake",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "staker",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "stakeId",
+        type: "uint256",
+      },
+    ],
+    name: "unstakeContract",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "staker",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "stakeId",
+        type: "uint256",
+      },
+    ],
+    name: "unstakeVirtual",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "stakeId",
+        type: "uint256",
+      },
+    ],
+    name: "viewMinimumStakeDurationLeft",
+    outputs: [
+      {
+        internalType: "uint32",
+        name: "timeLeft_",
+        type: "uint32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "stakeId",
+        type: "uint256",
+      },
+    ],
+    name: "viewReward",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "reward_",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "MigrationAlreadyCompleted",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "MigrationAlreadyInitiated",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "MigrationNotInitiated",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "ticketId",
+        type: "uint256",
+      },
+    ],
+    name: "NonTransferableError",
+    type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
+        name: "timestamp",
+        type: "uint32",
+      },
+    ],
+    name: "MemberBanned",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "memberAddress",
+            type: "address",
+          },
+          {
+            internalType: "uint32",
+            name: "level",
+            type: "uint32",
+          },
+          {
+            internalType: "uint32",
+            name: "timestamp",
+            type: "uint32",
+          },
+        ],
+        indexed: false,
+        internalType: "struct LibMemberLevel.Leaf",
+        name: "leaf",
+        type: "tuple",
+      },
+    ],
+    name: "MemberLevelUpdated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "newRoot",
+        type: "bytes32",
+      },
+    ],
+    name: "MerkleRootUpdated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "cancellor",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
+        name: "timeCancelled",
+        type: "uint32",
+      },
+    ],
+    name: "MigrationCancelled",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "initiatior",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
+        name: "timeInitiatied",
+        type: "uint32",
+      },
+    ],
+    name: "MigrationInitiated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+      {
+        components: [
+          {
+            internalType: "string",
+            name: "title",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "description",
+            type: "string",
+          },
+        ],
+        indexed: false,
+        internalType: "struct TicketCreate.TicketMeta",
+        name: "",
+        type: "tuple",
+      },
+    ],
+    name: "TicketsCreated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "operator",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256[]",
+        name: "ids",
+        type: "uint256[]",
+      },
+      {
+        indexed: false,
+        internalType: "uint256[]",
+        name: "values",
+        type: "uint256[]",
+      },
+    ],
+    name: "TransferBatch",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "operator",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "id",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "value",
+        type: "uint256",
+      },
+    ],
+    name: "TransferSingle",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "ticketId",
+        type: "uint256",
+      },
+    ],
+    name: "expireable",
+    outputs: [],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+      {
+        components: [
+          {
+            internalType: "string",
+            name: "title",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "description",
+            type: "string",
+          },
+        ],
+        internalType: "struct TicketCreate.TicketMeta",
+        name: "_ticketMeta",
+        type: "tuple",
+      },
+      {
+        components: [
+          {
+            components: [
+              {
+                internalType: "uint256",
+                name: "maxTransfers",
+                type: "uint256",
+              },
+              {
+                internalType: "bool",
+                name: "isActive",
+                type: "bool",
+              },
+            ],
+            internalType: "struct LibERC1155TransferConstraints.TransferLimit",
+            name: "transferLimit",
+            type: "tuple",
+          },
+          {
+            components: [
+              {
+                internalType: "uint32",
+                name: "minimumLevel",
+                type: "uint32",
+              },
+              {
+                internalType: "bool",
+                name: "isActive",
+                type: "bool",
+              },
+            ],
+            internalType:
+              "struct LibERC1155TransferConstraints.MemberLevelDependency",
+            name: "minimumMembershipLevel",
+            type: "tuple",
+          },
+          {
+            components: [
+              {
+                internalType: "uint32",
+                name: "expireTime",
+                type: "uint32",
+              },
+              {
+                internalType: "bool",
+                name: "isActive",
+                type: "bool",
+              },
+            ],
+            internalType: "struct LibERC1155TransferConstraints.Expireable",
+            name: "expireable",
+            type: "tuple",
+          },
+        ],
+        internalType: "struct LibERC1155TransferConstraints.Constraints",
+        name: "_constraints",
+        type: "tuple",
+      },
+    ],
+    name: "ticketCreate",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256[]",
+        name: "_amount",
+        type: "uint256[]",
+      },
+      {
+        components: [
+          {
+            internalType: "string",
+            name: "title",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "description",
+            type: "string",
+          },
+        ],
+        internalType: "struct TicketCreate.TicketMeta[]",
+        name: "_ticketMeta",
+        type: "tuple[]",
+      },
+      {
+        components: [
+          {
+            components: [
+              {
+                internalType: "uint256",
+                name: "maxTransfers",
+                type: "uint256",
+              },
+              {
+                internalType: "bool",
+                name: "isActive",
+                type: "bool",
+              },
+            ],
+            internalType: "struct LibERC1155TransferConstraints.TransferLimit",
+            name: "transferLimit",
+            type: "tuple",
+          },
+          {
+            components: [
+              {
+                internalType: "uint32",
+                name: "minimumLevel",
+                type: "uint32",
+              },
+              {
+                internalType: "bool",
+                name: "isActive",
+                type: "bool",
+              },
+            ],
+            internalType:
+              "struct LibERC1155TransferConstraints.MemberLevelDependency",
+            name: "minimumMembershipLevel",
+            type: "tuple",
+          },
+          {
+            components: [
+              {
+                internalType: "uint32",
+                name: "expireTime",
+                type: "uint32",
+              },
+              {
+                internalType: "bool",
+                name: "isActive",
+                type: "bool",
+              },
+            ],
+            internalType: "struct LibERC1155TransferConstraints.Expireable",
+            name: "expireable",
+            type: "tuple",
+          },
+        ],
+        internalType: "struct LibERC1155TransferConstraints.Constraints[]",
+        name: "_constraints",
+        type: "tuple[]",
+      },
+    ],
+    name: "ticketCreateBatch",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1874,6 +2759,19 @@ const _abi = [
       },
     ],
     name: "URI",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "string",
+        name: "uri",
+        type: "string",
+      },
+    ],
+    name: "URIChanged",
     type: "event",
   },
   {
@@ -2029,8 +2927,21 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "string",
+        name: "_uri",
+        type: "string",
+      },
+    ],
+    name: "setUri",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "uint256",
-        name: "",
+        name: "tokenId",
         type: "uint256",
       },
     ],
@@ -2081,7 +2992,7 @@ const _abi = [
         type: "bytes4",
       },
     ],
-    stateMutability: "nonpayable",
+    stateMutability: "pure",
     type: "function",
   },
   {
@@ -2120,7 +3031,7 @@ const _abi = [
         type: "bytes4",
       },
     ],
-    stateMutability: "nonpayable",
+    stateMutability: "pure",
     type: "function",
   },
   {
@@ -2375,6 +3286,32 @@ const _abi = [
     inputs: [
       {
         indexed: false,
+        internalType: "string",
+        name: "name",
+        type: "string",
+      },
+    ],
+    name: "CurrencyNameChanged",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "string",
+        name: "name",
+        type: "string",
+      },
+    ],
+    name: "CurrencySymbolChanged",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
         internalType: "address",
         name: "cancellor",
         type: "address",
@@ -2579,24 +3516,16 @@ const _abi = [
     inputs: [
       {
         internalType: "string",
-        name: "_name",
+        name: "_currencyName",
         type: "string",
       },
-    ],
-    name: "setName",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
       {
         internalType: "string",
-        name: "_symbol",
+        name: "_currencySymbol",
         type: "string",
       },
     ],
-    name: "setSymbol",
+    name: "setCurrencyNames",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

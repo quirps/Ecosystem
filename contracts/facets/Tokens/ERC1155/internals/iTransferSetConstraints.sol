@@ -94,6 +94,10 @@ Would like to clean this function up at some point.
             //expireable set
             bitMap ^= (1 << 3);
         }
+        if(_constraints.royaltyFee.isActive){ 
+            //expireable set
+            bitMap ^= (1 << 4);
+        }
       
         
         //get nonce
@@ -116,6 +120,9 @@ Would like to clean this function up at some point.
         }   
         if(_constraints.expireable.isActive){   
             cs.expireTime[ticketId] = _constraints.expireable.expireTime;
+        } 
+        if(_constraints.expireable.isActive){   
+            cs.royaltyFee[ticketId] = _constraints.royaltyFee.fee;
         } 
         
 

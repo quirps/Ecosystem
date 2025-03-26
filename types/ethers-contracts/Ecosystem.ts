@@ -53,61 +53,103 @@ export declare namespace IDiamondLoupe {
   };
 }
 
-export declare namespace LibEventFactory {
-  export type TicketDetailStruct = {
-    minAmount: PromiseOrValue<BigNumberish>;
-    maxAmount: PromiseOrValue<BigNumberish>;
-  };
-
-  export type TicketDetailStructOutput = [BigNumber, BigNumber] & {
-    minAmount: BigNumber;
-    maxAmount: BigNumber;
-  };
-}
-
-export declare namespace IMembers {
-  export type BountyStruct = {
-    currencyId: PromiseOrValue<BigNumberish>;
-    maxBalance: PromiseOrValue<BigNumberish>;
-    bountyAddress: PromiseOrValue<string>;
-    upRate: PromiseOrValue<BigNumberish>;
-    downRate: PromiseOrValue<BigNumberish>;
-  };
-
-  export type BountyStructOutput = [
-    BigNumber,
-    BigNumber,
-    string,
-    BigNumber,
-    BigNumber
-  ] & {
-    currencyId: BigNumber;
-    maxBalance: BigNumber;
-    bountyAddress: string;
-    upRate: BigNumber;
-    downRate: BigNumber;
-  };
-}
-
-export declare namespace LibMembers {
-  export type MemberRankStruct = {
-    timestamp: PromiseOrValue<BigNumberish>;
-    rank: PromiseOrValue<BigNumberish>;
-  };
-
-  export type MemberRankStructOutput = [number, number] & {
-    timestamp: number;
-    rank: number;
-  };
-
+export declare namespace LibMemberLevel {
   export type LeafStruct = {
     memberAddress: PromiseOrValue<string>;
-    memberRank: LibMembers.MemberRankStruct;
+    level: PromiseOrValue<BigNumberish>;
+    timestamp: PromiseOrValue<BigNumberish>;
   };
 
-  export type LeafStructOutput = [string, LibMembers.MemberRankStructOutput] & {
+  export type LeafStructOutput = [string, number, number] & {
     memberAddress: string;
-    memberRank: LibMembers.MemberRankStructOutput;
+    level: number;
+    timestamp: number;
+  };
+}
+
+export declare namespace LibMemberRegistry {
+  export type LeafStruct = {
+    username: PromiseOrValue<string>;
+    userAddress: PromiseOrValue<string>;
+  };
+
+  export type LeafStructOutput = [string, string] & {
+    username: string;
+    userAddress: string;
+  };
+}
+
+export declare namespace Stake {
+  export type RewardRateStruct = {
+    initialRate: PromiseOrValue<BigNumberish>;
+    rateIncrease: PromiseOrValue<BigNumberish>;
+    rateIncreaseStopDuration: PromiseOrValue<BigNumberish>;
+  };
+
+  export type RewardRateStructOutput = [number, number, number] & {
+    initialRate: number;
+    rateIncrease: number;
+    rateIncreaseStopDuration: number;
+  };
+}
+
+export declare namespace TicketCreate {
+  export type TicketMetaStruct = {
+    title: PromiseOrValue<string>;
+    description: PromiseOrValue<string>;
+  };
+
+  export type TicketMetaStructOutput = [string, string] & {
+    title: string;
+    description: string;
+  };
+}
+
+export declare namespace LibERC1155TransferConstraints {
+  export type TransferLimitStruct = {
+    maxTransfers: PromiseOrValue<BigNumberish>;
+    isActive: PromiseOrValue<boolean>;
+  };
+
+  export type TransferLimitStructOutput = [BigNumber, boolean] & {
+    maxTransfers: BigNumber;
+    isActive: boolean;
+  };
+
+  export type MemberLevelDependencyStruct = {
+    minimumLevel: PromiseOrValue<BigNumberish>;
+    isActive: PromiseOrValue<boolean>;
+  };
+
+  export type MemberLevelDependencyStructOutput = [number, boolean] & {
+    minimumLevel: number;
+    isActive: boolean;
+  };
+
+  export type ExpireableStruct = {
+    expireTime: PromiseOrValue<BigNumberish>;
+    isActive: PromiseOrValue<boolean>;
+  };
+
+  export type ExpireableStructOutput = [number, boolean] & {
+    expireTime: number;
+    isActive: boolean;
+  };
+
+  export type ConstraintsStruct = {
+    transferLimit: LibERC1155TransferConstraints.TransferLimitStruct;
+    minimumMembershipLevel: LibERC1155TransferConstraints.MemberLevelDependencyStruct;
+    expireable: LibERC1155TransferConstraints.ExpireableStruct;
+  };
+
+  export type ConstraintsStructOutput = [
+    LibERC1155TransferConstraints.TransferLimitStructOutput,
+    LibERC1155TransferConstraints.MemberLevelDependencyStructOutput,
+    LibERC1155TransferConstraints.ExpireableStructOutput
+  ] & {
+    transferLimit: LibERC1155TransferConstraints.TransferLimitStructOutput;
+    minimumMembershipLevel: LibERC1155TransferConstraints.MemberLevelDependencyStructOutput;
+    expireable: LibERC1155TransferConstraints.ExpireableStructOutput;
   };
 }
 
@@ -121,37 +163,48 @@ export interface EcosystemInterface extends utils.Interface {
     "facetFunctionSelectors(address)": FunctionFragment;
     "facets()": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
-    "createEvent(uint32,uint32,uint256,uint256,string,uint256[],(uint256,uint256)[])": FunctionFragment;
+    "royaltyInfo(uint256,uint256)": FunctionFragment;
+    "createEvent(uint32,uint32,uint256,uint256,string,uint256[],uint256)": FunctionFragment;
     "deactivateEvent(uint256,bytes32)": FunctionFragment;
     "extendEvent(uint256,uint32)": FunctionFragment;
     "redeemTickets(uint256,uint256[],uint256[])": FunctionFragment;
     "refundTicketsWithProof(uint256,uint256[],address,address,bytes32[])": FunctionFragment;
     "setImageUri(uint256,string)": FunctionFragment;
     "setMerkleRoot(uint256,bytes32)": FunctionFragment;
-    "addBountyBalance(uint256)": FunctionFragment;
-    "bountyAddress()": FunctionFragment;
-    "currencyId()": FunctionFragment;
-    "downRate()": FunctionFragment;
-    "getBounty()": FunctionFragment;
-    "getRank(address)": FunctionFragment;
-    "getUserRankHistory(address,uint64)": FunctionFragment;
-    "maxBalance()": FunctionFragment;
-    "removeBountyBalance(uint256)": FunctionFragment;
-    "setBountyConfig(uint256,address,uint256,uint256)": FunctionFragment;
-    "setMemberRankOwner((address,(uint32,uint32))[])": FunctionFragment;
-    "setMembersRankPermissioned((address,(uint32,uint32))[])": FunctionFragment;
-    "setMembersRanks(uint8,bytes32,bytes32,address,uint256,(address,(uint32,uint32)))": FunctionFragment;
-    "upRate()": FunctionFragment;
+    "banMember(address)": FunctionFragment;
+    "batchSetLevels((address,uint32,uint32)[])": FunctionFragment;
+    "getMemberLevel(address)": FunctionFragment;
+    "getMemberLevelStruct(address)": FunctionFragment;
+    "verifyAndSetLevel((address,uint32,uint32),bytes32[])": FunctionFragment;
     "cancelVerify(string)": FunctionFragment;
     "finalizeRecovery(string)": FunctionFragment;
-    "setUsernameOwner(string)": FunctionFragment;
+    "setUsernameAddressPair(string)": FunctionFragment;
+    "setUsernameOwner(string[],address[])": FunctionFragment;
+    "setUsernamePair(string)": FunctionFragment;
+    "usernameRecovery(string)": FunctionFragment;
     "verificationTime()": FunctionFragment;
-    "verifyUsername(string,uint8,bytes32,bytes32,address,bytes32,uint256,uint256)": FunctionFragment;
+    "verifyAndUsername((string,address),bytes32[])": FunctionFragment;
     "getModeratorRank(address)": FunctionFragment;
     "setModeratorRank(address,uint8)": FunctionFragment;
+    "setModeratorRanks(address[],uint8[])": FunctionFragment;
     "ecosystemOwner()": FunctionFragment;
     "isEcosystemOwnerVerify(address)": FunctionFragment;
     "setEcosystemOwner(address)": FunctionFragment;
+    "batchStake(address[],uint256[],uint8[],uint256[])": FunctionFragment;
+    "fundStakeAccount(uint256)": FunctionFragment;
+    "getGasStakeFee()": FunctionFragment;
+    "setRewardRates(uint8[],(uint16,uint16,uint16)[])": FunctionFragment;
+    "stake(uint256,uint8,uint256)": FunctionFragment;
+    "stakeContract(address,uint256,uint8,uint256)": FunctionFragment;
+    "stakeVirtual(address,uint256,uint8,uint256)": FunctionFragment;
+    "unstake(uint256,uint256)": FunctionFragment;
+    "unstakeContract(address,uint256,uint256)": FunctionFragment;
+    "unstakeVirtual(address,uint256,uint256)": FunctionFragment;
+    "viewMinimumStakeDurationLeft(uint256)": FunctionFragment;
+    "viewReward(uint256)": FunctionFragment;
+    "expireable(uint256)": FunctionFragment;
+    "ticketCreate(uint256,(string,string),((uint256,bool),(uint32,bool),(uint32,bool)))": FunctionFragment;
+    "ticketCreateBatch(uint256[],(string,string)[],((uint256,bool),(uint32,bool),(uint32,bool))[])": FunctionFragment;
     "balanceOf(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "balanceOfBatch(address[],uint256[])": FunctionFragment;
@@ -159,6 +212,7 @@ export interface EcosystemInterface extends utils.Interface {
     "burnBatch(address,uint256[],uint256[])": FunctionFragment;
     "mint(address,uint256,uint256,bytes)": FunctionFragment;
     "mintBatch(address,uint256[],uint256[],bytes)": FunctionFragment;
+    "setUri(string)": FunctionFragment;
     "uri(uint256)": FunctionFragment;
     "onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)": FunctionFragment;
     "onERC1155Received(address,address,uint256,uint256,bytes)": FunctionFragment;
@@ -170,8 +224,7 @@ export interface EcosystemInterface extends utils.Interface {
     "approve(address,uint256)": FunctionFragment;
     "decimals()": FunctionFragment;
     "name()": FunctionFragment;
-    "setName(string)": FunctionFragment;
-    "setSymbol(string)": FunctionFragment;
+    "setCurrencyNames(string,string)": FunctionFragment;
     "symbol()": FunctionFragment;
     "totalSupply()": FunctionFragment;
     "transfer(address,uint256)": FunctionFragment;
@@ -188,6 +241,7 @@ export interface EcosystemInterface extends utils.Interface {
       | "facetFunctionSelectors"
       | "facets"
       | "supportsInterface"
+      | "royaltyInfo"
       | "createEvent"
       | "deactivateEvent"
       | "extendEvent"
@@ -195,30 +249,40 @@ export interface EcosystemInterface extends utils.Interface {
       | "refundTicketsWithProof"
       | "setImageUri"
       | "setMerkleRoot"
-      | "addBountyBalance"
-      | "bountyAddress"
-      | "currencyId"
-      | "downRate"
-      | "getBounty"
-      | "getRank"
-      | "getUserRankHistory"
-      | "maxBalance"
-      | "removeBountyBalance"
-      | "setBountyConfig"
-      | "setMemberRankOwner"
-      | "setMembersRankPermissioned"
-      | "setMembersRanks"
-      | "upRate"
+      | "banMember"
+      | "batchSetLevels"
+      | "getMemberLevel"
+      | "getMemberLevelStruct"
+      | "verifyAndSetLevel"
       | "cancelVerify"
       | "finalizeRecovery"
+      | "setUsernameAddressPair"
       | "setUsernameOwner"
+      | "setUsernamePair"
+      | "usernameRecovery"
       | "verificationTime"
-      | "verifyUsername"
+      | "verifyAndUsername"
       | "getModeratorRank"
       | "setModeratorRank"
+      | "setModeratorRanks"
       | "ecosystemOwner"
       | "isEcosystemOwnerVerify"
       | "setEcosystemOwner"
+      | "batchStake"
+      | "fundStakeAccount"
+      | "getGasStakeFee"
+      | "setRewardRates"
+      | "stake"
+      | "stakeContract"
+      | "stakeVirtual"
+      | "unstake"
+      | "unstakeContract"
+      | "unstakeVirtual"
+      | "viewMinimumStakeDurationLeft"
+      | "viewReward"
+      | "expireable"
+      | "ticketCreate"
+      | "ticketCreateBatch"
       | "balanceOf(address,uint256)"
       | "balanceOf(address)"
       | "balanceOfBatch"
@@ -226,6 +290,7 @@ export interface EcosystemInterface extends utils.Interface {
       | "burnBatch"
       | "mint"
       | "mintBatch"
+      | "setUri"
       | "uri"
       | "onERC1155BatchReceived"
       | "onERC1155Received"
@@ -237,8 +302,7 @@ export interface EcosystemInterface extends utils.Interface {
       | "approve"
       | "decimals"
       | "name"
-      | "setName"
-      | "setSymbol"
+      | "setCurrencyNames"
       | "symbol"
       | "totalSupply"
       | "transfer"
@@ -279,6 +343,10 @@ export interface EcosystemInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
+    functionFragment: "royaltyInfo",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "createEvent",
     values: [
       PromiseOrValue<BigNumberish>,
@@ -287,7 +355,7 @@ export interface EcosystemInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>[],
-      LibEventFactory.TicketDetailStruct[]
+      PromiseOrValue<BigNumberish>
     ]
   ): string;
   encodeFunctionData(
@@ -325,64 +393,25 @@ export interface EcosystemInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BytesLike>]
   ): string;
   encodeFunctionData(
-    functionFragment: "addBountyBalance",
-    values: [PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "bountyAddress",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "currencyId",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "downRate", values?: undefined): string;
-  encodeFunctionData(functionFragment: "getBounty", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "getRank",
+    functionFragment: "banMember",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "getUserRankHistory",
-    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+    functionFragment: "batchSetLevels",
+    values: [LibMemberLevel.LeafStruct[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "maxBalance",
-    values?: undefined
+    functionFragment: "getMemberLevel",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "removeBountyBalance",
-    values: [PromiseOrValue<BigNumberish>]
+    functionFragment: "getMemberLevelStruct",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "setBountyConfig",
-    values: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    functionFragment: "verifyAndSetLevel",
+    values: [LibMemberLevel.LeafStruct, PromiseOrValue<BytesLike>[]]
   ): string;
-  encodeFunctionData(
-    functionFragment: "setMemberRankOwner",
-    values: [LibMembers.LeafStruct[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setMembersRankPermissioned",
-    values: [LibMembers.LeafStruct[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setMembersRanks",
-    values: [
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      LibMembers.LeafStruct
-    ]
-  ): string;
-  encodeFunctionData(functionFragment: "upRate", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "cancelVerify",
     values: [PromiseOrValue<string>]
@@ -392,7 +421,19 @@ export interface EcosystemInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "setUsernameAddressPair",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setUsernameOwner",
+    values: [PromiseOrValue<string>[], PromiseOrValue<string>[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setUsernamePair",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "usernameRecovery",
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
@@ -400,17 +441,8 @@ export interface EcosystemInterface extends utils.Interface {
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "verifyUsername",
-    values: [
-      PromiseOrValue<string>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<string>,
-      PromiseOrValue<BytesLike>,
-      PromiseOrValue<BigNumberish>,
-      PromiseOrValue<BigNumberish>
-    ]
+    functionFragment: "verifyAndUsername",
+    values: [LibMemberRegistry.LeafStruct, PromiseOrValue<BytesLike>[]]
   ): string;
   encodeFunctionData(
     functionFragment: "getModeratorRank",
@@ -419,6 +451,10 @@ export interface EcosystemInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "setModeratorRank",
     values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setModeratorRanks",
+    values: [PromiseOrValue<string>[], PromiseOrValue<BigNumberish>[]]
   ): string;
   encodeFunctionData(
     functionFragment: "ecosystemOwner",
@@ -431,6 +467,101 @@ export interface EcosystemInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "setEcosystemOwner",
     values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "batchStake",
+    values: [
+      PromiseOrValue<string>[],
+      PromiseOrValue<BigNumberish>[],
+      PromiseOrValue<BigNumberish>[],
+      PromiseOrValue<BigNumberish>[]
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "fundStakeAccount",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getGasStakeFee",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setRewardRates",
+    values: [PromiseOrValue<BigNumberish>[], Stake.RewardRateStruct[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "stake",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "stakeContract",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "stakeVirtual",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "unstake",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "unstakeContract",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "unstakeVirtual",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "viewMinimumStakeDurationLeft",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "viewReward",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "expireable",
+    values: [PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ticketCreate",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      TicketCreate.TicketMetaStruct,
+      LibERC1155TransferConstraints.ConstraintsStruct
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "ticketCreateBatch",
+    values: [
+      PromiseOrValue<BigNumberish>[],
+      TicketCreate.TicketMetaStruct[],
+      LibERC1155TransferConstraints.ConstraintsStruct[]
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "balanceOf(address,uint256)",
@@ -477,6 +608,10 @@ export interface EcosystemInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>[],
       PromiseOrValue<BytesLike>
     ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setUri",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "uri",
@@ -541,12 +676,8 @@ export interface EcosystemInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "decimals", values?: undefined): string;
   encodeFunctionData(functionFragment: "name", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "setName",
-    values: [PromiseOrValue<string>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setSymbol",
-    values: [PromiseOrValue<string>]
+    functionFragment: "setCurrencyNames",
+    values: [PromiseOrValue<string>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(functionFragment: "symbol", values?: undefined): string;
   encodeFunctionData(
@@ -593,6 +724,10 @@ export interface EcosystemInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "royaltyInfo",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "createEvent",
     data: BytesLike
   ): Result;
@@ -620,44 +755,23 @@ export interface EcosystemInterface extends utils.Interface {
     functionFragment: "setMerkleRoot",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "banMember", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "addBountyBalance",
+    functionFragment: "batchSetLevels",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "bountyAddress",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "currencyId", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "downRate", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "getBounty", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "getRank", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "getUserRankHistory",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "maxBalance", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "removeBountyBalance",
+    functionFragment: "getMemberLevel",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setBountyConfig",
+    functionFragment: "getMemberLevelStruct",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setMemberRankOwner",
+    functionFragment: "verifyAndSetLevel",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "setMembersRankPermissioned",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setMembersRanks",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "upRate", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "cancelVerify",
     data: BytesLike
@@ -667,7 +781,19 @@ export interface EcosystemInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setUsernameAddressPair",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setUsernameOwner",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setUsernamePair",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "usernameRecovery",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -675,7 +801,7 @@ export interface EcosystemInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "verifyUsername",
+    functionFragment: "verifyAndUsername",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -684,6 +810,10 @@ export interface EcosystemInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "setModeratorRank",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setModeratorRanks",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -696,6 +826,51 @@ export interface EcosystemInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "setEcosystemOwner",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "batchStake", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "fundStakeAccount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getGasStakeFee",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setRewardRates",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "stake", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "stakeContract",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "stakeVirtual",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "unstake", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "unstakeContract",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "unstakeVirtual",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "viewMinimumStakeDurationLeft",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "viewReward", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "expireable", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "ticketCreate",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "ticketCreateBatch",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -714,6 +889,7 @@ export interface EcosystemInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "burnBatch", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "mint", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "mintBatch", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "setUri", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "uri", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "onERC1155BatchReceived",
@@ -743,8 +919,10 @@ export interface EcosystemInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "approve", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "decimals", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "name", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "setName", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "setSymbol", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setCurrencyNames",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "symbol", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "totalSupply",
@@ -758,6 +936,10 @@ export interface EcosystemInterface extends utils.Interface {
 
   events: {
     "DiamondCut(tuple[],address,bytes)": EventFragment;
+    "DiamondCut(tuple[],address,bytes)": EventFragment;
+    "MigrationCancelled(address,uint32)": EventFragment;
+    "MigrationCancelled(address,uint32)": EventFragment;
+    "MigrationCancelled(address,uint32)": EventFragment;
     "MigrationCancelled(address,uint32)": EventFragment;
     "MigrationCancelled(address,uint32)": EventFragment;
     "MigrationCancelled(address,uint32)": EventFragment;
@@ -772,17 +954,21 @@ export interface EcosystemInterface extends utils.Interface {
     "MigrationInitiated(address,uint32)": EventFragment;
     "MigrationInitiated(address,uint32)": EventFragment;
     "MigrationInitiated(address,uint32)": EventFragment;
+    "MigrationInitiated(address,uint32)": EventFragment;
+    "MigrationInitiated(address,uint32)": EventFragment;
+    "MigrationInitiated(address,uint32)": EventFragment;
+    "RoyaltyFeeAccessed(address,uint256,uint256,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
     "EventActivated(uint256)": EventFragment;
     "EventDeactivated(uint256)": EventFragment;
-    "EventDetails(uint256,uint32,uint32,uint256,uint256,string,uint8)": EventFragment;
+    "EventDetails(uint256,uint32,uint32,uint256,uint256,string,uint256,uint8)": EventFragment;
     "EventExtended(uint256,uint32)": EventFragment;
     "ImageUriUpdated(uint256,string)": EventFragment;
     "RefundsEnabled(uint256,bytes32)": EventFragment;
-    "TicketDetails(uint256,uint256[],tuple[])": EventFragment;
+    "TicketDetails(uint256,uint256[])": EventFragment;
     "TicketRedeemed(uint256,uint256[],uint256[])": EventFragment;
     "TicketRefunded(uint256,uint256,uint256)": EventFragment;
     "TransferBatch(address,address,address,uint256[],uint256[])": EventFragment;
@@ -790,20 +976,51 @@ export interface EcosystemInterface extends utils.Interface {
     "TransferBatch(address,address,address,uint256[],uint256[])": EventFragment;
     "TransferBatch(address,address,address,uint256[],uint256[])": EventFragment;
     "TransferBatch(address,address,address,uint256[],uint256[])": EventFragment;
+    "TransferBatch(address,address,address,uint256[],uint256[])": EventFragment;
     "TransferSingle(address,address,address,uint256,uint256)": EventFragment;
     "TransferSingle(address,address,address,uint256,uint256)": EventFragment;
     "TransferSingle(address,address,address,uint256,uint256)": EventFragment;
     "TransferSingle(address,address,address,uint256,uint256)": EventFragment;
     "TransferSingle(address,address,address,uint256,uint256)": EventFragment;
-    "BountyBalanceChange(uint256,uint8)": EventFragment;
-    "BountyEvent(address,uint256,uint256,uint256,uint256)": EventFragment;
+    "TransferSingle(address,address,address,uint256,uint256)": EventFragment;
+    "MemberBanned(address,uint32)": EventFragment;
+    "MemberBanned(address,uint32)": EventFragment;
+    "MemberBanned(address,uint32)": EventFragment;
+    "MemberLevelUpdated(tuple)": EventFragment;
+    "MemberLevelUpdated(tuple)": EventFragment;
+    "MemberLevelUpdated(tuple)": EventFragment;
+    "MerkleRootUpdated(bytes32)": EventFragment;
+    "MerkleRootUpdated(bytes32)": EventFragment;
+    "MerkleRootUpdated(bytes32)": EventFragment;
     "RecoveryAction(string,address,uint8)": EventFragment;
     "UserRegistered(string,address)": EventFragment;
     "UsersRegistered(string[],address[])": EventFragment;
+    "OwnershipTransferred(address,address)": EventFragment;
+    "RewardRatesChanged(tuple[])": EventFragment;
+    "RewardsRetrieved(address,uint256,uint256,uint256)": EventFragment;
+    "StakeRewardAccountFunded(address,uint256)": EventFragment;
+    "TicketsCreated(uint256,uint256,tuple)": EventFragment;
     "URI(string,uint256)": EventFragment;
+    "URIChanged(string)": EventFragment;
+    "CurrencyNameChanged(string)": EventFragment;
+    "CurrencySymbolChanged(string)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "DiamondCut"): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "DiamondCut(tuple[],address,bytes)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "DiamondCut(tuple[],address,bytes)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "MigrationCancelled(address,uint32)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "MigrationCancelled(address,uint32)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "MigrationCancelled(address,uint32)"
+  ): EventFragment;
   getEvent(
     nameOrSignatureOrTopic: "MigrationCancelled(address,uint32)"
   ): EventFragment;
@@ -846,6 +1063,16 @@ export interface EcosystemInterface extends utils.Interface {
   getEvent(
     nameOrSignatureOrTopic: "MigrationInitiated(address,uint32)"
   ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "MigrationInitiated(address,uint32)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "MigrationInitiated(address,uint32)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "MigrationInitiated(address,uint32)"
+  ): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "RoyaltyFeeAccessed"): EventFragment;
   getEvent(
     nameOrSignatureOrTopic: "ApprovalForAll(address,address,bool)"
   ): EventFragment;
@@ -883,7 +1110,7 @@ export interface EcosystemInterface extends utils.Interface {
     nameOrSignatureOrTopic: "TransferBatch(address,address,address,uint256[],uint256[])"
   ): EventFragment;
   getEvent(
-    nameOrSignatureOrTopic: "TransferSingle(address,address,address,uint256,uint256)"
+    nameOrSignatureOrTopic: "TransferBatch(address,address,address,uint256[],uint256[])"
   ): EventFragment;
   getEvent(
     nameOrSignatureOrTopic: "TransferSingle(address,address,address,uint256,uint256)"
@@ -897,25 +1124,102 @@ export interface EcosystemInterface extends utils.Interface {
   getEvent(
     nameOrSignatureOrTopic: "TransferSingle(address,address,address,uint256,uint256)"
   ): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "BountyBalanceChange"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "BountyEvent"): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "TransferSingle(address,address,address,uint256,uint256)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "TransferSingle(address,address,address,uint256,uint256)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "MemberBanned(address,uint32)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "MemberBanned(address,uint32)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "MemberBanned(address,uint32)"
+  ): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MemberLevelUpdated(tuple)"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MemberLevelUpdated(tuple)"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MemberLevelUpdated(tuple)"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MerkleRootUpdated(bytes32)"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MerkleRootUpdated(bytes32)"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MerkleRootUpdated(bytes32)"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RecoveryAction"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "UserRegistered"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "UsersRegistered"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "RewardRatesChanged"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "RewardsRetrieved"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "StakeRewardAccountFunded"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "TicketsCreated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "URI"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "URIChanged"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "CurrencyNameChanged"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "CurrencySymbolChanged"): EventFragment;
 }
 
-export interface DiamondCutEventObject {
+export interface DiamondCut_tuple_array_address_bytes_EventObject {
   _diamondCut: IDiamondCut.FacetCutStructOutput[];
   _init: string;
   _calldata: string;
 }
-export type DiamondCutEvent = TypedEvent<
+export type DiamondCut_tuple_array_address_bytes_Event = TypedEvent<
   [IDiamondCut.FacetCutStructOutput[], string, string],
-  DiamondCutEventObject
+  DiamondCut_tuple_array_address_bytes_EventObject
 >;
 
-export type DiamondCutEventFilter = TypedEventFilter<DiamondCutEvent>;
+export type DiamondCut_tuple_array_address_bytes_EventFilter =
+  TypedEventFilter<DiamondCut_tuple_array_address_bytes_Event>;
+
+export interface DiamondCut_tuple_array_address_bytes_EventObject {
+  _diamondCut: IDiamondCut.FacetCutStructOutput[];
+  _init: string;
+  _calldata: string;
+}
+export type DiamondCut_tuple_array_address_bytes_Event = TypedEvent<
+  [IDiamondCut.FacetCutStructOutput[], string, string],
+  DiamondCut_tuple_array_address_bytes_EventObject
+>;
+
+export type DiamondCut_tuple_array_address_bytes_EventFilter =
+  TypedEventFilter<DiamondCut_tuple_array_address_bytes_Event>;
+
+export interface MigrationCancelled_address_uint32_EventObject {
+  cancellor: string;
+  timeCancelled: number;
+}
+export type MigrationCancelled_address_uint32_Event = TypedEvent<
+  [string, number],
+  MigrationCancelled_address_uint32_EventObject
+>;
+
+export type MigrationCancelled_address_uint32_EventFilter =
+  TypedEventFilter<MigrationCancelled_address_uint32_Event>;
+
+export interface MigrationCancelled_address_uint32_EventObject {
+  cancellor: string;
+  timeCancelled: number;
+}
+export type MigrationCancelled_address_uint32_Event = TypedEvent<
+  [string, number],
+  MigrationCancelled_address_uint32_EventObject
+>;
+
+export type MigrationCancelled_address_uint32_EventFilter =
+  TypedEventFilter<MigrationCancelled_address_uint32_Event>;
+
+export interface MigrationCancelled_address_uint32_EventObject {
+  cancellor: string;
+  timeCancelled: number;
+}
+export type MigrationCancelled_address_uint32_Event = TypedEvent<
+  [string, number],
+  MigrationCancelled_address_uint32_EventObject
+>;
+
+export type MigrationCancelled_address_uint32_EventFilter =
+  TypedEventFilter<MigrationCancelled_address_uint32_Event>;
 
 export interface MigrationCancelled_address_uint32_EventObject {
   cancellor: string;
@@ -1084,6 +1388,56 @@ export type MigrationInitiated_address_uint32_Event = TypedEvent<
 
 export type MigrationInitiated_address_uint32_EventFilter =
   TypedEventFilter<MigrationInitiated_address_uint32_Event>;
+
+export interface MigrationInitiated_address_uint32_EventObject {
+  initiatior: string;
+  timeInitiatied: number;
+}
+export type MigrationInitiated_address_uint32_Event = TypedEvent<
+  [string, number],
+  MigrationInitiated_address_uint32_EventObject
+>;
+
+export type MigrationInitiated_address_uint32_EventFilter =
+  TypedEventFilter<MigrationInitiated_address_uint32_Event>;
+
+export interface MigrationInitiated_address_uint32_EventObject {
+  initiatior: string;
+  timeInitiatied: number;
+}
+export type MigrationInitiated_address_uint32_Event = TypedEvent<
+  [string, number],
+  MigrationInitiated_address_uint32_EventObject
+>;
+
+export type MigrationInitiated_address_uint32_EventFilter =
+  TypedEventFilter<MigrationInitiated_address_uint32_Event>;
+
+export interface MigrationInitiated_address_uint32_EventObject {
+  initiatior: string;
+  timeInitiatied: number;
+}
+export type MigrationInitiated_address_uint32_Event = TypedEvent<
+  [string, number],
+  MigrationInitiated_address_uint32_EventObject
+>;
+
+export type MigrationInitiated_address_uint32_EventFilter =
+  TypedEventFilter<MigrationInitiated_address_uint32_Event>;
+
+export interface RoyaltyFeeAccessedEventObject {
+  sender: string;
+  tokenId: BigNumber;
+  salePrice: BigNumber;
+  royaltyAmount: BigNumber;
+}
+export type RoyaltyFeeAccessedEvent = TypedEvent<
+  [string, BigNumber, BigNumber, BigNumber],
+  RoyaltyFeeAccessedEventObject
+>;
+
+export type RoyaltyFeeAccessedEventFilter =
+  TypedEventFilter<RoyaltyFeeAccessedEvent>;
 
 export interface ApprovalForAll_address_address_bool_EventObject {
   account: string;
@@ -1165,10 +1519,11 @@ export interface EventDetailsEventObject {
   minEntries: BigNumber;
   maxEntries: BigNumber;
   imageUri: string;
+  maxEntriesPerUser: BigNumber;
   status: number;
 }
 export type EventDetailsEvent = TypedEvent<
-  [BigNumber, number, number, BigNumber, BigNumber, string, number],
+  [BigNumber, number, number, BigNumber, BigNumber, string, BigNumber, number],
   EventDetailsEventObject
 >;
 
@@ -1210,10 +1565,9 @@ export type RefundsEnabledEventFilter = TypedEventFilter<RefundsEnabledEvent>;
 export interface TicketDetailsEventObject {
   eventId: BigNumber;
   ticketIds: BigNumber[];
-  ticketDetails: LibEventFactory.TicketDetailStructOutput[];
 }
 export type TicketDetailsEvent = TypedEvent<
-  [BigNumber, BigNumber[], LibEventFactory.TicketDetailStructOutput[]],
+  [BigNumber, BigNumber[]],
   TicketDetailsEventObject
 >;
 
@@ -1323,6 +1677,22 @@ export type TransferBatch_address_address_address_uint256_array_uint256_array_Ev
 export type TransferBatch_address_address_address_uint256_array_uint256_array_EventFilter =
   TypedEventFilter<TransferBatch_address_address_address_uint256_array_uint256_array_Event>;
 
+export interface TransferBatch_address_address_address_uint256_array_uint256_array_EventObject {
+  operator: string;
+  from: string;
+  to: string;
+  ids: BigNumber[];
+  values: BigNumber[];
+}
+export type TransferBatch_address_address_address_uint256_array_uint256_array_Event =
+  TypedEvent<
+    [string, string, string, BigNumber[], BigNumber[]],
+    TransferBatch_address_address_address_uint256_array_uint256_array_EventObject
+  >;
+
+export type TransferBatch_address_address_address_uint256_array_uint256_array_EventFilter =
+  TypedEventFilter<TransferBatch_address_address_address_uint256_array_uint256_array_Event>;
+
 export interface TransferSingle_address_address_address_uint256_uint256_EventObject {
   operator: string;
   from: string;
@@ -1403,31 +1773,123 @@ export type TransferSingle_address_address_address_uint256_uint256_Event =
 export type TransferSingle_address_address_address_uint256_uint256_EventFilter =
   TypedEventFilter<TransferSingle_address_address_address_uint256_uint256_Event>;
 
-export interface BountyBalanceChangeEventObject {
-  amount: BigNumber;
-  direction: number;
+export interface TransferSingle_address_address_address_uint256_uint256_EventObject {
+  operator: string;
+  from: string;
+  to: string;
+  id: BigNumber;
+  value: BigNumber;
 }
-export type BountyBalanceChangeEvent = TypedEvent<
-  [BigNumber, number],
-  BountyBalanceChangeEventObject
+export type TransferSingle_address_address_address_uint256_uint256_Event =
+  TypedEvent<
+    [string, string, string, BigNumber, BigNumber],
+    TransferSingle_address_address_address_uint256_uint256_EventObject
+  >;
+
+export type TransferSingle_address_address_address_uint256_uint256_EventFilter =
+  TypedEventFilter<TransferSingle_address_address_address_uint256_uint256_Event>;
+
+export interface MemberBanned_address_uint32_EventObject {
+  user: string;
+  timestamp: number;
+}
+export type MemberBanned_address_uint32_Event = TypedEvent<
+  [string, number],
+  MemberBanned_address_uint32_EventObject
 >;
 
-export type BountyBalanceChangeEventFilter =
-  TypedEventFilter<BountyBalanceChangeEvent>;
+export type MemberBanned_address_uint32_EventFilter =
+  TypedEventFilter<MemberBanned_address_uint32_Event>;
 
-export interface BountyEventEventObject {
-  receiver: string;
-  bountyUp: BigNumber;
-  bountyUpRate: BigNumber;
-  bountiesDown: BigNumber;
-  bountyDownRate: BigNumber;
+export interface MemberBanned_address_uint32_EventObject {
+  user: string;
+  timestamp: number;
 }
-export type BountyEventEvent = TypedEvent<
-  [string, BigNumber, BigNumber, BigNumber, BigNumber],
-  BountyEventEventObject
+export type MemberBanned_address_uint32_Event = TypedEvent<
+  [string, number],
+  MemberBanned_address_uint32_EventObject
 >;
 
-export type BountyEventEventFilter = TypedEventFilter<BountyEventEvent>;
+export type MemberBanned_address_uint32_EventFilter =
+  TypedEventFilter<MemberBanned_address_uint32_Event>;
+
+export interface MemberBanned_address_uint32_EventObject {
+  user: string;
+  timestamp: number;
+}
+export type MemberBanned_address_uint32_Event = TypedEvent<
+  [string, number],
+  MemberBanned_address_uint32_EventObject
+>;
+
+export type MemberBanned_address_uint32_EventFilter =
+  TypedEventFilter<MemberBanned_address_uint32_Event>;
+
+export interface MemberLevelUpdated_tuple_EventObject {
+  leaf: LibMemberLevel.LeafStructOutput;
+}
+export type MemberLevelUpdated_tuple_Event = TypedEvent<
+  [LibMemberLevel.LeafStructOutput],
+  MemberLevelUpdated_tuple_EventObject
+>;
+
+export type MemberLevelUpdated_tuple_EventFilter =
+  TypedEventFilter<MemberLevelUpdated_tuple_Event>;
+
+export interface MemberLevelUpdated_tuple_EventObject {
+  leaf: LibMemberLevel.LeafStructOutput;
+}
+export type MemberLevelUpdated_tuple_Event = TypedEvent<
+  [LibMemberLevel.LeafStructOutput],
+  MemberLevelUpdated_tuple_EventObject
+>;
+
+export type MemberLevelUpdated_tuple_EventFilter =
+  TypedEventFilter<MemberLevelUpdated_tuple_Event>;
+
+export interface MemberLevelUpdated_tuple_EventObject {
+  leaf: LibMemberLevel.LeafStructOutput;
+}
+export type MemberLevelUpdated_tuple_Event = TypedEvent<
+  [LibMemberLevel.LeafStructOutput],
+  MemberLevelUpdated_tuple_EventObject
+>;
+
+export type MemberLevelUpdated_tuple_EventFilter =
+  TypedEventFilter<MemberLevelUpdated_tuple_Event>;
+
+export interface MerkleRootUpdated_bytes32_EventObject {
+  newRoot: string;
+}
+export type MerkleRootUpdated_bytes32_Event = TypedEvent<
+  [string],
+  MerkleRootUpdated_bytes32_EventObject
+>;
+
+export type MerkleRootUpdated_bytes32_EventFilter =
+  TypedEventFilter<MerkleRootUpdated_bytes32_Event>;
+
+export interface MerkleRootUpdated_bytes32_EventObject {
+  newRoot: string;
+}
+export type MerkleRootUpdated_bytes32_Event = TypedEvent<
+  [string],
+  MerkleRootUpdated_bytes32_EventObject
+>;
+
+export type MerkleRootUpdated_bytes32_EventFilter =
+  TypedEventFilter<MerkleRootUpdated_bytes32_Event>;
+
+export interface MerkleRootUpdated_bytes32_EventObject {
+  newRoot: string;
+}
+export type MerkleRootUpdated_bytes32_Event = TypedEvent<
+  [string],
+  MerkleRootUpdated_bytes32_EventObject
+>;
+
+export type MerkleRootUpdated_bytes32_EventFilter =
+  TypedEventFilter<MerkleRootUpdated_bytes32_Event>;
 
 export interface RecoveryActionEventObject {
   username: string;
@@ -1463,6 +1925,67 @@ export type UsersRegisteredEvent = TypedEvent<
 
 export type UsersRegisteredEventFilter = TypedEventFilter<UsersRegisteredEvent>;
 
+export interface OwnershipTransferredEventObject {
+  previousOwner: string;
+  newOwner: string;
+}
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string],
+  OwnershipTransferredEventObject
+>;
+
+export type OwnershipTransferredEventFilter =
+  TypedEventFilter<OwnershipTransferredEvent>;
+
+export interface RewardRatesChangedEventObject {
+  _rewardRates: Stake.RewardRateStructOutput[];
+}
+export type RewardRatesChangedEvent = TypedEvent<
+  [Stake.RewardRateStructOutput[]],
+  RewardRatesChangedEventObject
+>;
+
+export type RewardRatesChangedEventFilter =
+  TypedEventFilter<RewardRatesChangedEvent>;
+
+export interface RewardsRetrievedEventObject {
+  user: string;
+  amount: BigNumber;
+  reward: BigNumber;
+  stakeId: BigNumber;
+}
+export type RewardsRetrievedEvent = TypedEvent<
+  [string, BigNumber, BigNumber, BigNumber],
+  RewardsRetrievedEventObject
+>;
+
+export type RewardsRetrievedEventFilter =
+  TypedEventFilter<RewardsRetrievedEvent>;
+
+export interface StakeRewardAccountFundedEventObject {
+  funder: string;
+  amount: BigNumber;
+}
+export type StakeRewardAccountFundedEvent = TypedEvent<
+  [string, BigNumber],
+  StakeRewardAccountFundedEventObject
+>;
+
+export type StakeRewardAccountFundedEventFilter =
+  TypedEventFilter<StakeRewardAccountFundedEvent>;
+
+export interface TicketsCreatedEventObject {
+  arg0: BigNumber;
+  arg1: BigNumber;
+  arg2: TicketCreate.TicketMetaStructOutput;
+}
+export type TicketsCreatedEvent = TypedEvent<
+  [BigNumber, BigNumber, TicketCreate.TicketMetaStructOutput],
+  TicketsCreatedEventObject
+>;
+
+export type TicketsCreatedEventFilter = TypedEventFilter<TicketsCreatedEvent>;
+
 export interface URIEventObject {
   value: string;
   id: BigNumber;
@@ -1470,6 +1993,35 @@ export interface URIEventObject {
 export type URIEvent = TypedEvent<[string, BigNumber], URIEventObject>;
 
 export type URIEventFilter = TypedEventFilter<URIEvent>;
+
+export interface URIChangedEventObject {
+  uri: string;
+}
+export type URIChangedEvent = TypedEvent<[string], URIChangedEventObject>;
+
+export type URIChangedEventFilter = TypedEventFilter<URIChangedEvent>;
+
+export interface CurrencyNameChangedEventObject {
+  name: string;
+}
+export type CurrencyNameChangedEvent = TypedEvent<
+  [string],
+  CurrencyNameChangedEventObject
+>;
+
+export type CurrencyNameChangedEventFilter =
+  TypedEventFilter<CurrencyNameChangedEvent>;
+
+export interface CurrencySymbolChangedEventObject {
+  name: string;
+}
+export type CurrencySymbolChangedEvent = TypedEvent<
+  [string],
+  CurrencySymbolChangedEventObject
+>;
+
+export type CurrencySymbolChangedEventFilter =
+  TypedEventFilter<CurrencySymbolChangedEvent>;
 
 export interface Ecosystem extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -1540,6 +2092,12 @@ export interface Ecosystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
+    royaltyInfo(
+      tokenId: PromiseOrValue<BigNumberish>,
+      salePrice: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     createEvent(
       _startTime: PromiseOrValue<BigNumberish>,
       _endTime: PromiseOrValue<BigNumberish>,
@@ -1547,7 +2105,7 @@ export interface Ecosystem extends BaseContract {
       _maxEntries: PromiseOrValue<BigNumberish>,
       _imageUri: PromiseOrValue<string>,
       _ticketIds: PromiseOrValue<BigNumberish>[],
-      _ticketDetails: LibEventFactory.TicketDetailStruct[],
+      _maxEntriesPerUser: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -1591,70 +2149,31 @@ export interface Ecosystem extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    addBountyBalance(
-      amount: PromiseOrValue<BigNumberish>,
+    banMember(
+      _user: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    bountyAddress(overrides?: CallOverrides): Promise<[string]>;
+    batchSetLevels(
+      _leaves: LibMemberLevel.LeafStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
-    currencyId(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    downRate(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    getBounty(
+    getMemberLevel(
+      _user: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<
-      [IMembers.BountyStructOutput] & { bounty_: IMembers.BountyStructOutput }
-    >;
+    ): Promise<[number] & { memberLevel_: number }>;
 
-    getRank(
-      user: PromiseOrValue<string>,
+    getMemberLevelStruct(
+      _user: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<[number, number] & { level: number; timestamp: number }>;
+
+    verifyAndSetLevel(
+      _leaf: LibMemberLevel.LeafStruct,
+      _merkleProof: PromiseOrValue<BytesLike>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
-
-    getUserRankHistory(
-      user: PromiseOrValue<string>,
-      depth: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    maxBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    removeBountyBalance(
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setBountyConfig(
-      _maxBalance: PromiseOrValue<BigNumberish>,
-      _bountyAddress: PromiseOrValue<string>,
-      _upRate: PromiseOrValue<BigNumberish>,
-      _downRate: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setMemberRankOwner(
-      leaves: LibMembers.LeafStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setMembersRankPermissioned(
-      leaves: LibMembers.LeafStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setMembersRanks(
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      owner: PromiseOrValue<string>,
-      nonce: PromiseOrValue<BigNumberish>,
-      leaf: LibMembers.LeafStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    upRate(overrides?: CallOverrides): Promise<[BigNumber]>;
 
     cancelVerify(
       username: PromiseOrValue<string>,
@@ -1666,22 +2185,32 @@ export interface Ecosystem extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    setUsernameAddressPair(
+      username: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     setUsernameOwner(
+      username: PromiseOrValue<string>[],
+      userAddress: PromiseOrValue<string>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    setUsernamePair(
+      username: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    usernameRecovery(
       username: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
     verificationTime(overrides?: CallOverrides): Promise<[number]>;
 
-    verifyUsername(
-      username: PromiseOrValue<string>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      owner: PromiseOrValue<string>,
-      merkleRoot: PromiseOrValue<BytesLike>,
-      nonce: PromiseOrValue<BigNumberish>,
-      deadline: PromiseOrValue<BigNumberish>,
+    verifyAndUsername(
+      _leaf: LibMemberRegistry.LeafStruct,
+      _merkleProof: PromiseOrValue<BytesLike>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -1696,6 +2225,12 @@ export interface Ecosystem extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    setModeratorRanks(
+      _moderators: PromiseOrValue<string>[],
+      _ranks: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     ecosystemOwner(
       overrides?: CallOverrides
     ): Promise<[string] & { owner_: string }>;
@@ -1707,6 +2242,101 @@ export interface Ecosystem extends BaseContract {
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    batchStake(
+      user: PromiseOrValue<string>[],
+      amount: PromiseOrValue<BigNumberish>[],
+      tier: PromiseOrValue<BigNumberish>[],
+      stakeIds: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    fundStakeAccount(
+      amount: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    getGasStakeFee(
+      overrides?: CallOverrides
+    ): Promise<[number, number] & { feeScale_: number; fee_: number }>;
+
+    setRewardRates(
+      _stakeTier: PromiseOrValue<BigNumberish>[],
+      _rewardRate: Stake.RewardRateStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    stake(
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    stakeContract(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    stakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    unstake(
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    unstakeContract(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    unstakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    viewMinimumStakeDurationLeft(
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[number] & { timeLeft_: number }>;
+
+    viewReward(
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { reward_: BigNumber }>;
+
+    expireable(
+      ticketId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[void]>;
+
+    ticketCreate(
+      _amount: PromiseOrValue<BigNumberish>,
+      _ticketMeta: TicketCreate.TicketMetaStruct,
+      _constraints: LibERC1155TransferConstraints.ConstraintsStruct,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    ticketCreateBatch(
+      _amount: PromiseOrValue<BigNumberish>[],
+      _ticketMeta: TicketCreate.TicketMetaStruct[],
+      _constraints: LibERC1155TransferConstraints.ConstraintsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -1757,8 +2387,13 @@ export interface Ecosystem extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    setUri(
+      _uri: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     uri(
-      arg0: PromiseOrValue<BigNumberish>,
+      tokenId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<[string]>;
 
@@ -1768,8 +2403,8 @@ export interface Ecosystem extends BaseContract {
       ids: PromiseOrValue<BigNumberish>[],
       values: PromiseOrValue<BigNumberish>[],
       data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+      overrides?: CallOverrides
+    ): Promise<[string]>;
 
     onERC1155Received(
       operator: PromiseOrValue<string>,
@@ -1777,8 +2412,8 @@ export interface Ecosystem extends BaseContract {
       id: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BigNumberish>,
       data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+      overrides?: CallOverrides
+    ): Promise<[string]>;
 
     isApprovedForAll(
       account: PromiseOrValue<string>,
@@ -1826,13 +2461,9 @@ export interface Ecosystem extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<[string]>;
 
-    setName(
-      _name: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
-
-    setSymbol(
-      _symbol: PromiseOrValue<string>,
+    setCurrencyNames(
+      _currencyName: PromiseOrValue<string>,
+      _currencySymbol: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -1888,6 +2519,12 @@ export interface Ecosystem extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
+  royaltyInfo(
+    tokenId: PromiseOrValue<BigNumberish>,
+    salePrice: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   createEvent(
     _startTime: PromiseOrValue<BigNumberish>,
     _endTime: PromiseOrValue<BigNumberish>,
@@ -1895,7 +2532,7 @@ export interface Ecosystem extends BaseContract {
     _maxEntries: PromiseOrValue<BigNumberish>,
     _imageUri: PromiseOrValue<string>,
     _ticketIds: PromiseOrValue<BigNumberish>[],
-    _ticketDetails: LibEventFactory.TicketDetailStruct[],
+    _maxEntriesPerUser: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -1939,66 +2576,31 @@ export interface Ecosystem extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  addBountyBalance(
-    amount: PromiseOrValue<BigNumberish>,
+  banMember(
+    _user: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  bountyAddress(overrides?: CallOverrides): Promise<string>;
-
-  currencyId(overrides?: CallOverrides): Promise<BigNumber>;
-
-  downRate(overrides?: CallOverrides): Promise<BigNumber>;
-
-  getBounty(overrides?: CallOverrides): Promise<IMembers.BountyStructOutput>;
-
-  getRank(
-    user: PromiseOrValue<string>,
+  batchSetLevels(
+    _leaves: LibMemberLevel.LeafStruct[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  getUserRankHistory(
-    user: PromiseOrValue<string>,
-    depth: PromiseOrValue<BigNumberish>,
+  getMemberLevel(
+    _user: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<number>;
+
+  getMemberLevelStruct(
+    _user: PromiseOrValue<string>,
+    overrides?: CallOverrides
+  ): Promise<[number, number] & { level: number; timestamp: number }>;
+
+  verifyAndSetLevel(
+    _leaf: LibMemberLevel.LeafStruct,
+    _merkleProof: PromiseOrValue<BytesLike>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
-
-  maxBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
-  removeBountyBalance(
-    amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setBountyConfig(
-    _maxBalance: PromiseOrValue<BigNumberish>,
-    _bountyAddress: PromiseOrValue<string>,
-    _upRate: PromiseOrValue<BigNumberish>,
-    _downRate: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setMemberRankOwner(
-    leaves: LibMembers.LeafStruct[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setMembersRankPermissioned(
-    leaves: LibMembers.LeafStruct[],
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setMembersRanks(
-    v: PromiseOrValue<BigNumberish>,
-    r: PromiseOrValue<BytesLike>,
-    s: PromiseOrValue<BytesLike>,
-    owner: PromiseOrValue<string>,
-    nonce: PromiseOrValue<BigNumberish>,
-    leaf: LibMembers.LeafStruct,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  upRate(overrides?: CallOverrides): Promise<BigNumber>;
 
   cancelVerify(
     username: PromiseOrValue<string>,
@@ -2010,22 +2612,32 @@ export interface Ecosystem extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  setUsernameAddressPair(
+    username: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   setUsernameOwner(
+    username: PromiseOrValue<string>[],
+    userAddress: PromiseOrValue<string>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  setUsernamePair(
+    username: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  usernameRecovery(
     username: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
   verificationTime(overrides?: CallOverrides): Promise<number>;
 
-  verifyUsername(
-    username: PromiseOrValue<string>,
-    v: PromiseOrValue<BigNumberish>,
-    r: PromiseOrValue<BytesLike>,
-    s: PromiseOrValue<BytesLike>,
-    owner: PromiseOrValue<string>,
-    merkleRoot: PromiseOrValue<BytesLike>,
-    nonce: PromiseOrValue<BigNumberish>,
-    deadline: PromiseOrValue<BigNumberish>,
+  verifyAndUsername(
+    _leaf: LibMemberRegistry.LeafStruct,
+    _merkleProof: PromiseOrValue<BytesLike>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -2040,6 +2652,12 @@ export interface Ecosystem extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  setModeratorRanks(
+    _moderators: PromiseOrValue<string>[],
+    _ranks: PromiseOrValue<BigNumberish>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   ecosystemOwner(overrides?: CallOverrides): Promise<string>;
 
   isEcosystemOwnerVerify(
@@ -2049,6 +2667,101 @@ export interface Ecosystem extends BaseContract {
 
   setEcosystemOwner(
     _newOwner: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  batchStake(
+    user: PromiseOrValue<string>[],
+    amount: PromiseOrValue<BigNumberish>[],
+    tier: PromiseOrValue<BigNumberish>[],
+    stakeIds: PromiseOrValue<BigNumberish>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  fundStakeAccount(
+    amount: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  getGasStakeFee(
+    overrides?: CallOverrides
+  ): Promise<[number, number] & { feeScale_: number; fee_: number }>;
+
+  setRewardRates(
+    _stakeTier: PromiseOrValue<BigNumberish>[],
+    _rewardRate: Stake.RewardRateStruct[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  stake(
+    amount: PromiseOrValue<BigNumberish>,
+    tier: PromiseOrValue<BigNumberish>,
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  stakeContract(
+    staker: PromiseOrValue<string>,
+    amount: PromiseOrValue<BigNumberish>,
+    tier: PromiseOrValue<BigNumberish>,
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  stakeVirtual(
+    staker: PromiseOrValue<string>,
+    amount: PromiseOrValue<BigNumberish>,
+    tier: PromiseOrValue<BigNumberish>,
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  unstake(
+    amount: PromiseOrValue<BigNumberish>,
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  unstakeContract(
+    staker: PromiseOrValue<string>,
+    amount: PromiseOrValue<BigNumberish>,
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  unstakeVirtual(
+    staker: PromiseOrValue<string>,
+    amount: PromiseOrValue<BigNumberish>,
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  viewMinimumStakeDurationLeft(
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<number>;
+
+  viewReward(
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
+  expireable(
+    ticketId: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<void>;
+
+  ticketCreate(
+    _amount: PromiseOrValue<BigNumberish>,
+    _ticketMeta: TicketCreate.TicketMetaStruct,
+    _constraints: LibERC1155TransferConstraints.ConstraintsStruct,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  ticketCreateBatch(
+    _amount: PromiseOrValue<BigNumberish>[],
+    _ticketMeta: TicketCreate.TicketMetaStruct[],
+    _constraints: LibERC1155TransferConstraints.ConstraintsStruct[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -2099,8 +2812,13 @@ export interface Ecosystem extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  setUri(
+    _uri: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   uri(
-    arg0: PromiseOrValue<BigNumberish>,
+    tokenId: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<string>;
 
@@ -2110,8 +2828,8 @@ export interface Ecosystem extends BaseContract {
     ids: PromiseOrValue<BigNumberish>[],
     values: PromiseOrValue<BigNumberish>[],
     data: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+    overrides?: CallOverrides
+  ): Promise<string>;
 
   onERC1155Received(
     operator: PromiseOrValue<string>,
@@ -2119,8 +2837,8 @@ export interface Ecosystem extends BaseContract {
     id: PromiseOrValue<BigNumberish>,
     value: PromiseOrValue<BigNumberish>,
     data: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+    overrides?: CallOverrides
+  ): Promise<string>;
 
   isApprovedForAll(
     account: PromiseOrValue<string>,
@@ -2168,13 +2886,9 @@ export interface Ecosystem extends BaseContract {
 
   name(overrides?: CallOverrides): Promise<string>;
 
-  setName(
-    _name: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
-  setSymbol(
-    _symbol: PromiseOrValue<string>,
+  setCurrencyNames(
+    _currencyName: PromiseOrValue<string>,
+    _currencySymbol: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -2228,6 +2942,14 @@ export interface Ecosystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
+    royaltyInfo(
+      tokenId: PromiseOrValue<BigNumberish>,
+      salePrice: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<
+      [string, BigNumber] & { receiver: string; royaltyAmount: BigNumber }
+    >;
+
     createEvent(
       _startTime: PromiseOrValue<BigNumberish>,
       _endTime: PromiseOrValue<BigNumberish>,
@@ -2235,7 +2957,7 @@ export interface Ecosystem extends BaseContract {
       _maxEntries: PromiseOrValue<BigNumberish>,
       _imageUri: PromiseOrValue<string>,
       _ticketIds: PromiseOrValue<BigNumberish>[],
-      _ticketDetails: LibEventFactory.TicketDetailStruct[],
+      _maxEntriesPerUser: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -2279,66 +3001,31 @@ export interface Ecosystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    addBountyBalance(
-      amount: PromiseOrValue<BigNumberish>,
+    banMember(
+      _user: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    bountyAddress(overrides?: CallOverrides): Promise<string>;
+    batchSetLevels(
+      _leaves: LibMemberLevel.LeafStruct[],
+      overrides?: CallOverrides
+    ): Promise<void>;
 
-    currencyId(overrides?: CallOverrides): Promise<BigNumber>;
-
-    downRate(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getBounty(overrides?: CallOverrides): Promise<IMembers.BountyStructOutput>;
-
-    getRank(
-      user: PromiseOrValue<string>,
+    getMemberLevel(
+      _user: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<number>;
 
-    getUserRankHistory(
-      user: PromiseOrValue<string>,
-      depth: PromiseOrValue<BigNumberish>,
+    getMemberLevelStruct(
+      _user: PromiseOrValue<string>,
       overrides?: CallOverrides
-    ): Promise<LibMembers.MemberRankStructOutput[]>;
+    ): Promise<[number, number] & { level: number; timestamp: number }>;
 
-    maxBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
-    removeBountyBalance(
-      amount: PromiseOrValue<BigNumberish>,
+    verifyAndSetLevel(
+      _leaf: LibMemberLevel.LeafStruct,
+      _merkleProof: PromiseOrValue<BytesLike>[],
       overrides?: CallOverrides
     ): Promise<void>;
-
-    setBountyConfig(
-      _maxBalance: PromiseOrValue<BigNumberish>,
-      _bountyAddress: PromiseOrValue<string>,
-      _upRate: PromiseOrValue<BigNumberish>,
-      _downRate: PromiseOrValue<BigNumberish>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setMemberRankOwner(
-      leaves: LibMembers.LeafStruct[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setMembersRankPermissioned(
-      leaves: LibMembers.LeafStruct[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setMembersRanks(
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      owner: PromiseOrValue<string>,
-      nonce: PromiseOrValue<BigNumberish>,
-      leaf: LibMembers.LeafStruct,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    upRate(overrides?: CallOverrides): Promise<BigNumber>;
 
     cancelVerify(
       username: PromiseOrValue<string>,
@@ -2350,22 +3037,32 @@ export interface Ecosystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setUsernameAddressPair(
+      username: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setUsernameOwner(
+      username: PromiseOrValue<string>[],
+      userAddress: PromiseOrValue<string>[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setUsernamePair(
+      username: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    usernameRecovery(
       username: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
     verificationTime(overrides?: CallOverrides): Promise<number>;
 
-    verifyUsername(
-      username: PromiseOrValue<string>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      owner: PromiseOrValue<string>,
-      merkleRoot: PromiseOrValue<BytesLike>,
-      nonce: PromiseOrValue<BigNumberish>,
-      deadline: PromiseOrValue<BigNumberish>,
+    verifyAndUsername(
+      _leaf: LibMemberRegistry.LeafStruct,
+      _merkleProof: PromiseOrValue<BytesLike>[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -2380,6 +3077,12 @@ export interface Ecosystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setModeratorRanks(
+      _moderators: PromiseOrValue<string>[],
+      _ranks: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     ecosystemOwner(overrides?: CallOverrides): Promise<string>;
 
     isEcosystemOwnerVerify(
@@ -2389,6 +3092,101 @@ export interface Ecosystem extends BaseContract {
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    batchStake(
+      user: PromiseOrValue<string>[],
+      amount: PromiseOrValue<BigNumberish>[],
+      tier: PromiseOrValue<BigNumberish>[],
+      stakeIds: PromiseOrValue<BigNumberish>[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    fundStakeAccount(
+      amount: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    getGasStakeFee(
+      overrides?: CallOverrides
+    ): Promise<[number, number] & { feeScale_: number; fee_: number }>;
+
+    setRewardRates(
+      _stakeTier: PromiseOrValue<BigNumberish>[],
+      _rewardRate: Stake.RewardRateStruct[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    stake(
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    stakeContract(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    stakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    unstake(
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    unstakeContract(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    unstakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    viewMinimumStakeDurationLeft(
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<number>;
+
+    viewReward(
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    expireable(
+      ticketId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    ticketCreate(
+      _amount: PromiseOrValue<BigNumberish>,
+      _ticketMeta: TicketCreate.TicketMetaStruct,
+      _constraints: LibERC1155TransferConstraints.ConstraintsStruct,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    ticketCreateBatch(
+      _amount: PromiseOrValue<BigNumberish>[],
+      _ticketMeta: TicketCreate.TicketMetaStruct[],
+      _constraints: LibERC1155TransferConstraints.ConstraintsStruct[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -2439,8 +3237,13 @@ export interface Ecosystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    setUri(
+      _uri: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     uri(
-      arg0: PromiseOrValue<BigNumberish>,
+      tokenId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<string>;
 
@@ -2508,13 +3311,9 @@ export interface Ecosystem extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<string>;
 
-    setName(
-      _name: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setSymbol(
-      _symbol: PromiseOrValue<string>,
+    setCurrencyNames(
+      _currencyName: PromiseOrValue<string>,
+      _currencySymbol: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -2541,69 +3340,106 @@ export interface Ecosystem extends BaseContract {
       _diamondCut?: null,
       _init?: null,
       _calldata?: null
-    ): DiamondCutEventFilter;
-    DiamondCut(
+    ): DiamondCut_tuple_array_address_bytes_EventFilter;
+    "DiamondCut(tuple[],address,bytes)"(
       _diamondCut?: null,
       _init?: null,
       _calldata?: null
-    ): DiamondCutEventFilter;
+    ): DiamondCut_tuple_array_address_bytes_EventFilter;
+    "MigrationCancelled(address,uint32)"(
+      cancellor?: null,
+      timeCancelled?: null
+    ): MigrationCancelled_address_uint32_EventFilter;
+    "MigrationCancelled(address,uint32)"(
+      cancellor?: null,
+      timeCancelled?: null
+    ): MigrationCancelled_address_uint32_EventFilter;
+    "MigrationCancelled(address,uint32)"(
+      cancellor?: null,
+      timeCancelled?: null
+    ): MigrationCancelled_address_uint32_EventFilter;
+    "MigrationCancelled(address,uint32)"(
+      cancellor?: null,
+      timeCancelled?: null
+    ): MigrationCancelled_address_uint32_EventFilter;
+    "MigrationCancelled(address,uint32)"(
+      cancellor?: null,
+      timeCancelled?: null
+    ): MigrationCancelled_address_uint32_EventFilter;
+    "MigrationCancelled(address,uint32)"(
+      cancellor?: null,
+      timeCancelled?: null
+    ): MigrationCancelled_address_uint32_EventFilter;
+    "MigrationCancelled(address,uint32)"(
+      cancellor?: null,
+      timeCancelled?: null
+    ): MigrationCancelled_address_uint32_EventFilter;
+    "MigrationCancelled(address,uint32)"(
+      cancellor?: null,
+      timeCancelled?: null
+    ): MigrationCancelled_address_uint32_EventFilter;
+    "MigrationCancelled(address,uint32)"(
+      cancellor?: null,
+      timeCancelled?: null
+    ): MigrationCancelled_address_uint32_EventFilter;
+    "MigrationCancelled(address,uint32)"(
+      cancellor?: null,
+      timeCancelled?: null
+    ): MigrationCancelled_address_uint32_EventFilter;
+    "MigrationInitiated(address,uint32)"(
+      initiatior?: null,
+      timeInitiatied?: null
+    ): MigrationInitiated_address_uint32_EventFilter;
+    "MigrationInitiated(address,uint32)"(
+      initiatior?: null,
+      timeInitiatied?: null
+    ): MigrationInitiated_address_uint32_EventFilter;
+    "MigrationInitiated(address,uint32)"(
+      initiatior?: null,
+      timeInitiatied?: null
+    ): MigrationInitiated_address_uint32_EventFilter;
+    "MigrationInitiated(address,uint32)"(
+      initiatior?: null,
+      timeInitiatied?: null
+    ): MigrationInitiated_address_uint32_EventFilter;
+    "MigrationInitiated(address,uint32)"(
+      initiatior?: null,
+      timeInitiatied?: null
+    ): MigrationInitiated_address_uint32_EventFilter;
+    "MigrationInitiated(address,uint32)"(
+      initiatior?: null,
+      timeInitiatied?: null
+    ): MigrationInitiated_address_uint32_EventFilter;
+    "MigrationInitiated(address,uint32)"(
+      initiatior?: null,
+      timeInitiatied?: null
+    ): MigrationInitiated_address_uint32_EventFilter;
+    "MigrationInitiated(address,uint32)"(
+      initiatior?: null,
+      timeInitiatied?: null
+    ): MigrationInitiated_address_uint32_EventFilter;
+    "MigrationInitiated(address,uint32)"(
+      initiatior?: null,
+      timeInitiatied?: null
+    ): MigrationInitiated_address_uint32_EventFilter;
+    "MigrationInitiated(address,uint32)"(
+      initiatior?: null,
+      timeInitiatied?: null
+    ): MigrationInitiated_address_uint32_EventFilter;
 
-    "MigrationCancelled(address,uint32)"(
-      cancellor?: null,
-      timeCancelled?: null
-    ): MigrationCancelled_address_uint32_EventFilter;
-    "MigrationCancelled(address,uint32)"(
-      cancellor?: null,
-      timeCancelled?: null
-    ): MigrationCancelled_address_uint32_EventFilter;
-    "MigrationCancelled(address,uint32)"(
-      cancellor?: null,
-      timeCancelled?: null
-    ): MigrationCancelled_address_uint32_EventFilter;
-    "MigrationCancelled(address,uint32)"(
-      cancellor?: null,
-      timeCancelled?: null
-    ): MigrationCancelled_address_uint32_EventFilter;
-    "MigrationCancelled(address,uint32)"(
-      cancellor?: null,
-      timeCancelled?: null
-    ): MigrationCancelled_address_uint32_EventFilter;
-    "MigrationCancelled(address,uint32)"(
-      cancellor?: null,
-      timeCancelled?: null
-    ): MigrationCancelled_address_uint32_EventFilter;
-    "MigrationCancelled(address,uint32)"(
-      cancellor?: null,
-      timeCancelled?: null
-    ): MigrationCancelled_address_uint32_EventFilter;
-    "MigrationInitiated(address,uint32)"(
-      initiatior?: null,
-      timeInitiatied?: null
-    ): MigrationInitiated_address_uint32_EventFilter;
-    "MigrationInitiated(address,uint32)"(
-      initiatior?: null,
-      timeInitiatied?: null
-    ): MigrationInitiated_address_uint32_EventFilter;
-    "MigrationInitiated(address,uint32)"(
-      initiatior?: null,
-      timeInitiatied?: null
-    ): MigrationInitiated_address_uint32_EventFilter;
-    "MigrationInitiated(address,uint32)"(
-      initiatior?: null,
-      timeInitiatied?: null
-    ): MigrationInitiated_address_uint32_EventFilter;
-    "MigrationInitiated(address,uint32)"(
-      initiatior?: null,
-      timeInitiatied?: null
-    ): MigrationInitiated_address_uint32_EventFilter;
-    "MigrationInitiated(address,uint32)"(
-      initiatior?: null,
-      timeInitiatied?: null
-    ): MigrationInitiated_address_uint32_EventFilter;
-    "MigrationInitiated(address,uint32)"(
-      initiatior?: null,
-      timeInitiatied?: null
-    ): MigrationInitiated_address_uint32_EventFilter;
+    "RoyaltyFeeAccessed(address,uint256,uint256,uint256)"(
+      sender?: null,
+      tokenId?: null,
+      salePrice?: null,
+      royaltyAmount?: null
+    ): RoyaltyFeeAccessedEventFilter;
+    RoyaltyFeeAccessed(
+      sender?: null,
+      tokenId?: null,
+      salePrice?: null,
+      royaltyAmount?: null
+    ): RoyaltyFeeAccessedEventFilter;
+
     "ApprovalForAll(address,address,bool)"(
       account?: PromiseOrValue<string> | null,
       operator?: PromiseOrValue<string> | null,
@@ -2631,13 +3467,14 @@ export interface Ecosystem extends BaseContract {
     "EventDeactivated(uint256)"(eventId?: null): EventDeactivatedEventFilter;
     EventDeactivated(eventId?: null): EventDeactivatedEventFilter;
 
-    "EventDetails(uint256,uint32,uint32,uint256,uint256,string,uint8)"(
+    "EventDetails(uint256,uint32,uint32,uint256,uint256,string,uint256,uint8)"(
       eventId?: null,
       startTime?: null,
       endTime?: null,
       minEntries?: null,
       maxEntries?: null,
       imageUri?: null,
+      maxEntriesPerUser?: null,
       status?: null
     ): EventDetailsEventFilter;
     EventDetails(
@@ -2647,6 +3484,7 @@ export interface Ecosystem extends BaseContract {
       minEntries?: null,
       maxEntries?: null,
       imageUri?: null,
+      maxEntriesPerUser?: null,
       status?: null
     ): EventDetailsEventFilter;
 
@@ -2674,16 +3512,11 @@ export interface Ecosystem extends BaseContract {
       merkleRoot?: null
     ): RefundsEnabledEventFilter;
 
-    "TicketDetails(uint256,uint256[],tuple[])"(
+    "TicketDetails(uint256,uint256[])"(
       eventId?: null,
-      ticketIds?: null,
-      ticketDetails?: null
+      ticketIds?: null
     ): TicketDetailsEventFilter;
-    TicketDetails(
-      eventId?: null,
-      ticketIds?: null,
-      ticketDetails?: null
-    ): TicketDetailsEventFilter;
+    TicketDetails(eventId?: null, ticketIds?: null): TicketDetailsEventFilter;
 
     "TicketRedeemed(uint256,uint256[],uint256[])"(
       eventId?: null,
@@ -2742,6 +3575,13 @@ export interface Ecosystem extends BaseContract {
       ids?: null,
       values?: null
     ): TransferBatch_address_address_address_uint256_array_uint256_array_EventFilter;
+    "TransferBatch(address,address,address,uint256[],uint256[])"(
+      operator?: PromiseOrValue<string> | null,
+      from?: PromiseOrValue<string> | null,
+      to?: PromiseOrValue<string> | null,
+      ids?: null,
+      values?: null
+    ): TransferBatch_address_address_address_uint256_array_uint256_array_EventFilter;
     "TransferSingle(address,address,address,uint256,uint256)"(
       operator?: PromiseOrValue<string> | null,
       from?: PromiseOrValue<string> | null,
@@ -2777,30 +3617,43 @@ export interface Ecosystem extends BaseContract {
       id?: null,
       value?: null
     ): TransferSingle_address_address_address_uint256_uint256_EventFilter;
-
-    "BountyBalanceChange(uint256,uint8)"(
-      amount?: null,
-      direction?: null
-    ): BountyBalanceChangeEventFilter;
-    BountyBalanceChange(
-      amount?: null,
-      direction?: null
-    ): BountyBalanceChangeEventFilter;
-
-    "BountyEvent(address,uint256,uint256,uint256,uint256)"(
-      receiver?: null,
-      bountyUp?: null,
-      bountyUpRate?: null,
-      bountiesDown?: null,
-      bountyDownRate?: null
-    ): BountyEventEventFilter;
-    BountyEvent(
-      receiver?: null,
-      bountyUp?: null,
-      bountyUpRate?: null,
-      bountiesDown?: null,
-      bountyDownRate?: null
-    ): BountyEventEventFilter;
+    "TransferSingle(address,address,address,uint256,uint256)"(
+      operator?: PromiseOrValue<string> | null,
+      from?: PromiseOrValue<string> | null,
+      to?: PromiseOrValue<string> | null,
+      id?: null,
+      value?: null
+    ): TransferSingle_address_address_address_uint256_uint256_EventFilter;
+    "MemberBanned(address,uint32)"(
+      user?: PromiseOrValue<string> | null,
+      timestamp?: null
+    ): MemberBanned_address_uint32_EventFilter;
+    "MemberBanned(address,uint32)"(
+      user?: PromiseOrValue<string> | null,
+      timestamp?: null
+    ): MemberBanned_address_uint32_EventFilter;
+    "MemberBanned(address,uint32)"(
+      user?: PromiseOrValue<string> | null,
+      timestamp?: null
+    ): MemberBanned_address_uint32_EventFilter;
+    "MemberLevelUpdated(tuple)"(
+      leaf?: null
+    ): MemberLevelUpdated_tuple_EventFilter;
+    "MemberLevelUpdated(tuple)"(
+      leaf?: null
+    ): MemberLevelUpdated_tuple_EventFilter;
+    "MemberLevelUpdated(tuple)"(
+      leaf?: null
+    ): MemberLevelUpdated_tuple_EventFilter;
+    "MerkleRootUpdated(bytes32)"(
+      newRoot?: null
+    ): MerkleRootUpdated_bytes32_EventFilter;
+    "MerkleRootUpdated(bytes32)"(
+      newRoot?: null
+    ): MerkleRootUpdated_bytes32_EventFilter;
+    "MerkleRootUpdated(bytes32)"(
+      newRoot?: null
+    ): MerkleRootUpdated_bytes32_EventFilter;
 
     "RecoveryAction(string,address,uint8)"(
       username?: null,
@@ -2831,11 +3684,69 @@ export interface Ecosystem extends BaseContract {
       userAddress?: null
     ): UsersRegisteredEventFilter;
 
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: PromiseOrValue<string> | null,
+      newOwner?: PromiseOrValue<string> | null
+    ): OwnershipTransferredEventFilter;
+    OwnershipTransferred(
+      previousOwner?: PromiseOrValue<string> | null,
+      newOwner?: PromiseOrValue<string> | null
+    ): OwnershipTransferredEventFilter;
+
+    "RewardRatesChanged(tuple[])"(
+      _rewardRates?: null
+    ): RewardRatesChangedEventFilter;
+    RewardRatesChanged(_rewardRates?: null): RewardRatesChangedEventFilter;
+
+    "RewardsRetrieved(address,uint256,uint256,uint256)"(
+      user?: null,
+      amount?: null,
+      reward?: null,
+      stakeId?: null
+    ): RewardsRetrievedEventFilter;
+    RewardsRetrieved(
+      user?: null,
+      amount?: null,
+      reward?: null,
+      stakeId?: null
+    ): RewardsRetrievedEventFilter;
+
+    "StakeRewardAccountFunded(address,uint256)"(
+      funder?: null,
+      amount?: null
+    ): StakeRewardAccountFundedEventFilter;
+    StakeRewardAccountFunded(
+      funder?: null,
+      amount?: null
+    ): StakeRewardAccountFundedEventFilter;
+
+    "TicketsCreated(uint256,uint256,tuple)"(
+      arg0?: null,
+      arg1?: null,
+      arg2?: null
+    ): TicketsCreatedEventFilter;
+    TicketsCreated(
+      arg0?: null,
+      arg1?: null,
+      arg2?: null
+    ): TicketsCreatedEventFilter;
+
     "URI(string,uint256)"(
       value?: null,
       id?: PromiseOrValue<BigNumberish> | null
     ): URIEventFilter;
     URI(value?: null, id?: PromiseOrValue<BigNumberish> | null): URIEventFilter;
+
+    "URIChanged(string)"(uri?: null): URIChangedEventFilter;
+    URIChanged(uri?: null): URIChangedEventFilter;
+
+    "CurrencyNameChanged(string)"(name?: null): CurrencyNameChangedEventFilter;
+    CurrencyNameChanged(name?: null): CurrencyNameChangedEventFilter;
+
+    "CurrencySymbolChanged(string)"(
+      name?: null
+    ): CurrencySymbolChangedEventFilter;
+    CurrencySymbolChanged(name?: null): CurrencySymbolChangedEventFilter;
   };
 
   estimateGas: {
@@ -2873,6 +3784,12 @@ export interface Ecosystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    royaltyInfo(
+      tokenId: PromiseOrValue<BigNumberish>,
+      salePrice: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     createEvent(
       _startTime: PromiseOrValue<BigNumberish>,
       _endTime: PromiseOrValue<BigNumberish>,
@@ -2880,7 +3797,7 @@ export interface Ecosystem extends BaseContract {
       _maxEntries: PromiseOrValue<BigNumberish>,
       _imageUri: PromiseOrValue<string>,
       _ticketIds: PromiseOrValue<BigNumberish>[],
-      _ticketDetails: LibEventFactory.TicketDetailStruct[],
+      _maxEntriesPerUser: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -2924,66 +3841,31 @@ export interface Ecosystem extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    addBountyBalance(
-      amount: PromiseOrValue<BigNumberish>,
+    banMember(
+      _user: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    bountyAddress(overrides?: CallOverrides): Promise<BigNumber>;
-
-    currencyId(overrides?: CallOverrides): Promise<BigNumber>;
-
-    downRate(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getBounty(overrides?: CallOverrides): Promise<BigNumber>;
-
-    getRank(
-      user: PromiseOrValue<string>,
+    batchSetLevels(
+      _leaves: LibMemberLevel.LeafStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    getUserRankHistory(
-      user: PromiseOrValue<string>,
-      depth: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    getMemberLevel(
+      _user: PromiseOrValue<string>,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    maxBalance(overrides?: CallOverrides): Promise<BigNumber>;
-
-    removeBountyBalance(
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    getMemberLevelStruct(
+      _user: PromiseOrValue<string>,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    setBountyConfig(
-      _maxBalance: PromiseOrValue<BigNumberish>,
-      _bountyAddress: PromiseOrValue<string>,
-      _upRate: PromiseOrValue<BigNumberish>,
-      _downRate: PromiseOrValue<BigNumberish>,
+    verifyAndSetLevel(
+      _leaf: LibMemberLevel.LeafStruct,
+      _merkleProof: PromiseOrValue<BytesLike>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
-
-    setMemberRankOwner(
-      leaves: LibMembers.LeafStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setMembersRankPermissioned(
-      leaves: LibMembers.LeafStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setMembersRanks(
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      owner: PromiseOrValue<string>,
-      nonce: PromiseOrValue<BigNumberish>,
-      leaf: LibMembers.LeafStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    upRate(overrides?: CallOverrides): Promise<BigNumber>;
 
     cancelVerify(
       username: PromiseOrValue<string>,
@@ -2995,22 +3877,32 @@ export interface Ecosystem extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    setUsernameAddressPair(
+      username: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     setUsernameOwner(
+      username: PromiseOrValue<string>[],
+      userAddress: PromiseOrValue<string>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    setUsernamePair(
+      username: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    usernameRecovery(
       username: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     verificationTime(overrides?: CallOverrides): Promise<BigNumber>;
 
-    verifyUsername(
-      username: PromiseOrValue<string>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      owner: PromiseOrValue<string>,
-      merkleRoot: PromiseOrValue<BytesLike>,
-      nonce: PromiseOrValue<BigNumberish>,
-      deadline: PromiseOrValue<BigNumberish>,
+    verifyAndUsername(
+      _leaf: LibMemberRegistry.LeafStruct,
+      _merkleProof: PromiseOrValue<BytesLike>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -3025,6 +3917,12 @@ export interface Ecosystem extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    setModeratorRanks(
+      _moderators: PromiseOrValue<string>[],
+      _ranks: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     ecosystemOwner(overrides?: CallOverrides): Promise<BigNumber>;
 
     isEcosystemOwnerVerify(
@@ -3034,6 +3932,99 @@ export interface Ecosystem extends BaseContract {
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    batchStake(
+      user: PromiseOrValue<string>[],
+      amount: PromiseOrValue<BigNumberish>[],
+      tier: PromiseOrValue<BigNumberish>[],
+      stakeIds: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    fundStakeAccount(
+      amount: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    getGasStakeFee(overrides?: CallOverrides): Promise<BigNumber>;
+
+    setRewardRates(
+      _stakeTier: PromiseOrValue<BigNumberish>[],
+      _rewardRate: Stake.RewardRateStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    stake(
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    stakeContract(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    stakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    unstake(
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    unstakeContract(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    unstakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    viewMinimumStakeDurationLeft(
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    viewReward(
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    expireable(
+      ticketId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    ticketCreate(
+      _amount: PromiseOrValue<BigNumberish>,
+      _ticketMeta: TicketCreate.TicketMetaStruct,
+      _constraints: LibERC1155TransferConstraints.ConstraintsStruct,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    ticketCreateBatch(
+      _amount: PromiseOrValue<BigNumberish>[],
+      _ticketMeta: TicketCreate.TicketMetaStruct[],
+      _constraints: LibERC1155TransferConstraints.ConstraintsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -3084,8 +4075,13 @@ export interface Ecosystem extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    setUri(
+      _uri: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     uri(
-      arg0: PromiseOrValue<BigNumberish>,
+      tokenId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -3095,7 +4091,7 @@ export interface Ecosystem extends BaseContract {
       ids: PromiseOrValue<BigNumberish>[],
       values: PromiseOrValue<BigNumberish>[],
       data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     onERC1155Received(
@@ -3104,7 +4100,7 @@ export interface Ecosystem extends BaseContract {
       id: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BigNumberish>,
       data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     isApprovedForAll(
@@ -3153,13 +4149,9 @@ export interface Ecosystem extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<BigNumber>;
 
-    setName(
-      _name: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
-
-    setSymbol(
-      _symbol: PromiseOrValue<string>,
+    setCurrencyNames(
+      _currencyName: PromiseOrValue<string>,
+      _currencySymbol: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -3216,6 +4208,12 @@ export interface Ecosystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    royaltyInfo(
+      tokenId: PromiseOrValue<BigNumberish>,
+      salePrice: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     createEvent(
       _startTime: PromiseOrValue<BigNumberish>,
       _endTime: PromiseOrValue<BigNumberish>,
@@ -3223,7 +4221,7 @@ export interface Ecosystem extends BaseContract {
       _maxEntries: PromiseOrValue<BigNumberish>,
       _imageUri: PromiseOrValue<string>,
       _ticketIds: PromiseOrValue<BigNumberish>[],
-      _ticketDetails: LibEventFactory.TicketDetailStruct[],
+      _maxEntriesPerUser: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -3267,66 +4265,31 @@ export interface Ecosystem extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    addBountyBalance(
-      amount: PromiseOrValue<BigNumberish>,
+    banMember(
+      _user: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    bountyAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    currencyId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    downRate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    getBounty(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    getRank(
-      user: PromiseOrValue<string>,
+    batchSetLevels(
+      _leaves: LibMemberLevel.LeafStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    getUserRankHistory(
-      user: PromiseOrValue<string>,
-      depth: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    getMemberLevel(
+      _user: PromiseOrValue<string>,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    maxBalance(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    removeBountyBalance(
-      amount: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    getMemberLevelStruct(
+      _user: PromiseOrValue<string>,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    setBountyConfig(
-      _maxBalance: PromiseOrValue<BigNumberish>,
-      _bountyAddress: PromiseOrValue<string>,
-      _upRate: PromiseOrValue<BigNumberish>,
-      _downRate: PromiseOrValue<BigNumberish>,
+    verifyAndSetLevel(
+      _leaf: LibMemberLevel.LeafStruct,
+      _merkleProof: PromiseOrValue<BytesLike>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
-
-    setMemberRankOwner(
-      leaves: LibMembers.LeafStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setMembersRankPermissioned(
-      leaves: LibMembers.LeafStruct[],
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setMembersRanks(
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      owner: PromiseOrValue<string>,
-      nonce: PromiseOrValue<BigNumberish>,
-      leaf: LibMembers.LeafStruct,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    upRate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     cancelVerify(
       username: PromiseOrValue<string>,
@@ -3338,22 +4301,32 @@ export interface Ecosystem extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    setUsernameAddressPair(
+      username: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     setUsernameOwner(
+      username: PromiseOrValue<string>[],
+      userAddress: PromiseOrValue<string>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setUsernamePair(
+      username: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    usernameRecovery(
       username: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     verificationTime(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    verifyUsername(
-      username: PromiseOrValue<string>,
-      v: PromiseOrValue<BigNumberish>,
-      r: PromiseOrValue<BytesLike>,
-      s: PromiseOrValue<BytesLike>,
-      owner: PromiseOrValue<string>,
-      merkleRoot: PromiseOrValue<BytesLike>,
-      nonce: PromiseOrValue<BigNumberish>,
-      deadline: PromiseOrValue<BigNumberish>,
+    verifyAndUsername(
+      _leaf: LibMemberRegistry.LeafStruct,
+      _merkleProof: PromiseOrValue<BytesLike>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -3368,6 +4341,12 @@ export interface Ecosystem extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    setModeratorRanks(
+      _moderators: PromiseOrValue<string>[],
+      _ranks: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     ecosystemOwner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     isEcosystemOwnerVerify(
@@ -3377,6 +4356,99 @@ export interface Ecosystem extends BaseContract {
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    batchStake(
+      user: PromiseOrValue<string>[],
+      amount: PromiseOrValue<BigNumberish>[],
+      tier: PromiseOrValue<BigNumberish>[],
+      stakeIds: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    fundStakeAccount(
+      amount: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    getGasStakeFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    setRewardRates(
+      _stakeTier: PromiseOrValue<BigNumberish>[],
+      _rewardRate: Stake.RewardRateStruct[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    stake(
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    stakeContract(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    stakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    unstake(
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    unstakeContract(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    unstakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    viewMinimumStakeDurationLeft(
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    viewReward(
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    expireable(
+      ticketId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    ticketCreate(
+      _amount: PromiseOrValue<BigNumberish>,
+      _ticketMeta: TicketCreate.TicketMetaStruct,
+      _constraints: LibERC1155TransferConstraints.ConstraintsStruct,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    ticketCreateBatch(
+      _amount: PromiseOrValue<BigNumberish>[],
+      _ticketMeta: TicketCreate.TicketMetaStruct[],
+      _constraints: LibERC1155TransferConstraints.ConstraintsStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -3427,8 +4499,13 @@ export interface Ecosystem extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    setUri(
+      _uri: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     uri(
-      arg0: PromiseOrValue<BigNumberish>,
+      tokenId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
@@ -3438,7 +4515,7 @@ export interface Ecosystem extends BaseContract {
       ids: PromiseOrValue<BigNumberish>[],
       values: PromiseOrValue<BigNumberish>[],
       data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     onERC1155Received(
@@ -3447,7 +4524,7 @@ export interface Ecosystem extends BaseContract {
       id: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BigNumberish>,
       data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     isApprovedForAll(
@@ -3496,13 +4573,9 @@ export interface Ecosystem extends BaseContract {
 
     name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    setName(
-      _name: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setSymbol(
-      _symbol: PromiseOrValue<string>,
+    setCurrencyNames(
+      _currencyName: PromiseOrValue<string>,
+      _currencySymbol: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

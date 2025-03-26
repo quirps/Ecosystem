@@ -8,6 +8,7 @@ struct ConstraintStorage{
     mapping(uint256 => uint256) tranfserLimit; 
     mapping(uint256 => uint32) minimumMemberLevel; 
     mapping(uint256 => uint32) expireTime;
+    mapping(uint256 => uint24) royaltyFee;
     mapping(uint128  => uint128) ticketIntervalNonce;
 } 
  
@@ -24,8 +25,12 @@ function erc1155ConstraintStorage() internal pure returns (ConstraintStorage sto
         TransferLimit transferLimit;
         MemberLevelDependency minimumMembershipLevel;
         Expireable expireable;
+        RoyaltyFee royaltyFee;
     }
-
+    struct RoyaltyFee{
+        uint24 fee;
+        bool isActive;
+    }
     struct TransferLimit{
         uint256 maxTransfers;
         bool isActive;

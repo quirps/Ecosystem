@@ -93,7 +93,6 @@ contract EcosystemRegistry is iOwnership {
         // Placeholder
     }
 
-
     //change to 
     function deployVersion(bytes32 versionNumber, string memory name, uint256 salt, bytes calldata diamondBytecode) public returns (address ecosystemAddress_) {
         Version storage _version = versions[versionNumber];
