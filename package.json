@@ -9,7 +9,7 @@
     "test-local": "hardhat --network local test test/test-with-ethers.js",
     "run-with-hardhat-node": "run-with-testrpc --testrpc-cmd ./scripts/hardhat-node",
     "compile": "npx hardhat compile",
-    "deploy:local": "npx hardhat deploy --network localhost",
+    "deploy:local": "npx hardhat deploy --network localhost --show-stack-traces",
     "deploy:sepolia": "npx hardhat deploy --network sepolia",
     "deploy:local:core": "npx hardhat deploy --network localhost --tags Core",
     "deploy:local:version": "npx hardhat deploy --network localhost --tags DeployVersion",

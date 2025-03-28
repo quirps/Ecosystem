@@ -9,7 +9,10 @@ require("hardhat-diamond-abi");
 require("hardhat-deploy");
 // require("./diamondABItest");
 
-
+const FACETS = [
+    'DiamondCutFacet', 'DiamondInit', 'DiamondLoupeFacet', 'ERC1155Ecosystem', 'ERC1155Transfer','ERC1155ReceiverEcosystem','ERC20Ecosystem', 'MemberRegistry',
+    'Members', 'Moderator', 'OwnershipFacet', 'EventFactory', 'Stake','ERC2981','TicketCreate',
+]
 WALLET_BASE_AMOUNT = "10000000000000000000000000000" // 10**30
 
 // You need to export an object to set up your config
@@ -19,10 +22,7 @@ WALLET_BASE_AMOUNT = "10000000000000000000000000000" // 10**30
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  typechain: {
-    outDir: "typechain-types",
-    target: "ethers-v5",
-  },
+  
   sources: ["./contracts", "./node_modules/registry/contracts"],
   solidity: '0.8.28',
   diamondAbi: {
