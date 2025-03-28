@@ -31,11 +31,11 @@ contract EcosystemRegistry is iOwnership {
     mapping(address => Ecosystem[]) userEcosystems;
     //mapping(uint240 => mapping(bytes32 => address)) optimizedFacet;
 
-    address immutable diamondDeployAddress;
     // Structs
     struct Version {
         bool exists;
         uint32 uploadedTimestamp;
+        address diamondDeployAddress; 
         IDiamondCut.FacetCut[] facetCuts;
     }
     
@@ -54,14 +54,14 @@ contract EcosystemRegistry is iOwnership {
 
 
     // Constructor
-    constructor(address _diamondDeployAddress) {
+    constructor() {
         owner = msgSender();
-        diamondDeployAddress = _diamondDeployAddress;
     }
 
     // Owner-Only Functions
     function uploadVersion(
         bytes32 versionNumber,
+        address diamondDeployAddress, 
         IDiamondCut.FacetCut[] memory facetCuts
     ) public onlyOwner {
         require(msgSender() == owner, "Only the owner may upload new ecosystem versions.");
@@ -70,6 +70,7 @@ contract EcosystemRegistry is iOwnership {
         Version storage newVersion = versions[versionNumber];
         newVersion.uploadedTimestamp = uint32(block.timestamp);
         newVersion.exists = true;
+        newVersion.diamondDeployAddress = diamondDeployAddress;
 
         for (uint i = 0; i < facetCuts.length; i++) {
             
@@ -98,9 +99,9 @@ contract EcosystemRegistry is iOwnership {
         Version storage _version = versions[versionNumber];
         // Step 1: Check version number validity
         require(_version.exists, "Version is not valid or not active");
-        
+         
         console.log(1); 
-        ecosystemAddress_ = IDiamondDeploy(diamondDeployAddress).deploy(msgSender(), salt, diamondBytecode, _version.facetCuts);
+        ecosystemAddress_ = IDiamondDeploy(_version.diamondDeployAddress).deploy(msgSender(), salt, diamondBytecode, _version.facetCuts);
         console.log(2);
         // Step 4: Update the user's ecosystems
         Ecosystem memory newEcosystem = Ecosystem(name, ecosystemAddress_, versionNumber);

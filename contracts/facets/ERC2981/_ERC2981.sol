@@ -19,6 +19,5 @@ contract iERC2981 is iOwnership{
         royaltyAmount = ( salePrice * _royalteFee ) / 100000; // Basis points calculation
         
         emit RoyaltyFeeAccessed(msgSender(), tokenId, salePrice, royaltyAmount); 
-
     }
 }

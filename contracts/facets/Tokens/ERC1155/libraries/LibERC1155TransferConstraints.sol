@@ -27,6 +27,10 @@ function erc1155ConstraintStorage() internal pure returns (ConstraintStorage sto
         Expireable expireable;
         RoyaltyFee royaltyFee;
     }
+    struct MaxAmount{
+        uint256 maxAmount;
+        bool isActive;
+    }
     struct RoyaltyFee{
         uint24 fee;
         bool isActive;

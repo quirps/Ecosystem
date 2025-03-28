@@ -7,11 +7,10 @@ contract DiamondDeploy {
     address public registryAddress;
     bool isRegistrySet = false;
     bytes32 bytecodeHash;
-    /// @notice This event is emitted when a new Diamond is deployed
-    /// @param bytecode The bytecode of the deployed Diamond contract
-    event NewDiamond(bytes bytecode);
+
     
-    constructor(bytes memory _bytecode ) { 
+    constructor(address registry, bytes memory _bytecode ) { 
+        registryAddress = registry; 
         bytecodeHash = keccak256(_bytecode);
     }
 
@@ -45,16 +44,10 @@ contract DiamondDeploy {
                 revert(0, 0)
             }
         }
-        emit NewDiamond(_bytecode);
 
         return deployedAddress;
     }
 
-    function setRegistry(address _registry) external {
-        require( ! isRegistrySet, "Can only set a registry once.");
-        registryAddress = _registry;
-        isRegistrySet = true;
-    }
  
 }
 

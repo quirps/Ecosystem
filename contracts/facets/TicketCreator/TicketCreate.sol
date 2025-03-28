@@ -9,6 +9,7 @@ contract TicketCreate is iTransferSetConstraints,  iERC1155 {
     struct TicketMeta{
         string title;
         string description; 
+        string imageHash;
     } 
 
     event TicketsCreated(uint256, uint256, TicketMeta);
