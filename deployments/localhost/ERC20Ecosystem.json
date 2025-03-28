@@ -1,0 +1,439 @@
+{
+  "address": "0xb1CEBa0ef1cce5CaDe7F518271984172492be4FC",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "MigrationAlreadyCompleted",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "MigrationAlreadyInitiated",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "MigrationNotInitiated",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "ApprovalForAll",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "name": "CurrencyNameChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        }
+      ],
+      "name": "CurrencySymbolChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "cancellor",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "timeCancelled",
+          "type": "uint32"
+        }
+      ],
+      "name": "MigrationCancelled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "initiatior",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "timeInitiatied",
+          "type": "uint32"
+        }
+      ],
+      "name": "MigrationInitiated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "oldOwner",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "ids",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "values",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "TransferBatch",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "TransferSingle",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        }
+      ],
+      "name": "allowance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "spender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "approve",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "decimals",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "name",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_currencyName",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_currencySymbol",
+          "type": "string"
+        }
+      ],
+      "name": "setCurrencyNames",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "symbol",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "transfer",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "recipient",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "transferFrom",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x53e12badb48946e57fad0a842b8f11f65ea18966d5b360aa560025469c7a49c5",
+  "receipt": {
+    "to": null,
+    "from": "0x1a47C1D6d5B47048536f1111C854e48fA9D76fdF",
+    "contractAddress": "0xb1CEBa0ef1cce5CaDe7F518271984172492be4FC",
+    "transactionIndex": 0,
+    "gasUsed": "894156",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x07d2aed3621994f4355b6bbe75c3166af2c29dd9173611d578cd972bcc919019",
+    "transactionHash": "0x53e12badb48946e57fad0a842b8f11f65ea18966d5b360aa560025469c7a49c5",
+    "logs": [],
+    "blockNumber": 17,
+    "cumulativeGasUsed": "894156",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "54a7063fbd1377e55e2032f74c4aa199",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.28+commit.7893614a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"MigrationAlreadyCompleted\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MigrationAlreadyInitiated\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MigrationNotInitiated\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"approved\",\"type\":\"bool\"}],\"name\":\"ApprovalForAll\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"name\":\"CurrencyNameChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"name\",\"type\":\"string\"}],\"name\":\"CurrencySymbolChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"cancellor\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"timeCancelled\",\"type\":\"uint32\"}],\"name\":\"MigrationCancelled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"initiatior\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint32\",\"name\":\"timeInitiatied\",\"type\":\"uint32\"}],\"name\":\"MigrationInitiated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oldOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"ids\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"}],\"name\":\"TransferBatch\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"operator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"name\":\"TransferSingle\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"}],\"name\":\"allowance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"spender\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"approve\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"decimals\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"_currencyName\",\"type\":\"string\"},{\"internalType\":\"string\",\"name\":\"_currencySymbol\",\"type\":\"string\"}],\"name\":\"setCurrencyNames\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"symbol\",\"outputs\":[{\"internalType\":\"string\",\"name\":\"\",\"type\":\"string\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"totalSupply\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"transfer\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"recipient\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"transferFrom\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"events\":{\"ApprovalForAll(address,address,bool)\":{\"details\":\"Emitted when `account` grants or revokes permission to `operator` to transfer their tokens, according to `approved`.\"},\"TransferBatch(address,address,address,uint256[],uint256[])\":{\"details\":\"Equivalent to multiple {TransferSingle} events, where `operator`, `from` and `to` are the same for all transfers.\"},\"TransferSingle(address,address,address,uint256,uint256)\":{\"details\":\"Emitted when `value` tokens of token type `id` are transferred from `from` to `to` by `operator`.\"}},\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/facets/Tokens/ERC20/ERC20.sol\":\"ERC20Ecosystem\"},\"evmVersion\":\"cancun\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/facets/ERC2771Recipient/LibERC2771Recipient.sol\":{\"content\":\"// LibEventStorage.sol\\r\\npragma solidity ^0.8.0;\\r\\n\\r\\n\\r\\n\\r\\nlibrary LibERC2771Recipient {\\r\\n    bytes32 constant STORAGE_POSITION = keccak256(\\\"diamond.storage.ERC2771Recipient\\\");\\r\\n\\r\\n   \\r\\n    struct ERC2771RecipientStorage {\\r\\n        address trustedForwarder;\\r\\n    }\\r\\n\\r\\n    function erc2771RecipientStorage() internal pure returns ( ERC2771RecipientStorage storage es) {\\r\\n        bytes32 position = STORAGE_POSITION;\\r\\n        assembly {\\r\\n            es.slot := position\\r\\n        }\\r\\n    }\\r\\n\\r\\n\\r\\n   function __getTrustedForwarder() internal  view returns (address trustedForwarder_){\\r\\n       ERC2771RecipientStorage storage es =  erc2771RecipientStorage();\\r\\n        trustedForwarder_ =  es.trustedForwarder;\\r\\n    }\\r\\n\\r\\n    function __setTrustedForwarder(address _forwarder) internal {\\r\\n        ERC2771RecipientStorage storage es =  erc2771RecipientStorage();\\r\\n        es.trustedForwarder = _forwarder; \\r\\n    }\\r\\n \\r\\n  \\r\\n    function _isTrustedForwarder(address forwarder) public  view returns(bool) {\\r\\n        ERC2771RecipientStorage storage es =  erc2771RecipientStorage();\\r\\n        return forwarder == es.trustedForwarder;\\r\\n    }\\r\\n \\r\\n    \\r\\n    function _msgSender() internal  view returns (address ret) {\\r\\n        if (msg.data.length >= 20 && _isTrustedForwarder(msg.sender)) {\\r\\n            // At this point we know that the sender is a trusted forwarder,\\r\\n            // so we trust that the last bytes of msg.data are the verified sender address.\\r\\n            // extract sender address from the end of msg.data\\r\\n            assembly {\\r\\n                ret := shr(96,calldataload(sub(calldatasize(),20)))\\r\\n            }\\r\\n        } else {\\r\\n            ret = msg.sender;\\r\\n        }\\r\\n    }\\r\\n\\r\\n    \\r\\n    function _msgData() internal  view returns (bytes calldata ret) {\\r\\n        if (msg.data.length >= 20 && _isTrustedForwarder(msg.sender)) {\\r\\n            return msg.data[0:msg.data.length-20];\\r\\n        } else {\\r\\n            return msg.data;\\r\\n        }\\r\\n    }\\r\\n}\\r\\n\",\"keccak256\":\"0x6ff10e2f12c8a61f2ae6ff642711976888a210d309d0e03885193162664330cb\"},\"contracts/facets/ERC2771Recipient/_ERC2771Recipient.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\r\\n// solhint-disable no-inline-assembly\\r\\npragma solidity >=0.8.0;\\r\\n\\r\\n\\r\\n\\r\\nimport { LibERC2771Recipient } from \\\"./LibERC2771Recipient.sol\\\";  \\r\\n/**\\r\\n * @title The ERC-2771 Recipient Base Abstract Class - Implementation\\r\\n *\\r\\n * @notice Note that this contract was called `BaseRelayRecipient` in the previous revision of the GSN.\\r\\n *\\r\\n * @notice A base contract to be inherited by any contract that want to receive relayed transactions.\\r\\n *\\r\\n * @notice A subclass must use `_msgSender()` instead of `msg.sender`.\\r\\n */\\r\\ncontract iERC2771Recipient {\\r\\n \\r\\n    /*\\r\\n     * Forwarder singleton we accept calls from\\r\\n     */\\r\\n     \\r\\n    \\r\\n\\r\\n    function _getTrustedForwarder() internal  view returns (address forwarder){\\r\\n        return LibERC2771Recipient.__getTrustedForwarder();\\r\\n    }\\r\\n\\r\\n    function _setTrustedForwarder(address _forwarder) internal {\\r\\n        LibERC2771Recipient.__setTrustedForwarder(_forwarder); \\r\\n    }\\r\\n  \\r\\n  \\r\\n    function _isTrustedForwarder(address forwarder) internal  view returns(bool) {\\r\\n        return LibERC2771Recipient._isTrustedForwarder(forwarder);\\r\\n    } \\r\\n\\r\\n    \\r\\n    function msgSender() internal  view returns (address ret_) {\\r\\n        ret_ = LibERC2771Recipient._msgSender();\\r\\n    }\\r\\n    \\r\\n    function msgData() internal  view returns (bytes calldata ret_) {\\r\\n        ret_ = LibERC2771Recipient._msgData();\\r\\n    }\\r\\n}\",\"keccak256\":\"0x0a097bedc1831e582bf1b64b8406b71a3441ed6f9d09b12874821b94d3ce9a88\",\"license\":\"MIT\"},\"contracts/facets/Ownership/LibOwnership.sol\":{\"content\":\"pragma solidity ^0.8.0;\\r\\n\\r\\n\\r\\n\\r\\nlibrary LibOwnership {\\r\\nbytes32 constant OWNERSHIP_STORAGE_POSITION = keccak256(\\\"diamond.ownership.storage\\\");\\r\\nuint24 constant MIGRATION_TRANSITION_LOCK_TIMESPAN = 259200; // 3 days\\r\\n\\r\\nstruct OwnershipStorage{\\r\\n    address ecosystemOwner;\\r\\n    address registry;\\r\\n    Migration migration;\\r\\n}\\r\\nstruct Migration{\\r\\n    bool isMigrating;\\r\\n    uint32 initiationTimestamp;\\r\\n}\\r\\n\\r\\nfunction ownershipStorage() internal pure returns (OwnershipStorage storage os) {\\r\\n        bytes32 position = OWNERSHIP_STORAGE_POSITION;\\r\\n        assembly {\\r\\n            os.slot := position \\r\\n        }\\r\\n    }\\r\\n\\r\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\r\\n\\r\\n    /**\\r\\n        Should never be used outside of iOwnership.sol (exception for the initial diamond constructor)\\r\\n        @notice Sets the owner of this ecosystem\\r\\n        @param _newEcosystemOwner  new ecosystem owner \\r\\n     */\\r\\n    function _setEcosystemOwner(address _newEcosystemOwner) internal {\\r\\n        OwnershipStorage storage os = ownershipStorage();\\r\\n        address previousOwner = os.ecosystemOwner;\\r\\n        os.ecosystemOwner = _newEcosystemOwner;\\r\\n        emit OwnershipTransferred(previousOwner, _newEcosystemOwner);\\r\\n    }\\r\\n\\r\\n    function _ecosystemOwner() internal view returns (address ecosystemOwner_) {\\r\\n        ecosystemOwner_ = ownershipStorage().ecosystemOwner;\\r\\n    }\\r\\n\\r\\n    function _setRegistry(address _registry) internal {\\r\\n        OwnershipStorage storage os = ownershipStorage();\\r\\n        os.registry = _registry;\\r\\n    }\\r\\n    function _getRegistry() internal view returns (address registry_) {\\r\\n        OwnershipStorage storage os = ownershipStorage();\\r\\n        registry_ = os.registry;\\r\\n    }\\r\\n    \\r\\n    \\r\\n} \",\"keccak256\":\"0x424fd62131dbaccfa06ef6f6deb4e1ef1d75db9d9e0908c864faff0e1d52099e\"},\"contracts/facets/Ownership/_Ownership.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\r\\npragma solidity ^0.8.0;\\r\\n\\r\\nimport {LibOwnership} from \\\"./LibOwnership.sol\\\";\\r\\nimport {iERC2771Recipient} from \\\"../ERC2771Recipient/_ERC2771Recipient.sol\\\";     \\r\\n\\r\\ncontract iOwnership is iERC2771Recipient {\\r\\n    error MigrationAlreadyInitiated();\\r\\n    error MigrationAlreadyCompleted();\\r\\n    error MigrationNotInitiated();\\r\\n\\r\\n    event MigrationInitiated(address initiatior, uint32 timeInitiatied);\\r\\n    event MigrationCancelled(address cancellor, uint32 timeCancelled);\\r\\n    event OwnershipChanged(address oldOwner, address newOwner); \\r\\n    modifier onlyOwner(){\\r\\n        msgSender() == _ecosystemOwner();\\r\\n        _;\\r\\n    }\\r\\n    function _setEcosystemOwner( address _newOwner) internal {\\r\\n        isEcosystemOwnerVerification();\\r\\n        LibOwnership._setEcosystemOwner(_newOwner);\\r\\n    }\\r\\n\\r\\n    function _ecosystemOwner() internal view returns (address owner_) {\\r\\n        owner_ = LibOwnership._ecosystemOwner();\\r\\n    }\\r\\n\\r\\n    function isEcosystemOwnerVerification() internal view {\\r\\n        require( msgSender() == _ecosystemOwner(), \\\"Must be the Ecosystem owner\\\"); \\r\\n    }\\r\\n    \\r\\n\\r\\n    //Migration related methods\\r\\n\\r\\n    /**\\r\\n     * @dev sole purpose is to restrict user from having access to ecosystem modularity\\r\\n     * until they initiate a migration. only modular changes are done via registry until\\r\\n     * then. \\r\\n     */\\r\\n    function isEffectiveOwner() internal view {\\r\\n        LibOwnership.OwnershipStorage storage os = LibOwnership.ownershipStorage();\\r\\n        LibOwnership.Migration storage _migration = os.migration;\\r\\n        if( _migration.isMigrating && isMigrationPeriodOver( _migration.initiationTimestamp ) ){\\r\\n            require( msgSender() == os.ecosystemOwner, \\\"Sender must be the owner.\\\");\\r\\n        }\\r\\n        else{\\r\\n            require(msgSender() == os.registry, \\\"Sender must be from the registry.\\\");\\r\\n        }\\r\\n    }\\r\\n\\r\\n    \\r\\n    /**\\r\\n     * @dev start the migration \\r\\n     */\\r\\n    function _initiateMigration() internal {\\r\\n        LibOwnership.OwnershipStorage storage os = LibOwnership.ownershipStorage();\\r\\n        LibOwnership.Migration storage _migration = os.migration;\\r\\n        if( _migration.isMigrating ){\\r\\n            revert MigrationAlreadyInitiated();\\r\\n        }\\r\\n        else{\\r\\n            _migration.isMigrating = true;\\r\\n            _migration.initiationTimestamp = uint32(block.timestamp);\\r\\n            emit MigrationInitiated(msgSender(), uint32(block.timestamp) );\\r\\n        } \\r\\n    }\\r\\n    function _cancelMigration() internal {\\r\\n        LibOwnership.OwnershipStorage storage os = LibOwnership.ownershipStorage();\\r\\n        LibOwnership.Migration storage _migration = os.migration;\\r\\n        uint32 _initiationTimestamp = _migration.initiationTimestamp;\\r\\n        if( _migration.isMigrating  ) {\\r\\n            if(isMigrationPeriodOver( _initiationTimestamp )){\\r\\n                revert MigrationAlreadyCompleted();\\r\\n            }\\r\\n            else{\\r\\n                _migration.isMigrating = false;\\r\\n                emit MigrationCancelled(msgSender(), uint32(block.timestamp));\\r\\n            }\\r\\n        }\\r\\n        else {\\r\\n            revert MigrationNotInitiated();\\r\\n        }\\r\\n        \\r\\n    }\\r\\n    function isMigrationPeriodOver( uint32 _initiationTimestamp ) internal view returns (bool isOver_){\\r\\n        isOver_ = uint32(block.timestamp) + LibOwnership.MIGRATION_TRANSITION_LOCK_TIMESPAN > _initiationTimestamp;\\r\\n    }\\r\\n}\\r\\n \",\"keccak256\":\"0x3fa7c0716afb600bfa154cef5596f51bb7a707b1d394648498ff24e35731f0ba\",\"license\":\"MIT\"},\"contracts/facets/Tokens/ERC1155/interfaces/IERC1155Receiver.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\r\\n// OpenZeppelin Contracts (last updated v4.5.0) (token/ERC1155/IERC1155Receiver.sol)\\r\\n\\r\\npragma solidity ^0.8.0;\\r\\n\\r\\n\\r\\n/**\\r\\n * @dev _Available since v3.1._\\r\\n */\\r\\ninterface IERC1155Receiver  {\\r\\n    /**\\r\\n     * @dev Handles the receipt of a single ERC1155 token type. This function is\\r\\n     * called at the end of a `safeTransferFrom` after the balance has been updated.\\r\\n     *\\r\\n     * NOTE: To accept the transfer, this must return\\r\\n     * `bytes4(keccak256(\\\"onERC1155Received(address,address,uint256,uint256,bytes)\\\"))`\\r\\n     * (i.e. 0xf23a6e61, or its own function selector).\\r\\n     *\\r\\n     * @param operator The address which initiated the transfer (i.e. msg.sender)\\r\\n     * @param from The address which previously owned the token\\r\\n     * @param id The ID of the token being transferred\\r\\n     * @param value The amount of tokens being transferred\\r\\n     * @param data Additional data with no specified format\\r\\n     * @return `bytes4(keccak256(\\\"onERC1155Received(address,address,uint256,uint256,bytes)\\\"))` if transfer is allowed\\r\\n     */\\r\\n    function onERC1155Received(\\r\\n        address operator,\\r\\n        address from,\\r\\n        uint256 id,\\r\\n        uint256 value,\\r\\n        bytes calldata data\\r\\n    ) external returns (bytes4);\\r\\n\\r\\n    /**\\r\\n     * @dev Handles the receipt of a multiple ERC1155 token types. This function\\r\\n     * is called at the end of a `safeBatchTransferFrom` after the balances have\\r\\n     * been updated.\\r\\n     *\\r\\n     * NOTE: To accept the transfer(s), this must return\\r\\n     * `bytes4(keccak256(\\\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\\\"))`\\r\\n     * (i.e. 0xbc197c81, or its own function selector).\\r\\n     *\\r\\n     * @param operator The address which initiated the batch transfer (i.e. msg.sender)\\r\\n     * @param from The address which previously owned the token\\r\\n     * @param ids An array containing ids of each token being transferred (order and length must match values array)\\r\\n     * @param values An array containing amounts of each token being transferred (order and length must match ids array)\\r\\n     * @param data Additional data with no specified format\\r\\n     * @return `bytes4(keccak256(\\\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\\\"))` if transfer is allowed\\r\\n     */\\r\\n    function onERC1155BatchReceived(\\r\\n        address operator,\\r\\n        address from,\\r\\n        uint256[] calldata ids,\\r\\n        uint256[] calldata values,\\r\\n        bytes calldata data\\r\\n    ) external returns (bytes4);\\r\\n}\\r\\n\",\"keccak256\":\"0x903479627911c42b944018e3af01eecab68fbc134c6002f8fdc21d1626abf762\",\"license\":\"MIT\"},\"contracts/facets/Tokens/ERC1155/interfaces/IERC1155Transfer.sol\":{\"content\":\"pragma solidity ^0.8.0;\\r\\n\\r\\n\\r\\ninterface IERC1155Transfer{\\r\\n\\r\\n\\r\\n /**\\r\\n     * @dev Transfers `amount` tokens of token type `id` from `from` to `to`.\\r\\n     *\\r\\n     * Emits a {TransferSingle} event.\\r\\n     *\\r\\n     * Requirements:\\r\\n     *\\r\\n     * - `to` cannot be the zero address.\\r\\n     * - If the caller is not `from`, it must have been approved to spend ``from``'s tokens via {setApprovalForAll}.\\r\\n     * - `from` must have a balance of tokens of type `id` of at least `amount`.\\r\\n     * - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155Received} and return the\\r\\n     * acceptance magic value.\\r\\n     */\\r\\n    function safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes calldata data) external;\\r\\n    \\r\\n    /**\\r\\n     * @dev xref:ROOT:erc1155.adoc#batch-operations[Batched] version of {safeTransferFrom}.\\r\\n     *\\r\\n     * Emits a {TransferBatch} event.\\r\\n     *\\r\\n     * Requirements:\\r\\n     *\\r\\n     * - `ids` and `amounts` must have the same length.\\r\\n     * - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155BatchReceived} and return the\\r\\n     * acceptance magic value.\\r\\n     */\\r\\n    function safeBatchTransferFrom(\\r\\n        address from,\\r\\n        address to,\\r\\n        uint256[] calldata ids,\\r\\n        uint256[] calldata amounts,\\r\\n        bytes calldata data\\r\\n    ) external;\\r\\n\\r\\n      /**\\r\\n     * @dev Grants or revokes permission to `operator` to transfer the caller's tokens, according to `approved`,\\r\\n     *\\r\\n     * Emits an {ApprovalForAll} event.\\r\\n     *\\r\\n     * Requirements:\\r\\n     *\\r\\n     * - `operator` cannot be the caller.\\r\\n     */\\r\\n    function setApprovalForAll(address operator, bool approved) external;\\r\\n\\r\\n    /**\\r\\n     * @dev Returns true if `operator` is approved to transfer ``account``'s tokens.\\r\\n     *\\r\\n     * See {setApprovalForAll}.\\r\\n     */\\r\\n    function isApprovedForAll(address account, address operator) external view returns (bool);\\r\\n\\r\\n}\",\"keccak256\":\"0x1fba6f123b029993faac5769a036f58dd1ea79ce27136031aa2f366e982b0737\"},\"contracts/facets/Tokens/ERC1155/internals/iERC1155ContractTransfer.sol\":{\"content\":\"pragma solidity ^0.8.0;\\r\\n\\r\\nimport \\\"../interfaces/IERC1155Receiver.sol\\\";\\r\\nimport \\\"../../../../libraries/utils/Address.sol\\\";\\r\\nimport \\\"./iERC1155Receiver.sol\\\";\\r\\n\\r\\n//Safety check for transfers to contracts\\r\\ncontract iERC1155ContractTransfer is iERC1155Receiver {\\r\\n    \\r\\n    using Address for address;\\r\\n    /**\\r\\n     * @dev Emitted when `value` tokens of token type `id` are transferred from `from` to `to` by `operator`.\\r\\n     */\\r\\n    event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);\\r\\n\\r\\n    /**\\r\\n     * @dev Equivalent to multiple {TransferSingle} events, where `operator`, `from` and `to` are the same for all\\r\\n     * transfers.\\r\\n     */\\r\\n   /**\\r\\n     * @dev Equivalent to multiple {TransferSingle} events, where `operator`, `from` and `to` are the same for all\\r\\n     * transfers.\\r\\n     */\\r\\n    event TransferBatch(\\r\\n        address indexed operator,\\r\\n        address indexed from,\\r\\n        address indexed to,\\r\\n        uint256[] ids,\\r\\n        uint256[] values\\r\\n    );\\r\\n\\r\\n     function _doSafeTransferAcceptanceCheck(\\r\\n        address operator,\\r\\n        address from,\\r\\n        address to,\\r\\n        uint256 id,\\r\\n        uint256 amount,\\r\\n        bytes memory data\\r\\n    ) internal {\\r\\n        if (to.isContract()) {\\r\\n            if( to == address(this)){\\r\\n               return;\\r\\n            }\\r\\n            try IERC1155Receiver(to).onERC1155Received(operator, from, id, amount, data) returns (bytes4 response) {\\r\\n                if (response != IERC1155Receiver.onERC1155Received.selector) {\\r\\n                    revert(\\\"ERC1155: ERC1155Receiver rejected tokens\\\");\\r\\n                }\\r\\n            } catch Error(string memory reason) {\\r\\n                revert(reason);\\r\\n            } catch {\\r\\n                revert(\\\"ERC1155: transfer to non-ERC1155Receiver implementer\\\");\\r\\n            }\\r\\n        }\\r\\n    }\\r\\n\\r\\n    function _doSafeBatchTransferAcceptanceCheck(\\r\\n        address operator,\\r\\n        address from,\\r\\n        address to,\\r\\n        uint256[] memory ids,\\r\\n        uint256[] memory amounts,\\r\\n        bytes memory data\\r\\n    ) internal {\\r\\n        if (to.isContract()) {\\r\\n            if( to == address(this)){\\r\\n               return;\\r\\n            }\\r\\n            try IERC1155Receiver(to).onERC1155BatchReceived(operator, from, ids, amounts, data) returns (\\r\\n                bytes4 response\\r\\n            ) {\\r\\n                if (response != IERC1155Receiver.onERC1155BatchReceived.selector) {\\r\\n                    revert(\\\"ERC1155: ERC1155Receiver rejected tokens\\\");\\r\\n                }\\r\\n            } catch Error(string memory reason) {\\r\\n                revert(reason);\\r\\n            } catch {\\r\\n                revert(\\\"ERC1155: transfer to non-ERC1155Receiver implementer\\\");\\r\\n            }\\r\\n        }\\r\\n    }\\r\\n\\r\\n}\",\"keccak256\":\"0x929836d5a0c4a3961eb6d8c0dbc85213a50dff7fca377dd4df6e5e92832ab352\"},\"contracts/facets/Tokens/ERC1155/internals/iERC1155Receiver.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\r\\n// OpenZeppelin Contracts (last updated v4.5.0) (token/ERC1155/IERC1155Receiver.sol)\\r\\n\\r\\npragma solidity ^0.8.0;\\r\\n\\r\\n/**\\r\\n * @dev _Available since v3.1._\\r\\n */\\r\\ncontract iERC1155Receiver   {\\r\\n\\r\\n    function _onERC1155Received(\\r\\n    ) internal pure returns (bytes4){\\r\\n        return 0xf23a6e61;\\r\\n    }\\r\\n    function _onERC1155BatchReceived(\\r\\n    ) internal pure returns (bytes4){\\r\\n        return 0xbc197c81;\\r\\n    }\\r\\n}\\r\\n\",\"keccak256\":\"0xbeaf6ce27c1d8a0f9e54061b5cd887071a88a229e9ce742ad51d01e915b5b459\",\"license\":\"MIT\"},\"contracts/facets/Tokens/ERC1155/internals/iERC1155Transfer.sol\":{\"content\":\"pragma solidity ^0.8.0;\\r\\n\\r\\nimport {iERC2771Recipient} from \\\"../../../ERC2771Recipient/_ERC2771Recipient.sol\\\";    \\r\\nimport \\\"../libraries/LibERC1155.sol\\\";\\r\\nimport \\\"./iERC1155ContractTransfer.sol\\\";\\r\\nimport \\\"../interfaces/IERC1155Transfer.sol\\\";\\r\\n\\r\\ncontract iERC1155Transfer is iERC1155ContractTransfer, iERC2771Recipient {\\r\\n    /**\\r\\n     * @dev Emitted when `account` grants or revokes permission to `operator` to transfer their tokens, according to\\r\\n     * `approved`.\\r\\n     */\\r\\n    event ApprovalForAll(address indexed account, address indexed operator, bool approved);\\r\\n\\r\\n    /**\\r\\n     * @dev Equivalent to multiple {TransferSingle} events, where `operator`, `from` and `to` are the same for all\\r\\n     * transfers.\\r\\n     */\\r\\n\\r\\n    function _safeTransferFrom(address from, address to, uint256 id, uint256 amount, bytes memory data) internal {\\r\\n        require(to != address(0), \\\"ERC1155: transfer to the zero address\\\");\\r\\n        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();\\r\\n        address operator = msgSender(); \\r\\n        uint256[] memory ids = LibERC1155._asSingletonArray(id);\\r\\n        uint256[] memory amounts = LibERC1155._asSingletonArray(amount);\\r\\n\\r\\n        uint256 fromBalance = es.balance[id][from];\\r\\n        require(fromBalance >= amount, \\\"ERC1155: insufficient balance for transfer\\\");\\r\\n        unchecked {\\r\\n            es.balance[id][from] = fromBalance - amount;\\r\\n        }\\r\\n        es.balance[id][to] += amount;\\r\\n        emit TransferSingle(operator, from, to, id, amount);\\r\\n\\r\\n        _doSafeTransferAcceptanceCheck(operator, from, to, id, amount, data);\\r\\n    }\\r\\n\\r\\n    /**\\r\\n     * @dev xref:ROOT:erc1155.adoc#batch-operations[Batched] version of {_safeTransferFrom}.\\r\\n     *\\r\\n     * Emits a {TransferBatch} event.\\r\\n     *\\r\\n     * Requirements:\\r\\n     *\\r\\n     * - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155BatchReceived} and return the\\r\\n     * acceptance magic value.\\r\\n     */\\r\\n    function _safeBatchTransferFrom(address from, address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) internal {\\r\\n        require(ids.length == amounts.length, \\\"ERC1155: ids and amounts length mismatch\\\");\\r\\n        require(to != address(0), \\\"ERC1155: transfer to the zero address\\\");\\r\\n        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();\\r\\n        address operator = msgSender();\\r\\n\\r\\n        for (uint256 i = 0; i < ids.length; ++i) {\\r\\n            uint256 id = ids[i];\\r\\n            uint256 amount = amounts[i];\\r\\n\\r\\n            uint256 fromBalance = es.balance[id][from];\\r\\n            require(fromBalance >= amount, \\\"ERC1155: insufficient balance for transfer\\\");\\r\\n            unchecked {\\r\\n                es.balance[id][from] = fromBalance - amount;\\r\\n            }\\r\\n            es.balance[id][to] += amount;\\r\\n        }\\r\\n\\r\\n        emit TransferBatch(operator, from, to, ids, amounts);\\r\\n\\r\\n        _doSafeBatchTransferAcceptanceCheck(operator, from, to, ids, amounts, data);\\r\\n    }\\r\\n\\r\\n    /**\\r\\n     * @dev Approve `operator` to operate on all of `owner` tokens\\r\\n     *\\r\\n     * Emits an {ApprovalForAll} event.\\r\\n     */\\r\\n    function _setApprovalForAll(address owner, address operator, bool approved) internal {\\r\\n        require(owner != operator, \\\"ERC1155: setting approval status for self\\\");\\r\\n\\r\\n        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();\\r\\n        es.operatorApprovals[owner][operator] = approved;\\r\\n        emit ApprovalForAll(owner, operator, approved);\\r\\n    }\\r\\n\\r\\n    \\r\\n}\\r\\n\\r\\n\",\"keccak256\":\"0xbf776bb883cccddbaa660798a6e0f972c01864c9ee17fe9bf7ef3d0738a8da4f\"},\"contracts/facets/Tokens/ERC1155/libraries/LibERC1155.sol\":{\"content\":\"pragma solidity ^0.8.0;\\r\\n\\r\\nlibrary LibERC1155 {\\r\\n    bytes32 constant STORAGE_ERC1155 = \\\"diamond.storage.erc1155\\\";\\r\\n\\r\\n    struct ERC1155Storage {\\r\\n        // Mapping from token ID to account balances\\r\\n        mapping(uint256 => mapping(address => uint256)) balance;\\r\\n        // Mapping from account to operator approvals\\r\\n        mapping(address => mapping(address => bool)) operatorApprovals;\\r\\n        // Used as the URI for all token types by relying on ID substitution, e.g. https://token-cdn-domain/{id}.json\\r\\n        string uri;\\r\\n        uint256 totalSupply;\\r\\n    }\\r\\n\\r\\n    function erc1155Storage() internal pure returns (ERC1155Storage storage es_) {\\r\\n        bytes32 erc1155_key = STORAGE_ERC1155;\\r\\n        assembly {\\r\\n            es_.slot := erc1155_key\\r\\n        }\\r\\n    }\\r\\n\\r\\n    function getBalance(uint256 tokenId, address user) internal view returns (uint256 balance_) {\\r\\n        ERC1155Storage storage es = erc1155Storage();\\r\\n        balance_ = es.balance[tokenId][user];\\r\\n    }\\r\\n\\r\\n    function getOperatorApproval(address user, address operator) internal view returns (bool approved_) {\\r\\n        ERC1155Storage storage es = erc1155Storage();\\r\\n        approved_ = es.operatorApprovals[user][operator];\\r\\n    }\\r\\n    function _asSingletonArray(uint256 element) internal pure  returns (uint256[] memory) {\\r\\n        uint256[] memory array = new uint256[](1);\\r\\n        array[0] = element;\\r\\n\\r\\n        return array;\\r\\n    }\\r\\n}\\r\\n\",\"keccak256\":\"0x2b0592f9db824744321e8eb08cfed2fb6f7ee07e0acd5d5daf3fc3e4c3318779\"},\"contracts/facets/Tokens/ERC20/ERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\r\\npragma solidity ^0.8.0;\\r\\n\\r\\nimport \\\"../../../libraries/utils/Context.sol\\\";\\r\\nimport \\\"../../../libraries/utils/Ownable.sol\\\"; \\r\\nimport \\\"./libraries/LibERC20.sol\\\"; \\r\\nimport \\\"../../Ownership/LibOwnership.sol\\\";  \\r\\nimport \\\"../ERC1155/libraries/LibERC1155.sol\\\";\\r\\nimport \\\"../ERC1155/internals/iERC1155Transfer.sol\\\";\\r\\n \\r\\nimport {iOwnership} from \\\"../../Ownership/_Ownership.sol\\\";\\r\\n\\r\\nevent CurrencyNameChanged(string name);\\r\\nevent CurrencySymbolChanged(string name);\\r\\n\\r\\ncontract ERC20Ecosystem is iOwnership, iERC1155Transfer {\\r\\n\\r\\n    function setCurrencyNames( string memory _currencyName, string memory _currencySymbol)\\r\\n    external {\\r\\n        isEcosystemOwnerVerification(); \\r\\n        if( bytes(_currencyName).length != 0){\\r\\n            LibERC20._setName(_currencyName);\\r\\n            emit CurrencyNameChanged( _currencyName );\\r\\n        }\\r\\n        if( bytes(_currencySymbol).length != 0){ \\r\\n            LibERC20._setSymbol(_currencySymbol);\\r\\n            emit CurrencySymbolChanged( _currencySymbol );\\r\\n        }\\r\\n    }\\r\\n\\r\\n\\r\\n    //ERC20\\r\\n    function name() external view returns (string memory) {\\r\\n        return LibERC20.getName();\\r\\n    }\\r\\n\\r\\n    function symbol() external view returns (string memory) {\\r\\n      return LibERC20.getSymbol();\\r\\n    }\\r\\n\\r\\n    function decimals() external pure returns (uint8) {\\r\\n        return 18;\\r\\n    }\\r\\n\\r\\n    function totalSupply() public view returns (uint256) {\\r\\n        // Assuming the ERC1155 contract implements a function to get the total supply for a token ID\\r\\n        // If not, this function will need to be removed or modified\\r\\n        // return erc1155.totalSupply(tokenId);\\r\\n        return 0; // Replace with appropriate total supply logic\\r\\n    }\\r\\n\\r\\n    function balanceOf(address account) external view returns (uint256) {\\r\\n        return LibERC1155.getBalance(LibERC20.PRIMARY_CURRENCY_ID, account);\\r\\n    }\\r\\n\\r\\n    function allowance(address owner, address spender) external view returns (uint256) {\\r\\n        bool approvalStatus = LibERC1155.getOperatorApproval(owner, spender);\\r\\n        return approvalStatus ? type(uint256).max : type(uint256).min; // Replace with appropriate allowance logic\\r\\n    }\\r\\n\\r\\n    function transfer(address recipient, uint256 amount) external returns (bool) {\\r\\n        _safeTransferFrom(msgSender(), recipient, LibERC20.PRIMARY_CURRENCY_ID, amount, \\\"\\\");\\r\\n        return true;\\r\\n    }\\r\\n   \\r\\n    function approve(address spender, uint256 amount) external  returns (bool) {\\r\\n        _setApprovalForAll(msgSender(), spender, amount != 0);\\r\\n        return true; \\r\\n    }\\r\\n\\r\\n    function approvePermit(address owner, address spender, uint256 amount) internal returns (bool){\\r\\n        _setApprovalForAll(owner, spender, amount != 0);\\r\\n    }\\r\\n    function transferFrom(address sender, address recipient, uint256 amount) external  returns (bool) {\\r\\n        _safeTransferFrom(sender, recipient, LibERC20.PRIMARY_CURRENCY_ID, amount, \\\"\\\");\\r\\n        return false; // Replace with appropriate transferFrom logic\\r\\n    }\\r\\n}\\r\\n\",\"keccak256\":\"0x66945967cb68562a8e24dfb4ac11b99125f30ffac015f6dd5a347edd9896d0df\",\"license\":\"MIT\"},\"contracts/facets/Tokens/ERC20/libraries/LibERC20.sol\":{\"content\":\"pragma solidity ^0.8.6;\\r\\n\\r\\nlibrary LibERC20{\\r\\n    uint256 public constant PRIMARY_CURRENCY_ID = 0; \\r\\n    bytes32 constant ERC20_STORAGE_POSITION = keccak256(\\\"diamond.standard.erc20.storage\\\");\\r\\n    struct ERC20_Storage{\\r\\n        uint256 totalSupply;\\r\\n        string name;\\r\\n        string symbol;\\r\\n    }\\r\\n\\r\\n    function erc20Storage() internal pure returns (ERC20_Storage storage es){\\r\\n        bytes32 ERC20_STORAGE_POSITION = ERC20_STORAGE_POSITION;\\r\\n        assembly{\\r\\n            es.slot := ERC20_STORAGE_POSITION\\r\\n        }\\r\\n    }\\r\\n\\r\\n    function _setName(string memory _name) internal{\\r\\n        ERC20_Storage storage es = erc20Storage();\\r\\n        es.name = _name;\\r\\n    }\\r\\n    function _setSymbol(string memory _symbol) internal{\\r\\n        ERC20_Storage storage es = erc20Storage();\\r\\n        es.symbol = _symbol;\\r\\n    }\\r\\n    function getName() internal view returns(string memory name_) {\\r\\n        name_ = erc20Storage().name;\\r\\n    }\\r\\n    function getSymbol() internal view returns(string memory name_) {\\r\\n        name_ = erc20Storage().symbol;\\r\\n    }\\r\\n\\r\\n}\",\"keccak256\":\"0x5541de15add5c7fabeeda142ada2c091d8378a8dfc2133a63dea48632554ab21\"},\"contracts/libraries/utils/Address.sol\":{\"content\":\"library Address {\\r\\n\\r\\n    /**\\r\\n     * Returns whether the target address is a contract\\r\\n     * @dev This function will return false if invoked during the constructor of a contract,\\r\\n     * as the code is not actually created until after the constructor finishes.\\r\\n     * @param account address of the account to check\\r\\n     * @return whether the target address is a contract\\r\\n     */\\r\\n    function isContract(address account) internal view returns (bool) {\\r\\n        uint256 size;\\r\\n        // XXX Currently there is no better way to check if there is a contract in an address\\r\\n        // than to check the size of the code at that address.\\r\\n        // See https://ethereum.stackexchange.com/a/14016/36603\\r\\n        // for more details about how this works.\\r\\n        // TODO Check this again before the Serenity release, because all addresses will be\\r\\n        // contracts then.\\r\\n        // solium-disable-next-line security/no-inline-assembly\\r\\n        assembly { size := extcodesize(account) }\\r\\n        return size > 0;\\r\\n    }\\r\\n\\r\\n}\",\"keccak256\":\"0x332f7fa5b7e5de602575ce60b90e9f003ef7b6c5f6440064deb33ecca39c04d0\"},\"contracts/libraries/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\r\\n// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)\\r\\n\\r\\npragma solidity ^0.8.0;\\r\\n\\r\\n/**\\r\\n * @dev Provides information about the current execution context, including the\\r\\n * sender of the transaction and its data. While these are generally available\\r\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\r\\n * manner, since when dealing with meta-transactions the account sending and\\r\\n * paying for execution may not be the actual sender (as far as an application\\r\\n * is concerned).\\r\\n *\\r\\n * This contract is only required for intermediate, library-like contracts.\\r\\n */\\r\\nabstract contract Context {\\r\\n    function _msgSender() internal view virtual returns (address) {\\r\\n        return msg.sender;\\r\\n    }\\r\\n    function msgSender() internal view virtual returns (address) {\\r\\n        return msg.sender;\\r\\n    }\\r\\n    function _msgData() internal view virtual returns (bytes calldata) {\\r\\n        return msg.data;\\r\\n    }\\r\\n}\\r\\n\",\"keccak256\":\"0xc0396a4816197ac7b903c3d4f8a5c9ea28e908c74cf9f48b89f51f55aa95bc36\",\"license\":\"MIT\"},\"contracts/libraries/utils/Ownable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\r\\n// OpenZeppelin Contracts (last updated v4.9.0) (access/Ownable.sol)\\r\\n\\r\\npragma solidity ^0.8.0;\\r\\n\\r\\nimport \\\"./Context.sol\\\";\\r\\n\\r\\n/**\\r\\n * @dev Contract module which provides a basic access control mechanism, where\\r\\n * there is an account (an owner) that can be granted exclusive access to\\r\\n * specific functions.\\r\\n *\\r\\n * By default, the owner account will be the one that deploys the contract. This\\r\\n * can later be changed with {transferOwnership}.\\r\\n *\\r\\n * This module is used through inheritance. It will make available the modifier\\r\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\r\\n * the owner.\\r\\n */\\r\\nabstract contract Ownable is Context {\\r\\n    address private _owner;\\r\\n\\r\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\r\\n\\r\\n    /**\\r\\n     * @dev Initializes the contract setting the deployer as the initial owner.\\r\\n     */\\r\\n    constructor() {\\r\\n        _transferOwnership(_msgSender());\\r\\n    }\\r\\n\\r\\n    /**\\r\\n     * @dev Throws if called by any account other than the owner.\\r\\n     */\\r\\n    modifier onlyOwner() {\\r\\n        _checkOwner();\\r\\n        _;\\r\\n    }\\r\\n\\r\\n    /**\\r\\n     * @dev Returns the address of the current owner.\\r\\n     */\\r\\n    function owner() public view virtual returns (address) {\\r\\n        return _owner;\\r\\n    }\\r\\n\\r\\n    /**\\r\\n     * @dev Throws if the sender is not the owner.\\r\\n     */\\r\\n    function _checkOwner() internal view virtual {\\r\\n        require(owner() == _msgSender(), \\\"Ownable: caller is not the owner\\\");\\r\\n    }\\r\\n\\r\\n    /**\\r\\n     * @dev Leaves the contract without owner. It will not be possible to call\\r\\n     * `onlyOwner` functions. Can only be called by the current owner.\\r\\n     *\\r\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\r\\n     * thereby disabling any functionality that is only available to the owner.\\r\\n     */\\r\\n    function renounceOwnership() public virtual onlyOwner {\\r\\n        _transferOwnership(address(0));\\r\\n    }\\r\\n\\r\\n    /**\\r\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\r\\n     * Can only be called by the current owner.\\r\\n     */\\r\\n    function transferOwnership(address newOwner) public virtual onlyOwner {\\r\\n        require(newOwner != address(0), \\\"Ownable: new owner is the zero address\\\");\\r\\n        _transferOwnership(newOwner);\\r\\n    }\\r\\n\\r\\n    /**\\r\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\r\\n     * Internal function without access restriction.\\r\\n     */\\r\\n    function _transferOwnership(address newOwner) internal virtual {\\r\\n        address oldOwner = _owner;\\r\\n        _owner = newOwner;\\r\\n        emit OwnershipTransferred(oldOwner, newOwner);\\r\\n    }\\r\\n}\\r\\n\",\"keccak256\":\"0x673b1da37f2744f44a9deb6a48a75634f35acb19cca8802ff92df829e381b0ed\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x6080604052348015600e575f5ffd5b50610f328061001c5f395ff3fe608060405234801561000f575f5ffd5b506004361061009b575f3560e01c8063313ce56711610063578063313ce5671461011857806370a082311461012757806395d89b411461013a578063a9059cbb14610142578063dd62ed3e14610155575f5ffd5b806306fdde031461009f578063095ea7b3146100bd5780631091465f146100e057806318160ddd146100f557806323b872dd14610105575b5f5ffd5b6100a7610168565b6040516100b49190610a6e565b60405180910390f35b6100d06100cb366004610aa2565b610177565b60405190151581526020016100b4565b6100f36100ee366004610b7b565b610196565b005b5f5b6040519081526020016100b4565b6100d0610113366004610be0565b610232565b604051601281526020016100b4565b6100f7610135366004610c1a565b610257565b6100a7610293565b6100d0610150366004610aa2565b61029d565b6100f7610163366004610c33565b6102c0565b606061017261031f565b905090565b5f61018c6101836103be565b848415156103c7565b5060015b92915050565b61019e6104e9565b8151156101e6576101ae8261055a565b7f04d3bfc04acc7afdd0529b3c60c8e78efddcb09ae8526934fba70d2eba850d7b826040516101dd9190610a6e565b60405180910390a15b80511561022e576101f681610598565b7f191b78e4c7830532af9978661ba5cd0d90502632d7d06a0d459414b8c3d7eb65816040516102259190610a6e565b60405180910390a15b5050565b5f61024e84845f8560405180602001604052805f8152506105d1565b505f9392505050565b6001600160a01b0381165f9081527fba4f68c463451b56edc468f33dd4d904d1aca5632e9b73a404ed5235b567d69c6020526040812054610190565b606061017261079f565b5f61018c6102a96103be565b845f8560405180602001604052805f8152506105d1565b6001600160a01b038281165f9081527f6469616d6f6e642e73746f726167652e657263313135350000000000000000016020908152604080832093851683529290529081205460ff1680610314575f610317565b5f195b949350505050565b60605f516020610edd5f395f51905f52600101805461033d90610c64565b80601f016020809104026020016040519081016040528092919081815260200182805461036990610c64565b80156103b45780601f1061038b576101008083540402835291602001916103b4565b820191905f5260205f20905b81548152906001019060200180831161039757829003601f168201915b5050505050905090565b5f6101726107bd565b816001600160a01b0316836001600160a01b03160361043f5760405162461bcd60e51b815260206004820152602960248201527f455243313135353a2073657474696e6720617070726f76616c20737461747573604482015268103337b91039b2b63360b91b60648201526084015b60405180910390fd5b6001600160a01b038381165f8181527f6469616d6f6e642e73746f726167652e657263313135350000000000000000016020908152604080832094871680845294825291829020805460ff191686151590811790915582519081529151766469616d6f6e642e73746f726167652e6572633131353560481b9493927f17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c3192908290030190a350505050565b6104f1610810565b6001600160a01b03166105026103be565b6001600160a01b0316146105585760405162461bcd60e51b815260206004820152601b60248201527f4d757374206265207468652045636f73797374656d206f776e657200000000006044820152606401610436565b565b5f516020610edd5f395f51905f527ffe4980b3cded4b6c88aa6ce831c92722d1f8b102c2cc3311eefa15eb3b3845616105938382610ce7565b505050565b5f516020610edd5f395f51905f527ffe4980b3cded4b6c88aa6ce831c92722d1f8b102c2cc3311eefa15eb3b3845626105938382610ce7565b6001600160a01b0384166106355760405162461bcd60e51b815260206004820152602560248201527f455243313135353a207472616e7366657220746f20746865207a65726f206164604482015264647265737360d81b6064820152608401610436565b766469616d6f6e642e73746f726167652e6572633131353560481b5f6106596103be565b90505f61066586610842565b90505f61067186610842565b5f888152602086815260408083206001600160a01b038e168452909152902054909150868110156106f75760405162461bcd60e51b815260206004820152602a60248201527f455243313135353a20696e73756666696369656e742062616c616e636520666f60448201526939103a3930b739b332b960b11b6064820152608401610436565b5f888152602086815260408083206001600160a01b038e8116855292528083208a85039055908b16825281208054899290610733908490610da2565b909155505060408051898152602081018990526001600160a01b03808c16928d821692918816917fc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62910160405180910390a4610793848b8b8b8b8b61088b565b50505050505050505050565b60605f516020610edd5f395f51905f52600201805461033d90610c64565b5f601436108015906107f857507f413a4c31c13c7c3de0c7da37be5d779b152baf3f21a1cb760fda41eb8ca97776546001600160a01b031633145b1561080a575060131936013560601c90565b50335b90565b5f6101727fd00049dc7109015045860694acecd3dc33338404aaf6e55a1c98a2bf41477b85546001600160a01b031690565b6040805160018082528183019092526060915f91906020808301908036833701905050905082815f8151811061087a5761087a610dc1565b602090810291909101015292915050565b6001600160a01b0384163b15610a38576001600160a01b0384163014610a385760405163f23a6e6160e01b81526001600160a01b0385169063f23a6e61906108df9089908990889088908890600401610dd5565b6020604051808303815f875af1925050508015610919575060408051601f3d908101601f1916820190925261091691810190610e19565b60015b6109c557610925610e40565b806308c379a00361095e5750610939610e58565b806109445750610960565b8060405162461bcd60e51b81526004016104369190610a6e565b505b60405162461bcd60e51b815260206004820152603460248201527f455243313135353a207472616e7366657220746f206e6f6e2d455243313135356044820152732932b1b2b4bb32b91034b6b83632b6b2b73a32b960611b6064820152608401610436565b6001600160e01b0319811663f23a6e6160e01b14610a365760405162461bcd60e51b815260206004820152602860248201527f455243313135353a204552433131353552656365697665722072656a656374656044820152676420746f6b656e7360c01b6064820152608401610436565b505b505050505050565b5f81518084528060208401602086015e5f602082860101526020601f19601f83011685010191505092915050565b602081525f610a806020830184610a40565b9392505050565b80356001600160a01b0381168114610a9d575f5ffd5b919050565b5f5f60408385031215610ab3575f5ffd5b610abc83610a87565b946020939093013593505050565b634e487b7160e01b5f52604160045260245ffd5b601f8201601f1916810167ffffffffffffffff81118282101715610b0457610b04610aca565b6040525050565b5f82601f830112610b1a575f5ffd5b813567ffffffffffffffff811115610b3457610b34610aca565b604051610b4b601f8301601f191660200182610ade565b818152846020838601011115610b5f575f5ffd5b816020850160208301375f918101602001919091529392505050565b5f5f60408385031215610b8c575f5ffd5b823567ffffffffffffffff811115610ba2575f5ffd5b610bae85828601610b0b565b925050602083013567ffffffffffffffff811115610bca575f5ffd5b610bd685828601610b0b565b9150509250929050565b5f5f5f60608486031215610bf2575f5ffd5b610bfb84610a87565b9250610c0960208501610a87565b929592945050506040919091013590565b5f60208284031215610c2a575f5ffd5b610a8082610a87565b5f5f60408385031215610c44575f5ffd5b610c4d83610a87565b9150610c5b60208401610a87565b90509250929050565b600181811c90821680610c7857607f821691505b602082108103610c9657634e487b7160e01b5f52602260045260245ffd5b50919050565b601f82111561059357805f5260205f20601f840160051c81016020851015610cc15750805b601f840160051c820191505b81811015610ce0575f8155600101610ccd565b5050505050565b815167ffffffffffffffff811115610d0157610d01610aca565b610d1581610d0f8454610c64565b84610c9c565b6020601f821160018114610d47575f8315610d305750848201515b5f19600385901b1c1916600184901b178455610ce0565b5f84815260208120601f198516915b82811015610d765787850151825560209485019460019092019101610d56565b5084821015610d9357868401515f19600387901b60f8161c191681555b50505050600190811b01905550565b8082018082111561019057634e487b7160e01b5f52601160045260245ffd5b634e487b7160e01b5f52603260045260245ffd5b6001600160a01b03868116825285166020820152604081018490526060810183905260a0608082018190525f90610e0e90830184610a40565b979650505050505050565b5f60208284031215610e29575f5ffd5b81516001600160e01b031981168114610a80575f5ffd5b5f60033d111561080d5760045f5f3e505f5160e01c90565b5f60443d1015610e655790565b6040513d600319016004823e80513d602482011167ffffffffffffffff82111715610e8f57505090565b808201805167ffffffffffffffff811115610eab575050505090565b3d8401600319018282016020011115610ec5575050505090565b610ed460208285010185610ade565b50939250505056fefe4980b3cded4b6c88aa6ce831c92722d1f8b102c2cc3311eefa15eb3b384560a2646970667358221220b50960871b68d0bd518b210271eb76a42bf4a752703bf4b92028cc5ea486351364736f6c634300081c0033",
+  "deployedBytecode": "0x608060405234801561000f575f5ffd5b506004361061009b575f3560e01c8063313ce56711610063578063313ce5671461011857806370a082311461012757806395d89b411461013a578063a9059cbb14610142578063dd62ed3e14610155575f5ffd5b806306fdde031461009f578063095ea7b3146100bd5780631091465f146100e057806318160ddd146100f557806323b872dd14610105575b5f5ffd5b6100a7610168565b6040516100b49190610a6e565b60405180910390f35b6100d06100cb366004610aa2565b610177565b60405190151581526020016100b4565b6100f36100ee366004610b7b565b610196565b005b5f5b6040519081526020016100b4565b6100d0610113366004610be0565b610232565b604051601281526020016100b4565b6100f7610135366004610c1a565b610257565b6100a7610293565b6100d0610150366004610aa2565b61029d565b6100f7610163366004610c33565b6102c0565b606061017261031f565b905090565b5f61018c6101836103be565b848415156103c7565b5060015b92915050565b61019e6104e9565b8151156101e6576101ae8261055a565b7f04d3bfc04acc7afdd0529b3c60c8e78efddcb09ae8526934fba70d2eba850d7b826040516101dd9190610a6e565b60405180910390a15b80511561022e576101f681610598565b7f191b78e4c7830532af9978661ba5cd0d90502632d7d06a0d459414b8c3d7eb65816040516102259190610a6e565b60405180910390a15b5050565b5f61024e84845f8560405180602001604052805f8152506105d1565b505f9392505050565b6001600160a01b0381165f9081527fba4f68c463451b56edc468f33dd4d904d1aca5632e9b73a404ed5235b567d69c6020526040812054610190565b606061017261079f565b5f61018c6102a96103be565b845f8560405180602001604052805f8152506105d1565b6001600160a01b038281165f9081527f6469616d6f6e642e73746f726167652e657263313135350000000000000000016020908152604080832093851683529290529081205460ff1680610314575f610317565b5f195b949350505050565b60605f516020610edd5f395f51905f52600101805461033d90610c64565b80601f016020809104026020016040519081016040528092919081815260200182805461036990610c64565b80156103b45780601f1061038b576101008083540402835291602001916103b4565b820191905f5260205f20905b81548152906001019060200180831161039757829003601f168201915b5050505050905090565b5f6101726107bd565b816001600160a01b0316836001600160a01b03160361043f5760405162461bcd60e51b815260206004820152602960248201527f455243313135353a2073657474696e6720617070726f76616c20737461747573604482015268103337b91039b2b63360b91b60648201526084015b60405180910390fd5b6001600160a01b038381165f8181527f6469616d6f6e642e73746f726167652e657263313135350000000000000000016020908152604080832094871680845294825291829020805460ff191686151590811790915582519081529151766469616d6f6e642e73746f726167652e6572633131353560481b9493927f17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c3192908290030190a350505050565b6104f1610810565b6001600160a01b03166105026103be565b6001600160a01b0316146105585760405162461bcd60e51b815260206004820152601b60248201527f4d757374206265207468652045636f73797374656d206f776e657200000000006044820152606401610436565b565b5f516020610edd5f395f51905f527ffe4980b3cded4b6c88aa6ce831c92722d1f8b102c2cc3311eefa15eb3b3845616105938382610ce7565b505050565b5f516020610edd5f395f51905f527ffe4980b3cded4b6c88aa6ce831c92722d1f8b102c2cc3311eefa15eb3b3845626105938382610ce7565b6001600160a01b0384166106355760405162461bcd60e51b815260206004820152602560248201527f455243313135353a207472616e7366657220746f20746865207a65726f206164604482015264647265737360d81b6064820152608401610436565b766469616d6f6e642e73746f726167652e6572633131353560481b5f6106596103be565b90505f61066586610842565b90505f61067186610842565b5f888152602086815260408083206001600160a01b038e168452909152902054909150868110156106f75760405162461bcd60e51b815260206004820152602a60248201527f455243313135353a20696e73756666696369656e742062616c616e636520666f60448201526939103a3930b739b332b960b11b6064820152608401610436565b5f888152602086815260408083206001600160a01b038e8116855292528083208a85039055908b16825281208054899290610733908490610da2565b909155505060408051898152602081018990526001600160a01b03808c16928d821692918816917fc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62910160405180910390a4610793848b8b8b8b8b61088b565b50505050505050505050565b60605f516020610edd5f395f51905f52600201805461033d90610c64565b5f601436108015906107f857507f413a4c31c13c7c3de0c7da37be5d779b152baf3f21a1cb760fda41eb8ca97776546001600160a01b031633145b1561080a575060131936013560601c90565b50335b90565b5f6101727fd00049dc7109015045860694acecd3dc33338404aaf6e55a1c98a2bf41477b85546001600160a01b031690565b6040805160018082528183019092526060915f91906020808301908036833701905050905082815f8151811061087a5761087a610dc1565b602090810291909101015292915050565b6001600160a01b0384163b15610a38576001600160a01b0384163014610a385760405163f23a6e6160e01b81526001600160a01b0385169063f23a6e61906108df9089908990889088908890600401610dd5565b6020604051808303815f875af1925050508015610919575060408051601f3d908101601f1916820190925261091691810190610e19565b60015b6109c557610925610e40565b806308c379a00361095e5750610939610e58565b806109445750610960565b8060405162461bcd60e51b81526004016104369190610a6e565b505b60405162461bcd60e51b815260206004820152603460248201527f455243313135353a207472616e7366657220746f206e6f6e2d455243313135356044820152732932b1b2b4bb32b91034b6b83632b6b2b73a32b960611b6064820152608401610436565b6001600160e01b0319811663f23a6e6160e01b14610a365760405162461bcd60e51b815260206004820152602860248201527f455243313135353a204552433131353552656365697665722072656a656374656044820152676420746f6b656e7360c01b6064820152608401610436565b505b505050505050565b5f81518084528060208401602086015e5f602082860101526020601f19601f83011685010191505092915050565b602081525f610a806020830184610a40565b9392505050565b80356001600160a01b0381168114610a9d575f5ffd5b919050565b5f5f60408385031215610ab3575f5ffd5b610abc83610a87565b946020939093013593505050565b634e487b7160e01b5f52604160045260245ffd5b601f8201601f1916810167ffffffffffffffff81118282101715610b0457610b04610aca565b6040525050565b5f82601f830112610b1a575f5ffd5b813567ffffffffffffffff811115610b3457610b34610aca565b604051610b4b601f8301601f191660200182610ade565b818152846020838601011115610b5f575f5ffd5b816020850160208301375f918101602001919091529392505050565b5f5f60408385031215610b8c575f5ffd5b823567ffffffffffffffff811115610ba2575f5ffd5b610bae85828601610b0b565b925050602083013567ffffffffffffffff811115610bca575f5ffd5b610bd685828601610b0b565b9150509250929050565b5f5f5f60608486031215610bf2575f5ffd5b610bfb84610a87565b9250610c0960208501610a87565b929592945050506040919091013590565b5f60208284031215610c2a575f5ffd5b610a8082610a87565b5f5f60408385031215610c44575f5ffd5b610c4d83610a87565b9150610c5b60208401610a87565b90509250929050565b600181811c90821680610c7857607f821691505b602082108103610c9657634e487b7160e01b5f52602260045260245ffd5b50919050565b601f82111561059357805f5260205f20601f840160051c81016020851015610cc15750805b601f840160051c820191505b81811015610ce0575f8155600101610ccd565b5050505050565b815167ffffffffffffffff811115610d0157610d01610aca565b610d1581610d0f8454610c64565b84610c9c565b6020601f821160018114610d47575f8315610d305750848201515b5f19600385901b1c1916600184901b178455610ce0565b5f84815260208120601f198516915b82811015610d765787850151825560209485019460019092019101610d56565b5084821015610d9357868401515f19600387901b60f8161c191681555b50505050600190811b01905550565b8082018082111561019057634e487b7160e01b5f52601160045260245ffd5b634e487b7160e01b5f52603260045260245ffd5b6001600160a01b03868116825285166020820152604081018490526060810183905260a0608082018190525f90610e0e90830184610a40565b979650505050505050565b5f60208284031215610e29575f5ffd5b81516001600160e01b031981168114610a80575f5ffd5b5f60033d111561080d5760045f5f3e505f5160e01c90565b5f60443d1015610e655790565b6040513d600319016004823e80513d602482011167ffffffffffffffff82111715610e8f57505090565b808201805167ffffffffffffffff811115610eab575050505090565b3d8401600319018282016020011115610ec5575050505090565b610ed460208285010185610ade565b50939250505056fefe4980b3cded4b6c88aa6ce831c92722d1f8b102c2cc3311eefa15eb3b384560a2646970667358221220b50960871b68d0bd518b210271eb76a42bf4a752703bf4b92028cc5ea486351364736f6c634300081c0033",
+  "devdoc": {
+    "events": {
+      "ApprovalForAll(address,address,bool)": {
+        "details": "Emitted when `account` grants or revokes permission to `operator` to transfer their tokens, according to `approved`."
+      },
+      "TransferBatch(address,address,address,uint256[],uint256[])": {
+        "details": "Equivalent to multiple {TransferSingle} events, where `operator`, `from` and `to` are the same for all transfers."
+      },
+      "TransferSingle(address,address,address,uint256,uint256)": {
+        "details": "Emitted when `value` tokens of token type `id` are transferred from `from` to `to` by `operator`."
+      }
+    },
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

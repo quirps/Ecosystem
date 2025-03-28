@@ -7,7 +7,7 @@
       "skipLibCheck": true,
       "forceConsistentCasingInFileNames": true
     },
-    "include": ["deploy/**/*"],
+    "include": ["deploy/**/*", "deploy/deploymentCon, "utils", "utils"fig.js"],
     "exclude": ["node_modules","src/*"]
   }
   

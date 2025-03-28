@@ -14,7 +14,7 @@
     "deploy:local:core": "npx hardhat deploy --network localhost --tags Core",
     "deploy:local:version": "npx hardhat deploy --network localhost --tags DeployVersion",
     "postdeploy:local": "npx hardhat deploy --network localhost --tags PostDeploy",
-    "start:server": "node server.js",
+    "start:server": "node ./server/server.js",
     "dev:node": "npx hardhat node",
     "test": "npx hardhat test"
   },
