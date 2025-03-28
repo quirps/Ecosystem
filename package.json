@@ -7,9 +7,16 @@
     "deploy0": "npx hardhat deploy",
     "resetUniswap": "rm /home/joe/Documents/UniswapV3Deploy/deploy-v3/state.json",
     "test-local": "hardhat --network local test test/test-with-ethers.js",
-    "test": "yarn run-with-hardhat-node 'hardhat test test/test-with-ethers.js' ",
     "run-with-hardhat-node": "run-with-testrpc --testrpc-cmd ./scripts/hardhat-node",
-    "node-with-gsn": "yarn run-with-hardhat-node 'gsn start'"
+    "compile": "npx hardhat compile",
+    "deploy:local": "npx hardhat deploy --network localhost",
+    "deploy:sepolia": "npx hardhat deploy --network sepolia",
+    "deploy:local:core": "npx hardhat deploy --network localhost --tags Core",
+    "deploy:local:version": "npx hardhat deploy --network localhost --tags DeployVersion",
+    "postdeploy:local": "npx hardhat deploy --network localhost --tags PostDeploy",
+    "start:server": "node server.js",
+    "dev:node": "npx hardhat node",
+    "test": "npx hardhat test"
   },
   "repository": {
     "type": "git",
@@ -35,6 +42,7 @@
     "dotenv": "^8.6.0",
     "ethereum-waffle": "^3.4.0",
     "hardhat": "^2.11.2",
+    "hardhat-deploy": "^1.0.1",
     "hardhat-gas-reporter": "^1.0.9",
     "hardhat-tracer": "^1.1.0-rc.9",
     "mocha": "^10.0.0",

@@ -6,10 +6,8 @@ const NUM_USERS  = 40;
 //require("hardhat-gas-reporter");
 require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-diamond-abi");
+require("hardhat-deploy");
 // require("./diamondABItest");
-
-
-const { facets : FACETS} = require('./deploy/ecosystem/versions/0.0.0.ts')
 
 
 WALLET_BASE_AMOUNT = "10000000000000000000000000000" // 10**30
@@ -81,6 +79,26 @@ module.exports = {
       gas: 900719925474099,  // 12 million
       blockGasLimit : 900719925474099
     }
+  },
+  namedAccounts: {
+    deployer: {
+      default: 0, // Default to the first account from the node
+      // Example: Specify different deployers per network
+      // 1: "0xYourMainnetDeployerAddress", // Mainnet (chainId 1)
+      // 11155111: "0xYourSepoliaDeployerAddress", // Sepolia
+    },
+    paths: {
+      sources: "./contracts",
+      tests: "./test",
+      cache: "./cache",
+      artifacts: "./artifacts",
+      deploy: "./deploy", // Specify deploy folder
+      deployments: "./deployments", // Specify deployments folder
+    },
+    typechain: {
+      outDir: 'typechain-types', // Output directory for typechain
+      target: 'ethers-v5', // Target ethers version
+    },
   }
 }
 
