@@ -29,7 +29,7 @@ app.use((req, res, next) => {
 
 // Root endpoint
 app.get('/', (req, res) => {
-  res.send('Web3 Artifact Server is running!');
+  res.status(200).send('Web3 Artifact Server is running!');
 });
 
 // Endpoint to serve the consolidated deployment artifacts JSON
@@ -41,6 +41,27 @@ app.get('/artifacts', (req, res) => {
     res.status(404).json({ error: 'Deployment artifacts not found. Run deployment first.' });
   }
 });
+app.get('/version', async (req,res)=>{
+  ///1. retrieve ecosystemABI
+  const resource = {ecosystemABI : [], diamondBytecode: ""}
+    const ecosystemArtifactPath = `./artifacts/hardhat-diamond-abi/HardhatDiamondABI.sol/Ecosystem.json`
+    if( fs.existsSync( ecosystemArtifactPath ) ){
+        const ecosystemABI = await fs.readFileSync( ecosystemArtifactPath)
+        resource.ecosystemABI = ecosystemABI
+        //2. Retrieve diamondBytecode
+        if (fs.existsSync(consolidatedArtifactFile)) {
+          const _artifact = fs.readFileSync(consolidatedArtifactFile)
+          const artifacts = JSON.parse(_artifact)
+          if ( artifacts.DiamondDeploy ){
+              resource.diamondBytecode = artifacts.DiamondDeploy.bytecode
+              res.status(200).json(resource)
+          }
+       }
+    }
+    else{
+      res.status(404).send("Error")
+    }
+})
 
 // Endpoint to serve specific TypeChain factory files
 app.get('/types/factories/:factoryName', (req, res) => {
