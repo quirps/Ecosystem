@@ -95,7 +95,7 @@ contract UniswapPaymaster is IUniswapPaymaster, Ownable, ReentrancyGuardContract
     mapping(address => mapping(address => uint256)) public lpTokenIds; // user => token => NFT position ID
     
 
-    constructor(address _uniswapRouter, address _weth, address _nftPositionManager) {
+    constructor(address _uniswapRouter, address _weth, address _nftPositionManager, address _owner) Ownable(_owner) {
         uniswapRouter = _uniswapRouter;
         wethAddress = _weth;
         nftPositionManagerAddress = _nftPositionManager;
@@ -115,8 +115,8 @@ contract UniswapPaymaster is IUniswapPaymaster, Ownable, ReentrancyGuardContract
         // Transfer tokens from sender to this contract
         IERC20(params.tokenIn).safeTransferFrom(msg.sender, address(this), params.amountInMaximum);
         
-        // Approve router to spend tokens
-        IERC20(params.tokenIn).safeApprove(uniswapRouter, params.amountInMaximum);
+        // Approve router to spend tokens 
+        IERC20(params.tokenIn).approve(uniswapRouter, params.amountInMaximum); 
         
         // Execute swap
         ISwapRouter.ExactOutputSingleParams memory swapParams = 
@@ -175,8 +175,8 @@ contract UniswapPaymaster is IUniswapPaymaster, Ownable, ReentrancyGuardContract
         );
         
         // Approve NFT position manager to use tokens
-        IERC20(token0).safeApprove(nftPositionManagerAddress, amount0);
-        IERC20(token1).safeApprove(nftPositionManagerAddress, amount1);
+        IERC20(token0).approve(nftPositionManagerAddress, amount0); 
+        IERC20(token1).approve(nftPositionManagerAddress, amount1);
         
         // Add liquidity to Uniswap V3 pool
         IUniswapV3PositionManager.MintParams memory params = IUniswapV3PositionManager.MintParams({
@@ -344,8 +344,8 @@ function removeLiquidityAndCollect(
         );
         
         // Approve NFT position manager to use tokens
-        IERC20(token0).safeApprove(nftPositionManagerAddress, amount0);
-        IERC20(token1).safeApprove(nftPositionManagerAddress, amount1);
+        IERC20(token0).approve(nftPositionManagerAddress, amount0);
+        IERC20(token1).approve(nftPositionManagerAddress, amount1); 
         
         // Calculate current rewards before adding to stake
         uint256 reward = calculateReward(msg.sender, _depositDetails.tokenAddress);

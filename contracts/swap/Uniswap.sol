@@ -4,7 +4,7 @@ pragma solidity ^0.8.28;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol";
 import "@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {ReentrancyGuardContract} from "../ReentrancyGuard.sol";
 
 /**
  * @notice Enables staking on the ecosystem as well as uniswap. 
@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
  * @author 
  * @notice 
  */
-contract UniswapDoubleStake is ReentrancyGuard {
+contract UniswapDoubleStake is ReentrancyGuardContract {
     INonfungiblePositionManager public immutable positionManager;
     address public immutable token0;
     address public immutable token1;
@@ -37,7 +37,7 @@ contract UniswapDoubleStake is ReentrancyGuard {
         uint256 amount1,
         int24 tickLower,
         int24 tickUpper
-    ) external nonReentrant {
+    ) external ReentrancyGuard {
         require(amount0 > 0 && amount1 > 0, "Amounts must be greater than zero");
 
         IERC20(token0).transferFrom(msg.sender, address(this), amount0);
@@ -64,7 +64,7 @@ contract UniswapDoubleStake is ReentrancyGuard {
         userStakedLiquidity[msg.sender] = tokenId;
     }
     
-    function withdrawLiquidity(uint256 tokenId) external nonReentrant {
+    function withdrawLiquidity(uint256 tokenId) external ReentrancyGuard {
         require(userStakedLiquidity[msg.sender] == tokenId, "Not owner of this position");
         
         positionManager.safeTransferFrom(address(this), msg.sender, tokenId);

@@ -9,6 +9,16 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
  */
 interface IRewardToken is IERC1155 {
     /**
+     * @notice Emitted when an NFT's locked status changes (for staking NFTs).
+     */
+    event NFTLockedStatusChanged(uint256 indexed nftId, bool locked);
+
+    /**
+     * @notice Emitted when enhancement NFTs are minted by the owner/admin.
+     */
+    event EnhancementNftMinted(address indexed minter, address indexed to, uint256 indexed id, uint256 amount, bytes data);
+
+    /**
      * @notice Mints `amount` tokens of token type `id` to `to`.
      * @dev Restricted to authorized minters (ExchangeRewards contract).
      * @param to The address that will receive the minted tokens.
@@ -43,20 +53,11 @@ interface IRewardToken is IERC1155 {
 
     /**
      * @notice Locks or unlocks an enhancement NFT, preventing/allowing transfer.
-     * @dev Restricted caller (ExchangeRewards contract).
+     * @dev Restricted caller (ExchangeRewards contract). Used for staking NFTs.
      * @param nftId The enhancement NFT token ID.
      * @param locked True to lock, false to unlock.
      */
     function setNFTLocked(uint256 nftId, bool locked) external;
 
-    /**
-      * @notice Emitted when an NFT's locked status changes.
-      */
-    event NFTLockedStatusChanged(uint256 indexed nftId, bool locked);
-
-    /**
-     * @notice Emitted when enhancement NFTs are minted by the owner.
-     */
-     event OwnerMintedEnhancementNFT(address indexed to, uint256 indexed id, uint256 amount);
-
+    function ownerMintEnhancementNFT(address to, uint256 id, uint256 amount, bytes calldata data) external;
 }
