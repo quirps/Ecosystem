@@ -16,21 +16,17 @@ interface IExchangeRewards {
         uint256 bonusValue; // BP for rates, Multiplier x10000 for purchase (e.g., 20000 = 2x)
         bool isActive;
     }
-
-    struct StakeInfo {
+ 
+       struct StakeInfo { 
         uint256 tokenId;
         address owner;
-        uint256 amount; // Actual amount staked
+        uint256 amount;
         uint256 startTime;
-        uint256 endTime; // Lockup end time (0 = no lock)
-        uint8 durationOption; // Index used to determine passive rate multiplier
-        uint256 feeShareRewardDebt; // Scaled per-token debt for fee share accumulator
-        uint256 passiveRewardDebt; // Tracks claimed passive rewards (implementation specific)
-        uint256 lastPassiveRewardClaimTime; // Initialize passive claim time to now
-        uint256 attachedNftId; // ID of attached staking NFT (0 if none)
-        // Boosts below are read from attached NFT's properties at calculation time
-        // uint16 passiveRateBoostBP; // DEPRECATED - Read from NFT properties
-        // uint16 feeShareBoostBP; // DEPRECATED - Read from NFT properties
+        uint256 endTime;
+        uint8 durationOption;
+        uint256 feeShareRewardDebt;       // Debt for Stream 2 (Fee Share)
+        uint256 lastPassiveRewardClaimTime; // Time for Stream 1 (Passive Accrual)
+        uint256 attachedNftId;
         bool active;
     }
 
@@ -82,7 +78,6 @@ interface IExchangeRewards {
     function claimPassiveStakingRewards(uint256[] calldata stakeIds) external; // Claims Stream 1 (Passive Accrual)
     function claimHoldingReward(uint256 tokenId) external; // Claims passive holding rewards (unrelated to staking)
     function claimDiscountVoucher(uint256 rewardTokenId, uint256 amountToBurn) external;
-
 
     // --- View Functions ---
     function getStakeInfo(uint256 stakeId) external view returns (StakeInfo memory); // Return memory struct
