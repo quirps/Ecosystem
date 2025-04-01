@@ -1,186 +1,276 @@
-// // SPDX-License-Identifier: MIT
-// pragma solidity ^0.8.19;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
 
-// import "@openzeppelin/contracts/access/Ownable.sol";
-// import "@openzeppelin/contracts/utils/Create2.sol";
-// import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "./IBytecodeDeployer.sol"; // Import the interface defined above
 
-// contract AppRegistry is Ownable {
-//     using EnumerableSet for EnumerableSet.Bytes32Set;
+/**
+ * @title MiniAppRegistry
+ * @author Gemini
+ * @notice A registry for discovering and deploying predefined "mini-app" contracts.
+ * @dev Manages metadata for different mini-app types and triggers deployments via
+ * associated BytecodeDeployer contracts using CREATE2.
+ */
+contract MiniAppRegistry {
+    // ======== State Variables ========
 
-//     struct AppMetadata {
-//         address developer;
-//         string name;
-//         bytes32 descriptionHash; // keccak256 of detailed description JSON string
-//         string metadataUri; // e.g., ipfs://<hash_containing_image_abi_etc>
-//         bool isApproved;
-//         uint256 version; // Simple version tracking
-//         // We don't store the full init_code on-chain due to gas costs.
-//         // The deployer (creator) will need to provide it when calling deployApp.
-//     }
+    address public owner;
+    bool public isOwnerNeeded; // If true, only owner can upload apps. If false, anyone can.
 
-//     // Mapping from init_code_hash (fingerprint) to metadata
-//     mapping(bytes32 => AppMetadata) public appMetadata;
+    struct AppInfo {
+        string name; // User-facing name (unique constraint enforced by mapping key)
+        string description;
+        string imageUri;
+        address bytecodeDeployer; // Address of the specific deployer for this app type
+        bool exists; // Flag to check if an app entry exists for a given name hash
+    }
 
-//     // Sets to easily iterate approved/pending apps (optional, adds gas)
-//     EnumerableSet.Bytes32Set private approvedAppFingerprints;
-//     EnumerableSet.Bytes32Set private pendingAppFingerprints; // Apps awaiting approval
+    // Mapping from keccak256 hash of the app name to its info
+    // Using hash avoids potential issues with string key length/gas and ensures uniqueness check is robust
+    mapping(bytes32 => AppInfo) public appInfoMap;
 
-//     // Keep track of deployed instances per creator (optional)
-//     mapping(address => mapping(bytes32 => address[])) public deployedInstances;
+    // Optional: Keep track of app names for enumeration (can be gas-intensive)
+    // bytes32[] public appNameHashes;
 
-//     event AppSubmitted(
-//         bytes32 indexed fingerprint,
-//         address indexed developer,
-//         string name,
-//         string metadataUri,
-//         uint256 version
-//     );
-//     event AppApproved(bytes32 indexed fingerprint);
-//     event AppRejected(bytes32 indexed fingerprint); // Or just remove from pending
-//     event AppDeployed(
-//         bytes32 indexed fingerprint,
-//         address indexed creator,
-//         address instanceAddress,
-//         bytes salt
-//     );
+    // ======== Events ========
 
-//     constructor(address _initialOwner) Ownable(_initialOwner) {}
+    event AppUploaded(
+        bytes32 indexed nameHash,
+        string name,
+        address bytecodeDeployer,
+        address uploader
+    );
+    event AppInstanceDeployed(
+        bytes32 indexed nameHash,
+        address indexed deployerContract, // The BytecodeDeployer used
+        address indexed instanceAddress,  // The newly deployed mini-app instance
+        bytes32 salt,
+        address initiator // Who called deployApp
+    );
+    event OwnerNeededSet(bool required);
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-//     /**
-//      * @notice Submit a new app or a new version of an existing app.
-//      * @param _name App name.
-//      * @param _description Description (consider hashing a structured JSON off-chain).
-//      * @param _metadataUri URI pointing to more metadata (icon, ABI, detailed desc).
-//      * @param _initCode The deployment bytecode of the app contract.
-//      * @param _previousVersionFingerprint The fingerprint of the previous version, if updating (bytes32(0) for new app).
-//      */
-//     function submitApp(
-//         string calldata _name,
-//         string calldata _description, // Pass the full description, hash it on-chain
-//         string calldata _metadataUri,
-//         bytes calldata _initCode,
-//         bytes32 _previousVersionFingerprint // For simple upgrade tracking
-//     ) external {
-//         require(bytes(_name).length > 0, "Name required");
-//         require(_initCode.length > 0, "Bytecode required");
+    // ======== Modifiers ========
 
-//         bytes32 fingerprint = keccak256(_initCode);
-//         require(appMetadata[fingerprint].developer == address(0), "Fingerprint exists"); // Prevent duplicate bytecode submission
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Registry: Caller is not the owner");
+        _;
+    }
 
-//         // Simple versioning based on previous submission by the same dev
-//         uint256 nextVersion = 1;
-//         if (_previousVersionFingerprint != bytes32(0)) {
-//             AppMetadata storage prevMeta = appMetadata[_previousVersionFingerprint];
-//             require(prevMeta.developer == msg.sender, "Not previous version owner");
-//             nextVersion = prevMeta.version + 1;
-//         }
+    // ======== Constructor ========
 
-//         appMetadata[fingerprint] = AppMetadata({
-//             developer: msg.sender,
-//             name: _name,
-//             descriptionHash: keccak256(bytes(_description)),
-//             metadataUri: _metadataUri,
-//             isApproved: false, // Requires admin approval
-//             version: nextVersion
-//         });
+    constructor(bool _startWithOwnerRestriction) {
+        owner = msg.sender;
+        isOwnerNeeded = _startWithOwnerRestriction;
+        emit OwnershipTransferred(address(0), msg.sender);
+        emit OwnerNeededSet(_startWithOwnerRestriction);
+    }
 
-//         pendingAppFingerprints.add(fingerprint);
+    // ======== Owner Functions ========
 
-//         emit AppSubmitted(fingerprint, msg.sender, _name, _metadataUri, nextVersion);
-//     }
+    /**
+     * @notice Sets whether the owner restriction for uploading apps is active.
+     * @param _needed True to restrict uploads to owner, false to allow anyone.
+     */
+    function setOwnerNeeded(bool _needed) external onlyOwner {
+        isOwnerNeeded = _needed;
+        emit OwnerNeededSet(_needed);
+    }
 
-//     /**
-//      * @notice Approve an app, making it deployable. Only owner.
-//      */
-//     function approveApp(bytes32 _fingerprint) external onlyOwner {
-//         require(appMetadata[_fingerprint].developer != address(0), "App not found");
-//         require(!appMetadata[_fingerprint].isApproved, "Already approved");
-//         require(pendingAppFingerprints.contains(_fingerprint), "Not pending"); // Ensure it was pending
+    /**
+     * @notice Transfers ownership of the registry contract.
+     * @param _newOwner The address of the new owner.
+     */
+    function transferOwnership(address _newOwner) external onlyOwner {
+        require(_newOwner != address(0), "Registry: New owner cannot be the zero address");
+        address oldOwner = owner;
+        owner = _newOwner;
+        emit OwnershipTransferred(oldOwner, _newOwner);
+    }
 
-//         appMetadata[_fingerprint].isApproved = true;
-//         pendingAppFingerprints.remove(_fingerprint);
-//         approvedAppFingerprints.add(_fingerprint);
+    // ======== Core Functions ========
 
-//         emit AppApproved(_fingerprint);
-//     }
+    /**
+     * @notice Registers a new type of mini-app in the registry.
+     * @dev The app name must be unique. Checks owner restriction if isOwnerNeeded is true.
+     * @param _name The unique name of the app type.
+     * @param _description A description for the app type.
+     * @param _imageUri A URI pointing to an image/icon for the app type.
+     * @param _bytecodeDeployer The address of the pre-deployed BytecodeDeployer contract
+     * responsible for deploying this specific app type.
+     */
+    function uploadApp(
+        string calldata _name,
+        string calldata _description,
+        string calldata _imageUri,
+        address _bytecodeDeployer // Must implement IBytecodeDeployer
+    ) external {
+        if (isOwnerNeeded) {
+            require(msg.sender == owner, "Registry: Owner restriction active");
+        }
 
-//     /**
-//      * @notice Reject an app. Only owner.
-//      */
-//     function rejectApp(bytes32 _fingerprint) external onlyOwner {
-//         // Could add more logic, like preventing re-submission?
-//         require(pendingAppFingerprints.contains(_fingerprint), "Not pending");
-//         // Optionally delete metadata or just remove from pending set
-//         pendingAppFingerprints.remove(_fingerprint);
-//         // Optionally delete appMetadata[_fingerprint]; to allow resubmission with same code?
-//         emit AppRejected(_fingerprint);
-//     }
+        require(_bytecodeDeployer != address(0), "Registry: Deployer cannot be zero address");
+        // Check if deployer actually implements the interface (optional but recommended)
+        // require(IBytecodeDeployer(_bytecodeDeployer).supportsInterface(type(IBytecodeDeployer).interfaceId), "Registry: Deployer doesn't implement IBytecodeDeployer");
+        // Note: supportsInterface requires the deployer to inherit ERC165. If not, skip this check.
+        // Consider a simple check like calling getAllowedBytecodeHash() to see if it reverts.
+        try IBytecodeDeployer(_bytecodeDeployer).getAllowedBytecodeHash() returns (bytes32) {
+            // Success, deployer seems valid
+        } catch {
+            revert("Registry: Invalid bytecode deployer contract");
+        }
 
-//     /**
-//      * @notice Deploy an instance of an approved app using CREATE2.
-//      * @param _fingerprint The keccak256 hash of the init_code for the approved app version.
-//      * @param _initCode The actual init_code (deployment bytecode) - verified against the fingerprint.
-//      * @param _salt A unique salt provided by the deployer (e.g., keccak256(abi.encodePacked(msg.sender, nonce))).
-//      * @param _constructorArgs ABI encoded constructor arguments for the app instance.
-//      */
-//     function deployAppInstance(
-//         bytes32 _fingerprint,
-//         bytes calldata _initCode,
-//         bytes32 _salt,
-//         bytes calldata _constructorArgs
-//     ) external payable returns (address instanceAddress) { // Payable if constructor needs funds
-//         require(appMetadata[_fingerprint].isApproved, "App not approved");
-//         require(keccak256(_initCode) == _fingerprint, "Code mismatch"); // CRITICAL CHECK
 
-//         // Combine init code with constructor arguments
-//         bytes memory deploymentCode = abi.encodePacked(_initCode, _constructorArgs);
+        bytes32 nameHash = keccak256(abi.encodePacked(_name));
+        require(!appInfoMap[nameHash].exists, "Registry: App name already exists");
 
-//         // Deploy using CREATE2
-//         instanceAddress = Create2.deploy(msg.value, _salt, deploymentCode); // msg.value forwards ETH if needed
+        appInfoMap[nameHash] = AppInfo({
+            name: _name,
+            description: _description,
+            imageUri: _imageUri,
+            bytecodeDeployer: _bytecodeDeployer,
+            exists: true
+        });
 
-//         require(instanceAddress != address(0), "Deployment failed");
+        // Optional: Add to list for enumeration
+        // appNameHashes.push(nameHash);
 
-//         // Optional: Track deployed instances
-//         bytes32 instanceSaltHash = keccak256(abi.encodePacked(msg.sender, _salt)); // Unique identifier for this deployment attempt
-//         deployedInstances[msg.sender][_fingerprint].push(instanceAddress);
+        emit AppUploaded(nameHash, _name, _bytecodeDeployer, msg.sender);
+    }
 
-//         emit AppDeployed(_fingerprint, msg.sender, instanceAddress, _salt);
-//     }
+    /**
+     * @notice Deploys an instance of a registered mini-app using its associated BytecodeDeployer.
+     * @param _appName The name of the app type to deploy.
+     * @param _salt A user-provided salt for CREATE2 predictability. Ensure uniqueness for distinct instances.
+     * @param _constructorArgs ABI-encoded constructor arguments for the mini-app instance.
+     * @return instanceAddress The address of the newly deployed mini-app contract instance.
+     */
+    function deployApp(
+        string calldata _appName,
+        bytes32 _salt,
+        bytes calldata _constructorArgs
+    ) external returns (address instanceAddress) {
+        bytes32 nameHash = keccak256(abi.encodePacked(_appName));
+        AppInfo storage app = appInfoMap[nameHash];
 
-//     // --- View Functions ---
+        require(app.exists, "Registry: App name not found");
+        require(app.bytecodeDeployer != address(0), "Registry: Invalid deployer address stored"); // Sanity check
 
-//     function getAppMetadata(bytes32 _fingerprint) external view returns (AppMetadata memory) {
-//         return appMetadata[_fingerprint];
-//     }
+        // Get the deployer contract interface
+        IBytecodeDeployer deployer = IBytecodeDeployer(app.bytecodeDeployer);
 
-//     function isApproved(bytes32 _fingerprint) external view returns (bool) {
-//         return appMetadata[_fingerprint].isApproved;
-//     }
+        // Call the deploy function on the specific BytecodeDeployer contract
+        // This deployer contract is responsible for bytecode verification and CREATE2 logic
+        instanceAddress = deployer.deploy(_salt, _constructorArgs);
 
-//     // Functions to get lists of approved/pending apps (use pagination off-chain)
-//     function getApprovedAppCount() external view returns (uint256) {
-//         return approvedAppFingerprints.length();
-//     }
+        require(instanceAddress != address(0), "Registry: Deployment failed"); // Deployer should revert on failure, but check address anyway
 
-//     function getApprovedAppFingerprint(uint256 _index) external view returns (bytes32) {
-//         return approvedAppFingerprints.at(_index);
-//     }
+        emit AppInstanceDeployed(
+            nameHash,
+            app.bytecodeDeployer,
+            instanceAddress,
+            _salt,
+            msg.sender
+        );
 
-//      function getPendingAppCount() external view returns (uint256) {
-//         return pendingAppFingerprints.length();
-//     }
+        return instanceAddress;
+    }
 
-//     function getPendingAppFingerprint(uint256 _index) external view returns (bytes32) {
-//         return pendingAppFingerprints.at(_index);
-//     }
+    // ======== View Functions ========
 
-//     function predictDeterministicAddress(bytes32 _fingerprint, bytes32 _salt, address _deployer) public view returns (address) {
-//          require(appMetadata[_fingerprint].developer != address(0), "App not found"); // Check if app exists
-//          // Note: This prediction requires the INIT_CODE_HASH, which is the fingerprint IF no constructor args are used.
-//          // If constructor args are used, the actual hash needed by Create2.computeAddress is keccak256(abi.encodePacked(INIT_CODE, CONSTRUCTOR_ARGS)).
-//          // For a simple prediction without args, we can use the fingerprint directly.
-//          // A more accurate prediction function would need the _constructorArgs as well.
-//          return Create2.computeAddress(_salt, _fingerprint, _deployer);
-//     }
-// }
+    /**
+     * @notice Retrieves the metadata for a registered app type by its name.
+     * @param _appName The name of the app type.
+     * @return name The app's name.
+     * @return description The app's description.
+     * @return imageUri The app's image URI.
+     * @return bytecodeDeployer The address of the app's deployer contract.
+     */
+    function retrieveApp(string calldata _appName)
+        external
+        view
+        returns (
+            string memory name,
+            string memory description,
+            string memory imageUri,
+            address bytecodeDeployer
+        )
+    {
+        bytes32 nameHash = keccak256(abi.encodePacked(_appName));
+        AppInfo storage app = appInfoMap[nameHash];
+        require(app.exists, "Registry: App name not found");
+
+        return (
+            app.name,
+            app.description,
+            app.imageUri,
+            app.bytecodeDeployer
+        );
+    }
+
+     /**
+     * @notice Retrieves the metadata for a registered app type by its name hash.
+     * @param _nameHash The keccak256 hash of the app type's name.
+     * @return name The app's name.
+     * @return description The app's description.
+     * @return imageUri The app's image URI.
+     * @return bytecodeDeployer The address of the app's deployer contract.
+     * @return exists Whether an app with this hash exists.
+     */
+    function retrieveAppByHash(bytes32 _nameHash)
+        external
+        view
+        returns (
+            string memory name,
+            string memory description,
+            string memory imageUri,
+            address bytecodeDeployer,
+            bool exists
+        )
+    {
+        AppInfo storage app = appInfoMap[_nameHash];
+        // No require here, allow checking for non-existent apps
+        return (
+            app.name,
+            app.description,
+            app.imageUri,
+            app.bytecodeDeployer,
+            app.exists
+        );
+    }
+
+    /**
+     * @notice Predicts the deployment address for a mini-app instance using CREATE2.
+     * @dev Calls the predictAddress function on the associated BytecodeDeployer.
+     * @param _appName The name of the app type.
+     * @param _salt The salt intended for deployment.
+     * @param _constructorArgs ABI-encoded constructor arguments intended for deployment.
+     * @return predictedAddress The pre-calculated deployment address.
+     */
+    function predictAppInstanceAddress(
+        string calldata _appName,
+        bytes32 _salt,
+        bytes calldata _constructorArgs
+    ) external view returns (address predictedAddress) {
+        bytes32 nameHash = keccak256(abi.encodePacked(_appName));
+        AppInfo storage app = appInfoMap[nameHash];
+
+        require(app.exists, "Registry: App name not found");
+        require(app.bytecodeDeployer != address(0), "Registry: Invalid deployer address stored");
+
+        IBytecodeDeployer deployer = IBytecodeDeployer(app.bytecodeDeployer);
+
+        return deployer.predictAddress(_salt, _constructorArgs);
+    }
+
+    // Optional: Function to get the number of registered apps (if using appNameHashes)
+    // function getAppCount() external view returns (uint256) {
+    //     return appNameHashes.length;
+    // }
+
+    // Optional: Function to get app hash by index (if using appNameHashes)
+    // function getAppHashByIndex(uint256 index) external view returns (bytes32) {
+    //     require(index < appNameHashes.length, "Registry: Index out of bounds");
+    //     return appNameHashes[index];
+    // }
+
+}
