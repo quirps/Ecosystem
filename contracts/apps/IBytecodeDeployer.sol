@@ -15,7 +15,7 @@ interface IBytecodeDeployer {
      * @param constructorArgs ABI-encoded constructor arguments for the mini-app contract.
      * @return instanceAddress The address of the newly deployed mini-app contract instance.
      */
-    function deploy(bytes32 salt, bytes memory constructorArgs) external returns (address instanceAddress);
+    function deploy(bytes32 salt, bytes memory bytecode, bytes memory constructorArgs) external returns (address instanceAddress);
 
     /**
      * @notice Returns the expected bytecode hash that this deployer is authorized to deploy.
@@ -29,5 +29,5 @@ interface IBytecodeDeployer {
       * @param constructorArgs ABI-encoded constructor arguments.
       * @return predictedAddress The pre-calculated deployment address.
       */
-    function predictAddress(bytes32 salt, bytes memory constructorArgs) external view returns (address predictedAddress);
+    function predictAddress(bytes32 salt, bytes memory bytecode, bytes memory constructorArgs) external view returns (address predictedAddress);
 }

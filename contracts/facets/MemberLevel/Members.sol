@@ -26,6 +26,16 @@ contract Members is IMembers, iMembers {
     }
 
 
+     /**
+     * @dev Batch set levels for multiple addresses (permissioned function)
+     * @param user  user address 
+     * @param level user's new level
+     */
+    function setMemberLevel( address user, uint32 level) external { 
+        _setMemberLevel(user, level);  
+    }
+
+
     /**
      * @dev Returns the level info for a given address
      * @param _user Address to query

@@ -25,8 +25,8 @@ library LibMemberLevel {
     }
 
     struct MemberLevel{
-        uint32 timestamp;
         uint32 level;
+        uint32 timestamp;
     }
     
     type level is uint32;

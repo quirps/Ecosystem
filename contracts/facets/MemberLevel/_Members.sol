@@ -86,6 +86,13 @@ contract iMembers is iOwnership {
         }
     }
 
+    function _setMemberLevel(address user, uint32 level) internal {
+        LibMemberLevel.MemberLevelStorage storage mrs = LibMemberLevel.memberLevelStorage();
+        uint32 _currentTimestamp = uint32( block.timestamp );
+        mrs.memberLevel[ user ] = LibMemberLevel.MemberLevel( level, _currentTimestamp ); 
+        emit MemberLevelUpdated( LibMemberLevel.Leaf( user, level, _currentTimestamp) );
+    }
+
      /**
      * @dev Returns the level info for a given address
      * @param _user Address to query

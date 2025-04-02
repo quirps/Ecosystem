@@ -22,6 +22,7 @@ contract MiniAppRegistry {
         string imageUri;
         address bytecodeDeployer; // Address of the specific deployer for this app type
         bool exists; // Flag to check if an app entry exists for a given name hash
+        bool isActive;
     }
 
     // Mapping from keccak256 hash of the app name to its info
@@ -48,7 +49,7 @@ contract MiniAppRegistry {
     );
     event OwnerNeededSet(bool required);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
+    event AppDeactivated(string _appName);   
     // ======== Modifiers ========
 
     modifier onlyOwner() {
@@ -128,7 +129,8 @@ contract MiniAppRegistry {
             description: _description,
             imageUri: _imageUri,
             bytecodeDeployer: _bytecodeDeployer,
-            exists: true
+            exists: true,
+            isActive : true 
         });
 
         // Optional: Add to list for enumeration
@@ -147,6 +149,7 @@ contract MiniAppRegistry {
     function deployApp(
         string calldata _appName,
         bytes32 _salt,
+        bytes calldata _bytecode,
         bytes calldata _constructorArgs
     ) external returns (address instanceAddress) {
         bytes32 nameHash = keccak256(abi.encodePacked(_appName));
@@ -160,7 +163,7 @@ contract MiniAppRegistry {
 
         // Call the deploy function on the specific BytecodeDeployer contract
         // This deployer contract is responsible for bytecode verification and CREATE2 logic
-        instanceAddress = deployer.deploy(_salt, _constructorArgs);
+        instanceAddress = deployer.deploy(_salt, _bytecode, _constructorArgs);
 
         require(instanceAddress != address(0), "Registry: Deployment failed"); // Deployer should revert on failure, but check address anyway
 
@@ -249,6 +252,7 @@ contract MiniAppRegistry {
     function predictAppInstanceAddress(
         string calldata _appName,
         bytes32 _salt,
+        bytes calldata _bytecode,
         bytes calldata _constructorArgs
     ) external view returns (address predictedAddress) {
         bytes32 nameHash = keccak256(abi.encodePacked(_appName));
@@ -259,7 +263,16 @@ contract MiniAppRegistry {
 
         IBytecodeDeployer deployer = IBytecodeDeployer(app.bytecodeDeployer);
 
-        return deployer.predictAddress(_salt, _constructorArgs);
+        return deployer.predictAddress(_salt, _bytecode, _constructorArgs);
+    }
+
+    function removeApp(
+        string calldata _appName 
+    ) external onlyOwner {
+        bytes32 nameHash = keccak256(abi.encodePacked(_appName));
+        AppInfo storage app = appInfoMap[nameHash];
+        app.isActive = false;
+        emit AppDeactivated(_appName);        
     }
 
     // Optional: Function to get the number of registered apps (if using appNameHashes)
