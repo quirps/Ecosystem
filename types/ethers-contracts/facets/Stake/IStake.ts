@@ -41,18 +41,28 @@ export interface IStakeInterface extends utils.Interface {
   functions: {
     "batchStake(address[],uint256[],uint8[],uint256[])": FunctionFragment;
     "fundStakeAccount(uint256)": FunctionFragment;
+    "getGasStakeFee()": FunctionFragment;
     "setRewardRates(uint8[],(uint16,uint16,uint16)[])": FunctionFragment;
-    "stake(address,uint256,uint8,uint256)": FunctionFragment;
-    "unstake(address,uint256,uint256)": FunctionFragment;
+    "stake(uint256,uint8,uint256)": FunctionFragment;
+    "stakeContract(address,uint256,uint8,uint256)": FunctionFragment;
+    "stakeVirtual(address,uint256,uint8,uint256)": FunctionFragment;
+    "unstake(uint256,uint256)": FunctionFragment;
+    "unstakeContract(address,uint256,uint256)": FunctionFragment;
+    "unstakeVirtual(address,uint256,uint256)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
       | "batchStake"
       | "fundStakeAccount"
+      | "getGasStakeFee"
       | "setRewardRates"
       | "stake"
+      | "stakeContract"
+      | "stakeVirtual"
       | "unstake"
+      | "unstakeContract"
+      | "unstakeVirtual"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -69,11 +79,32 @@ export interface IStakeInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
+    functionFragment: "getGasStakeFee",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "setRewardRates",
     values: [PromiseOrValue<BigNumberish>[], IStake.RewardRateStruct[]]
   ): string;
   encodeFunctionData(
     functionFragment: "stake",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "stakeContract",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "stakeVirtual",
     values: [
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
@@ -83,6 +114,18 @@ export interface IStakeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "unstake",
+    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "unstakeContract",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "unstakeVirtual",
     values: [
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
@@ -96,11 +139,31 @@ export interface IStakeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "getGasStakeFee",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "setRewardRates",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "stake", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "stakeContract",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "stakeVirtual",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "unstake", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "unstakeContract",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "unstakeVirtual",
+    data: BytesLike
+  ): Result;
 
   events: {};
 }
@@ -145,6 +208,10 @@ export interface IStake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    getGasStakeFee(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     setRewardRates(
       _stakeTier: PromiseOrValue<BigNumberish>[],
       _rewardRate: IStake.RewardRateStruct[],
@@ -152,6 +219,13 @@ export interface IStake extends BaseContract {
     ): Promise<ContractTransaction>;
 
     stake(
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    stakeContract(
       user: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       tier: PromiseOrValue<BigNumberish>,
@@ -159,8 +233,29 @@ export interface IStake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    stakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     unstake(
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    unstakeContract(
       user: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    unstakeVirtual(
+      staker: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       stakeId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -180,6 +275,10 @@ export interface IStake extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  getGasStakeFee(
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   setRewardRates(
     _stakeTier: PromiseOrValue<BigNumberish>[],
     _rewardRate: IStake.RewardRateStruct[],
@@ -187,6 +286,13 @@ export interface IStake extends BaseContract {
   ): Promise<ContractTransaction>;
 
   stake(
+    amount: PromiseOrValue<BigNumberish>,
+    tier: PromiseOrValue<BigNumberish>,
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  stakeContract(
     user: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
     tier: PromiseOrValue<BigNumberish>,
@@ -194,8 +300,29 @@ export interface IStake extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  stakeVirtual(
+    staker: PromiseOrValue<string>,
+    amount: PromiseOrValue<BigNumberish>,
+    tier: PromiseOrValue<BigNumberish>,
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   unstake(
+    amount: PromiseOrValue<BigNumberish>,
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  unstakeContract(
     user: PromiseOrValue<string>,
+    amount: PromiseOrValue<BigNumberish>,
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  unstakeVirtual(
+    staker: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
     stakeId: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -215,6 +342,8 @@ export interface IStake extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    getGasStakeFee(overrides?: CallOverrides): Promise<[number, number]>;
+
     setRewardRates(
       _stakeTier: PromiseOrValue<BigNumberish>[],
       _rewardRate: IStake.RewardRateStruct[],
@@ -222,6 +351,13 @@ export interface IStake extends BaseContract {
     ): Promise<void>;
 
     stake(
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    stakeContract(
       user: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       tier: PromiseOrValue<BigNumberish>,
@@ -229,8 +365,29 @@ export interface IStake extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    stakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     unstake(
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    unstakeContract(
       user: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    unstakeVirtual(
+      staker: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       stakeId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
@@ -253,6 +410,10 @@ export interface IStake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    getGasStakeFee(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     setRewardRates(
       _stakeTier: PromiseOrValue<BigNumberish>[],
       _rewardRate: IStake.RewardRateStruct[],
@@ -260,6 +421,13 @@ export interface IStake extends BaseContract {
     ): Promise<BigNumber>;
 
     stake(
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    stakeContract(
       user: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       tier: PromiseOrValue<BigNumberish>,
@@ -267,8 +435,29 @@ export interface IStake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    stakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     unstake(
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    unstakeContract(
       user: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    unstakeVirtual(
+      staker: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       stakeId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -289,6 +478,10 @@ export interface IStake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    getGasStakeFee(
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     setRewardRates(
       _stakeTier: PromiseOrValue<BigNumberish>[],
       _rewardRate: IStake.RewardRateStruct[],
@@ -296,6 +489,13 @@ export interface IStake extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     stake(
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    stakeContract(
       user: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       tier: PromiseOrValue<BigNumberish>,
@@ -303,8 +503,29 @@ export interface IStake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    stakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     unstake(
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    unstakeContract(
       user: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    unstakeVirtual(
+      staker: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       stakeId: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }

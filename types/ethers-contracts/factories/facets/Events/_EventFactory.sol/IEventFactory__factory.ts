@@ -117,6 +117,12 @@ const _abi = [
       },
       {
         indexed: false,
+        internalType: "uint256",
+        name: "maxEntriesPerUser",
+        type: "uint256",
+      },
+      {
+        indexed: false,
         internalType: "enum LibEventFactory.EventStatus",
         name: "status",
         type: "uint8",
@@ -206,6 +212,25 @@ const _abi = [
     inputs: [
       {
         indexed: false,
+        internalType: "address",
+        name: "oldOwner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipChanged",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
         internalType: "uint256",
         name: "eventId",
         type: "uint256",
@@ -234,24 +259,6 @@ const _abi = [
         internalType: "uint256[]",
         name: "ticketIds",
         type: "uint256[]",
-      },
-      {
-        components: [
-          {
-            internalType: "uint256",
-            name: "minAmount",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "maxAmount",
-            type: "uint256",
-          },
-        ],
-        indexed: false,
-        internalType: "struct LibEventFactory.TicketDetail[]",
-        name: "ticketDetails",
-        type: "tuple[]",
       },
     ],
     name: "TicketDetails",
@@ -384,7 +391,7 @@ const _abi = [
 ] as const;
 
 const _bytecode =
-  "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea26469706673582212209e685eba0246b6ba71d41a01ebacbf85d4ad38f79847ebc2df06e2499051a58b64736f6c63430008090033";
+  "0x6080604052348015600e575f5ffd5b50603e80601a5f395ff3fe60806040525f5ffdfea26469706673582212204db937ec7dab29b8c7cb582826e56250db59746f8b63be83ebf9ba7497a215a064736f6c634300081c0033";
 
 type IEventFactoryConstructorParams =
   | [signer?: Signer]

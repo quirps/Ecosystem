@@ -18,3 +18,5 @@ build
 bin
 
 test
+types/ethers-contracts/*
+deployments

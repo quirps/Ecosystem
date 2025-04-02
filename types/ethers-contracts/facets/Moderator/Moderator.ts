@@ -27,10 +27,14 @@ export interface ModeratorInterface extends utils.Interface {
   functions: {
     "getModeratorRank(address)": FunctionFragment;
     "setModeratorRank(address,uint8)": FunctionFragment;
+    "setModeratorRanks(address[],uint8[])": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic: "getModeratorRank" | "setModeratorRank"
+    nameOrSignatureOrTopic:
+      | "getModeratorRank"
+      | "setModeratorRank"
+      | "setModeratorRanks"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -41,6 +45,10 @@ export interface ModeratorInterface extends utils.Interface {
     functionFragment: "setModeratorRank",
     values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
   ): string;
+  encodeFunctionData(
+    functionFragment: "setModeratorRanks",
+    values: [PromiseOrValue<string>[], PromiseOrValue<BigNumberish>[]]
+  ): string;
 
   decodeFunctionResult(
     functionFragment: "getModeratorRank",
@@ -48,6 +56,10 @@ export interface ModeratorInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "setModeratorRank",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setModeratorRanks",
     data: BytesLike
   ): Result;
 
@@ -91,6 +103,12 @@ export interface Moderator extends BaseContract {
       _rank: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
+
+    setModeratorRanks(
+      _moderators: PromiseOrValue<string>[],
+      _ranks: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
   };
 
   getModeratorRank(
@@ -104,6 +122,12 @@ export interface Moderator extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  setModeratorRanks(
+    _moderators: PromiseOrValue<string>[],
+    _ranks: PromiseOrValue<BigNumberish>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   callStatic: {
     getModeratorRank(
       _moderator: PromiseOrValue<string>,
@@ -113,6 +137,12 @@ export interface Moderator extends BaseContract {
     setModeratorRank(
       _moderator: PromiseOrValue<string>,
       _rank: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setModeratorRanks(
+      _moderators: PromiseOrValue<string>[],
+      _ranks: PromiseOrValue<BigNumberish>[],
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -130,6 +160,12 @@ export interface Moderator extends BaseContract {
       _rank: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
+
+    setModeratorRanks(
+      _moderators: PromiseOrValue<string>[],
+      _ranks: PromiseOrValue<BigNumberish>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -141,6 +177,12 @@ export interface Moderator extends BaseContract {
     setModeratorRank(
       _moderator: PromiseOrValue<string>,
       _rank: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setModeratorRanks(
+      _moderators: PromiseOrValue<string>[],
+      _ranks: PromiseOrValue<BigNumberish>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };

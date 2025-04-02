@@ -7,13 +7,15 @@ import type {
   BigNumberish,
   BytesLike,
   CallOverrides,
-  ContractTransaction,
-  Overrides,
   PopulatedTransaction,
   Signer,
   utils,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type {
+  FunctionFragment,
+  Result,
+  EventFragment,
+} from "@ethersproject/abi";
 import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
@@ -23,25 +25,119 @@ import type {
   PromiseOrValue,
 } from "../../../../common";
 
-export interface ITransferSetConstraintsInterface extends utils.Interface {
-  functions: {
-    "setExpireable(uint256)": FunctionFragment;
+export declare namespace LibMemberLevel {
+  export type LeafStruct = {
+    memberAddress: PromiseOrValue<string>;
+    level: PromiseOrValue<BigNumberish>;
+    timestamp: PromiseOrValue<BigNumberish>;
   };
 
-  getFunction(nameOrSignatureOrTopic: "setExpireable"): FunctionFragment;
+  export type LeafStructOutput = [string, number, number] & {
+    memberAddress: string;
+    level: number;
+    timestamp: number;
+  };
+}
+
+export interface ITransferSetConstraintsInterface extends utils.Interface {
+  functions: {
+    "expireable(uint256)": FunctionFragment;
+  };
+
+  getFunction(nameOrSignatureOrTopic: "expireable"): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "setExpireable",
+    functionFragment: "expireable",
     values: [PromiseOrValue<BigNumberish>]
   ): string;
 
-  decodeFunctionResult(
-    functionFragment: "setExpireable",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "expireable", data: BytesLike): Result;
 
-  events: {};
+  events: {
+    "MemberBanned(address,uint32)": EventFragment;
+    "MemberLevelUpdated(tuple)": EventFragment;
+    "MerkleRootUpdated(bytes32)": EventFragment;
+    "MigrationCancelled(address,uint32)": EventFragment;
+    "MigrationInitiated(address,uint32)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "MemberBanned"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MemberLevelUpdated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MerkleRootUpdated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MigrationCancelled"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MigrationInitiated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipChanged"): EventFragment;
 }
+
+export interface MemberBannedEventObject {
+  user: string;
+  timestamp: number;
+}
+export type MemberBannedEvent = TypedEvent<
+  [string, number],
+  MemberBannedEventObject
+>;
+
+export type MemberBannedEventFilter = TypedEventFilter<MemberBannedEvent>;
+
+export interface MemberLevelUpdatedEventObject {
+  leaf: LibMemberLevel.LeafStructOutput;
+}
+export type MemberLevelUpdatedEvent = TypedEvent<
+  [LibMemberLevel.LeafStructOutput],
+  MemberLevelUpdatedEventObject
+>;
+
+export type MemberLevelUpdatedEventFilter =
+  TypedEventFilter<MemberLevelUpdatedEvent>;
+
+export interface MerkleRootUpdatedEventObject {
+  newRoot: string;
+}
+export type MerkleRootUpdatedEvent = TypedEvent<
+  [string],
+  MerkleRootUpdatedEventObject
+>;
+
+export type MerkleRootUpdatedEventFilter =
+  TypedEventFilter<MerkleRootUpdatedEvent>;
+
+export interface MigrationCancelledEventObject {
+  cancellor: string;
+  timeCancelled: number;
+}
+export type MigrationCancelledEvent = TypedEvent<
+  [string, number],
+  MigrationCancelledEventObject
+>;
+
+export type MigrationCancelledEventFilter =
+  TypedEventFilter<MigrationCancelledEvent>;
+
+export interface MigrationInitiatedEventObject {
+  initiatior: string;
+  timeInitiatied: number;
+}
+export type MigrationInitiatedEvent = TypedEvent<
+  [string, number],
+  MigrationInitiatedEventObject
+>;
+
+export type MigrationInitiatedEventFilter =
+  TypedEventFilter<MigrationInitiatedEvent>;
+
+export interface OwnershipChangedEventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChangedEvent = TypedEvent<
+  [string, string],
+  OwnershipChangedEventObject
+>;
+
+export type OwnershipChangedEventFilter =
+  TypedEventFilter<OwnershipChangedEvent>;
 
 export interface ITransferSetConstraints extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -70,37 +166,79 @@ export interface ITransferSetConstraints extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    setExpireable(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+    expireable(
+      ticketId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[void]>;
   };
 
-  setExpireable(
-    arg0: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  expireable(
+    ticketId: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<void>;
 
   callStatic: {
-    setExpireable(
-      arg0: PromiseOrValue<BigNumberish>,
+    expireable(
+      ticketId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
   };
 
-  filters: {};
+  filters: {
+    "MemberBanned(address,uint32)"(
+      user?: PromiseOrValue<string> | null,
+      timestamp?: null
+    ): MemberBannedEventFilter;
+    MemberBanned(
+      user?: PromiseOrValue<string> | null,
+      timestamp?: null
+    ): MemberBannedEventFilter;
+
+    "MemberLevelUpdated(tuple)"(leaf?: null): MemberLevelUpdatedEventFilter;
+    MemberLevelUpdated(leaf?: null): MemberLevelUpdatedEventFilter;
+
+    "MerkleRootUpdated(bytes32)"(newRoot?: null): MerkleRootUpdatedEventFilter;
+    MerkleRootUpdated(newRoot?: null): MerkleRootUpdatedEventFilter;
+
+    "MigrationCancelled(address,uint32)"(
+      cancellor?: null,
+      timeCancelled?: null
+    ): MigrationCancelledEventFilter;
+    MigrationCancelled(
+      cancellor?: null,
+      timeCancelled?: null
+    ): MigrationCancelledEventFilter;
+
+    "MigrationInitiated(address,uint32)"(
+      initiatior?: null,
+      timeInitiatied?: null
+    ): MigrationInitiatedEventFilter;
+    MigrationInitiated(
+      initiatior?: null,
+      timeInitiatied?: null
+    ): MigrationInitiatedEventFilter;
+
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+    OwnershipChanged(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+  };
 
   estimateGas: {
-    setExpireable(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    expireable(
+      ticketId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    setExpireable(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    expireable(
+      ticketId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }

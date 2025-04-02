@@ -17,10 +17,12 @@ export interface IOwnershipInterface extends utils.Interface {
   events: {
     "MigrationCancelled(address,uint32)": EventFragment;
     "MigrationInitiated(address,uint32)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "MigrationCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationInitiated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipChanged"): EventFragment;
 }
 
 export interface MigrationCancelledEventObject {
@@ -46,6 +48,18 @@ export type MigrationInitiatedEvent = TypedEvent<
 
 export type MigrationInitiatedEventFilter =
   TypedEventFilter<MigrationInitiatedEvent>;
+
+export interface OwnershipChangedEventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChangedEvent = TypedEvent<
+  [string, string],
+  OwnershipChangedEventObject
+>;
+
+export type OwnershipChangedEventFilter =
+  TypedEventFilter<OwnershipChangedEvent>;
 
 export interface IOwnership extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -95,6 +109,15 @@ export interface IOwnership extends BaseContract {
       initiatior?: null,
       timeInitiatied?: null
     ): MigrationInitiatedEventFilter;
+
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+    OwnershipChanged(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
   };
 
   estimateGas: {};

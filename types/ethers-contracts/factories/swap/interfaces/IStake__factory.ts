@@ -86,6 +86,29 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "uint256",
+        name: "amount",
+        type: "uint256",
+      },
+      {
+        internalType: "enum IStake.StakeTier",
+        name: "tier",
+        type: "uint8",
+      },
+      {
+        internalType: "uint256",
+        name: "stakeId",
+        type: "uint256",
+      },
+    ],
+    name: "stake",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "address",
         name: "user",
         type: "address",
@@ -106,7 +129,7 @@ const _abi = [
         type: "uint256",
       },
     ],
-    name: "stake",
+    name: "stakeContract",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

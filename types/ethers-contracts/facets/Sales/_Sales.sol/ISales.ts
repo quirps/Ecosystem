@@ -20,6 +20,7 @@ export interface ISalesInterface extends utils.Interface {
     "ItemPurchased(uint256,address,uint256)": EventFragment;
     "MigrationCancelled(address,uint32)": EventFragment;
     "MigrationInitiated(address,uint32)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
     "SaleCreated(uint256)": EventFragment;
     "TransferBatch(address,address,address,uint256[],uint256[])": EventFragment;
     "TransferSingle(address,address,address,uint256,uint256)": EventFragment;
@@ -29,6 +30,7 @@ export interface ISalesInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "ItemPurchased"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationInitiated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SaleCreated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "TransferBatch"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "TransferSingle"): EventFragment;
@@ -81,6 +83,18 @@ export type MigrationInitiatedEvent = TypedEvent<
 
 export type MigrationInitiatedEventFilter =
   TypedEventFilter<MigrationInitiatedEvent>;
+
+export interface OwnershipChangedEventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChangedEvent = TypedEvent<
+  [string, string],
+  OwnershipChangedEventObject
+>;
+
+export type OwnershipChangedEventFilter =
+  TypedEventFilter<OwnershipChangedEvent>;
 
 export interface SaleCreatedEventObject {
   saleId: BigNumber;
@@ -187,6 +201,15 @@ export interface ISales extends BaseContract {
       initiatior?: null,
       timeInitiatied?: null
     ): MigrationInitiatedEventFilter;
+
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+    OwnershipChanged(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
 
     "SaleCreated(uint256)"(saleId?: null): SaleCreatedEventFilter;
     SaleCreated(saleId?: null): SaleCreatedEventFilter;

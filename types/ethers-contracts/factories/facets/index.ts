@@ -3,8 +3,10 @@
 /* eslint-disable */
 export * as diamond from "./Diamond";
 export * as erc2771Recipient from "./ERC2771Recipient";
+export * as erc2981 from "./ERC2981";
 export * as events from "./Events";
-export * as memberRankings from "./MemberRankings";
+export * as exchangeManage from "./ExchangeManage";
+export * as memberLevel from "./MemberLevel";
 export * as memberRegistry from "./MemberRegistry";
 export * as moderator from "./Moderator";
 export * as ownership from "./Ownership";

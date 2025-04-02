@@ -161,6 +161,25 @@ const _abi = [
     type: "event",
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "oldOwner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipChanged",
+    type: "event",
+  },
+  {
     inputs: [],
     name: "cancelMigration",
     outputs: [],
@@ -360,6 +379,25 @@ const _abi = [
       },
     ],
     name: "MigrationInitiated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "oldOwner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipChanged",
     type: "event",
   },
   {
@@ -617,6 +655,25 @@ const _abi = [
       },
     ],
     name: "MigrationInitiated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "oldOwner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipChanged",
     type: "event",
   },
   {
@@ -1074,6 +1131,25 @@ const _abi = [
     type: "event",
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "oldOwner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipChanged",
+    type: "event",
+  },
+  {
     inputs: [
       {
         internalType: "address",
@@ -1162,6 +1238,24 @@ const _abi = [
   {
     inputs: [
       {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        internalType: "uint32",
+        name: "level",
+        type: "uint32",
+      },
+    ],
+    name: "setMemberLevel",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         components: [
           {
             internalType: "address",
@@ -1245,6 +1339,25 @@ const _abi = [
       },
     ],
     name: "MigrationInitiated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "oldOwner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipChanged",
     type: "event",
   },
   {
@@ -1548,6 +1661,25 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
+        indexed: false,
+        internalType: "address",
+        name: "oldOwner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipChanged",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
         indexed: true,
         internalType: "address",
         name: "previousOwner",
@@ -1586,6 +1718,19 @@ const _abi = [
     ],
     name: "isEcosystemOwnerVerify",
     outputs: [],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "owner_",
+        type: "address",
+      },
+    ],
     stateMutability: "view",
     type: "function",
   },
@@ -1740,6 +1885,25 @@ const _abi = [
       },
     ],
     name: "MigrationInitiated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "oldOwner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipChanged",
     type: "event",
   },
   {
@@ -2318,6 +2482,25 @@ const _abi = [
     inputs: [
       {
         indexed: false,
+        internalType: "address",
+        name: "oldOwner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipChanged",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
         internalType: "uint256",
         name: "",
         type: "uint256",
@@ -2338,6 +2521,11 @@ const _abi = [
           {
             internalType: "string",
             name: "description",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "imageHash",
             type: "string",
           },
         ],
@@ -2456,6 +2644,11 @@ const _abi = [
             name: "description",
             type: "string",
           },
+          {
+            internalType: "string",
+            name: "imageHash",
+            type: "string",
+          },
         ],
         internalType: "struct TicketCreate.TicketMeta",
         name: "_ticketMeta",
@@ -2515,6 +2708,23 @@ const _abi = [
             name: "expireable",
             type: "tuple",
           },
+          {
+            components: [
+              {
+                internalType: "uint24",
+                name: "fee",
+                type: "uint24",
+              },
+              {
+                internalType: "bool",
+                name: "isActive",
+                type: "bool",
+              },
+            ],
+            internalType: "struct LibERC1155TransferConstraints.RoyaltyFee",
+            name: "royaltyFee",
+            type: "tuple",
+          },
         ],
         internalType: "struct LibERC1155TransferConstraints.Constraints",
         name: "_constraints",
@@ -2543,6 +2753,11 @@ const _abi = [
           {
             internalType: "string",
             name: "description",
+            type: "string",
+          },
+          {
+            internalType: "string",
+            name: "imageHash",
             type: "string",
           },
         ],
@@ -2602,6 +2817,23 @@ const _abi = [
             ],
             internalType: "struct LibERC1155TransferConstraints.Expireable",
             name: "expireable",
+            type: "tuple",
+          },
+          {
+            components: [
+              {
+                internalType: "uint24",
+                name: "fee",
+                type: "uint24",
+              },
+              {
+                internalType: "bool",
+                name: "isActive",
+                type: "bool",
+              },
+            ],
+            internalType: "struct LibERC1155TransferConstraints.RoyaltyFee",
+            name: "royaltyFee",
             type: "tuple",
           },
         ],
@@ -2666,6 +2898,25 @@ const _abi = [
       },
     ],
     name: "MigrationInitiated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "oldOwner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipChanged",
     type: "event",
   },
   {
@@ -3343,6 +3594,25 @@ const _abi = [
       },
     ],
     name: "MigrationInitiated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "oldOwner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipChanged",
     type: "event",
   },
   {

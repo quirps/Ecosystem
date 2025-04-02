@@ -30,6 +30,7 @@ export interface OwnershipFacetInterface extends utils.Interface {
   functions: {
     "ecosystemOwner()": FunctionFragment;
     "isEcosystemOwnerVerify(address)": FunctionFragment;
+    "owner()": FunctionFragment;
     "setEcosystemOwner(address)": FunctionFragment;
   };
 
@@ -37,6 +38,7 @@ export interface OwnershipFacetInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "ecosystemOwner"
       | "isEcosystemOwnerVerify"
+      | "owner"
       | "setEcosystemOwner"
   ): FunctionFragment;
 
@@ -48,6 +50,7 @@ export interface OwnershipFacetInterface extends utils.Interface {
     functionFragment: "isEcosystemOwnerVerify",
     values: [PromiseOrValue<string>]
   ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "setEcosystemOwner",
     values: [PromiseOrValue<string>]
@@ -61,6 +64,7 @@ export interface OwnershipFacetInterface extends utils.Interface {
     functionFragment: "isEcosystemOwnerVerify",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setEcosystemOwner",
     data: BytesLike
@@ -69,10 +73,14 @@ export interface OwnershipFacetInterface extends utils.Interface {
   events: {
     "MigrationCancelled(address,uint32)": EventFragment;
     "MigrationInitiated(address,uint32)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
+    "OwnershipTransferred(address,address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "MigrationCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationInitiated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipChanged"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
 }
 
 export interface MigrationCancelledEventObject {
@@ -98,6 +106,30 @@ export type MigrationInitiatedEvent = TypedEvent<
 
 export type MigrationInitiatedEventFilter =
   TypedEventFilter<MigrationInitiatedEvent>;
+
+export interface OwnershipChangedEventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChangedEvent = TypedEvent<
+  [string, string],
+  OwnershipChangedEventObject
+>;
+
+export type OwnershipChangedEventFilter =
+  TypedEventFilter<OwnershipChangedEvent>;
+
+export interface OwnershipTransferredEventObject {
+  previousOwner: string;
+  newOwner: string;
+}
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string],
+  OwnershipTransferredEventObject
+>;
+
+export type OwnershipTransferredEventFilter =
+  TypedEventFilter<OwnershipTransferredEvent>;
 
 export interface OwnershipFacet extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -135,6 +167,8 @@ export interface OwnershipFacet extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[void]>;
 
+    owner(overrides?: CallOverrides): Promise<[string] & { owner_: string }>;
+
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -148,6 +182,8 @@ export interface OwnershipFacet extends BaseContract {
     overrides?: CallOverrides
   ): Promise<void>;
 
+  owner(overrides?: CallOverrides): Promise<string>;
+
   setEcosystemOwner(
     _newOwner: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
@@ -160,6 +196,8 @@ export interface OwnershipFacet extends BaseContract {
       _tenativeOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
@@ -185,6 +223,24 @@ export interface OwnershipFacet extends BaseContract {
       initiatior?: null,
       timeInitiatied?: null
     ): MigrationInitiatedEventFilter;
+
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+    OwnershipChanged(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: PromiseOrValue<string> | null,
+      newOwner?: PromiseOrValue<string> | null
+    ): OwnershipTransferredEventFilter;
+    OwnershipTransferred(
+      previousOwner?: PromiseOrValue<string> | null,
+      newOwner?: PromiseOrValue<string> | null
+    ): OwnershipTransferredEventFilter;
   };
 
   estimateGas: {
@@ -194,6 +250,8 @@ export interface OwnershipFacet extends BaseContract {
       _tenativeOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
@@ -208,6 +266,8 @@ export interface OwnershipFacet extends BaseContract {
       _tenativeOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,

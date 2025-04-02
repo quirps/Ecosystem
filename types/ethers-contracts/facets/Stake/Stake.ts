@@ -27,6 +27,20 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
+export declare namespace LibMemberLevel {
+  export type LeafStruct = {
+    memberAddress: PromiseOrValue<string>;
+    level: PromiseOrValue<BigNumberish>;
+    timestamp: PromiseOrValue<BigNumberish>;
+  };
+
+  export type LeafStructOutput = [string, number, number] & {
+    memberAddress: string;
+    level: number;
+    timestamp: number;
+  };
+}
+
 export declare namespace Stake {
   export type RewardRateStruct = {
     initialRate: PromiseOrValue<BigNumberish>;
@@ -44,17 +58,15 @@ export declare namespace Stake {
 export interface StakeInterface extends utils.Interface {
   functions: {
     "batchStake(address[],uint256[],uint8[],uint256[])": FunctionFragment;
-    "bountyAddress()": FunctionFragment;
-    "currencyId()": FunctionFragment;
-    "downRate()": FunctionFragment;
     "fundStakeAccount(uint256)": FunctionFragment;
-    "maxBalance()": FunctionFragment;
+    "getGasStakeFee()": FunctionFragment;
     "setRewardRates(uint8[],(uint16,uint16,uint16)[])": FunctionFragment;
     "stake(uint256,uint8,uint256)": FunctionFragment;
     "stakeContract(address,uint256,uint8,uint256)": FunctionFragment;
+    "stakeVirtual(address,uint256,uint8,uint256)": FunctionFragment;
     "unstake(uint256,uint256)": FunctionFragment;
     "unstakeContract(address,uint256,uint256)": FunctionFragment;
-    "upRate()": FunctionFragment;
+    "unstakeVirtual(address,uint256,uint256)": FunctionFragment;
     "viewMinimumStakeDurationLeft(uint256)": FunctionFragment;
     "viewReward(uint256)": FunctionFragment;
   };
@@ -62,17 +74,15 @@ export interface StakeInterface extends utils.Interface {
   getFunction(
     nameOrSignatureOrTopic:
       | "batchStake"
-      | "bountyAddress"
-      | "currencyId"
-      | "downRate"
       | "fundStakeAccount"
-      | "maxBalance"
+      | "getGasStakeFee"
       | "setRewardRates"
       | "stake"
       | "stakeContract"
+      | "stakeVirtual"
       | "unstake"
       | "unstakeContract"
-      | "upRate"
+      | "unstakeVirtual"
       | "viewMinimumStakeDurationLeft"
       | "viewReward"
   ): FunctionFragment;
@@ -87,20 +97,11 @@ export interface StakeInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
-    functionFragment: "bountyAddress",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "currencyId",
-    values?: undefined
-  ): string;
-  encodeFunctionData(functionFragment: "downRate", values?: undefined): string;
-  encodeFunctionData(
     functionFragment: "fundStakeAccount",
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
-    functionFragment: "maxBalance",
+    functionFragment: "getGasStakeFee",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -125,6 +126,15 @@ export interface StakeInterface extends utils.Interface {
     ]
   ): string;
   encodeFunctionData(
+    functionFragment: "stakeVirtual",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "unstake",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
@@ -136,7 +146,14 @@ export interface StakeInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>
     ]
   ): string;
-  encodeFunctionData(functionFragment: "upRate", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "unstakeVirtual",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
   encodeFunctionData(
     functionFragment: "viewMinimumStakeDurationLeft",
     values: [PromiseOrValue<BigNumberish>]
@@ -148,16 +165,13 @@ export interface StakeInterface extends utils.Interface {
 
   decodeFunctionResult(functionFragment: "batchStake", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "bountyAddress",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "currencyId", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "downRate", data: BytesLike): Result;
-  decodeFunctionResult(
     functionFragment: "fundStakeAccount",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "maxBalance", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getGasStakeFee",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "setRewardRates",
     data: BytesLike
@@ -167,12 +181,19 @@ export interface StakeInterface extends utils.Interface {
     functionFragment: "stakeContract",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "stakeVirtual",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "unstake", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "unstakeContract",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "upRate", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "unstakeVirtual",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "viewMinimumStakeDurationLeft",
     data: BytesLike
@@ -181,10 +202,12 @@ export interface StakeInterface extends utils.Interface {
 
   events: {
     "ApprovalForAll(address,address,bool)": EventFragment;
-    "BountyBalanceChange(uint256,uint8)": EventFragment;
-    "BountyEvent(address,uint256,uint256,uint256,uint256)": EventFragment;
+    "MemberBanned(address,uint32)": EventFragment;
+    "MemberLevelUpdated(tuple)": EventFragment;
+    "MerkleRootUpdated(bytes32)": EventFragment;
     "MigrationCancelled(address,uint32)": EventFragment;
     "MigrationInitiated(address,uint32)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
     "RewardRatesChanged(tuple[])": EventFragment;
     "RewardsRetrieved(address,uint256,uint256,uint256)": EventFragment;
     "StakeRewardAccountFunded(address,uint256)": EventFragment;
@@ -193,10 +216,12 @@ export interface StakeInterface extends utils.Interface {
   };
 
   getEvent(nameOrSignatureOrTopic: "ApprovalForAll"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "BountyBalanceChange"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "BountyEvent"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MemberBanned"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MemberLevelUpdated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MerkleRootUpdated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationInitiated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RewardRatesChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RewardsRetrieved"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "StakeRewardAccountFunded"): EventFragment;
@@ -216,31 +241,38 @@ export type ApprovalForAllEvent = TypedEvent<
 
 export type ApprovalForAllEventFilter = TypedEventFilter<ApprovalForAllEvent>;
 
-export interface BountyBalanceChangeEventObject {
-  amount: BigNumber;
-  direction: number;
+export interface MemberBannedEventObject {
+  user: string;
+  timestamp: number;
 }
-export type BountyBalanceChangeEvent = TypedEvent<
-  [BigNumber, number],
-  BountyBalanceChangeEventObject
+export type MemberBannedEvent = TypedEvent<
+  [string, number],
+  MemberBannedEventObject
 >;
 
-export type BountyBalanceChangeEventFilter =
-  TypedEventFilter<BountyBalanceChangeEvent>;
+export type MemberBannedEventFilter = TypedEventFilter<MemberBannedEvent>;
 
-export interface BountyEventEventObject {
-  receiver: string;
-  bountyUp: BigNumber;
-  bountyUpRate: BigNumber;
-  bountiesDown: BigNumber;
-  bountyDownRate: BigNumber;
+export interface MemberLevelUpdatedEventObject {
+  leaf: LibMemberLevel.LeafStructOutput;
 }
-export type BountyEventEvent = TypedEvent<
-  [string, BigNumber, BigNumber, BigNumber, BigNumber],
-  BountyEventEventObject
+export type MemberLevelUpdatedEvent = TypedEvent<
+  [LibMemberLevel.LeafStructOutput],
+  MemberLevelUpdatedEventObject
 >;
 
-export type BountyEventEventFilter = TypedEventFilter<BountyEventEvent>;
+export type MemberLevelUpdatedEventFilter =
+  TypedEventFilter<MemberLevelUpdatedEvent>;
+
+export interface MerkleRootUpdatedEventObject {
+  newRoot: string;
+}
+export type MerkleRootUpdatedEvent = TypedEvent<
+  [string],
+  MerkleRootUpdatedEventObject
+>;
+
+export type MerkleRootUpdatedEventFilter =
+  TypedEventFilter<MerkleRootUpdatedEvent>;
 
 export interface MigrationCancelledEventObject {
   cancellor: string;
@@ -265,6 +297,18 @@ export type MigrationInitiatedEvent = TypedEvent<
 
 export type MigrationInitiatedEventFilter =
   TypedEventFilter<MigrationInitiatedEvent>;
+
+export interface OwnershipChangedEventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChangedEvent = TypedEvent<
+  [string, string],
+  OwnershipChangedEventObject
+>;
+
+export type OwnershipChangedEventFilter =
+  TypedEventFilter<OwnershipChangedEvent>;
 
 export interface RewardRatesChangedEventObject {
   _rewardRates: Stake.RewardRateStructOutput[];
@@ -366,18 +410,14 @@ export interface Stake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    bountyAddress(overrides?: CallOverrides): Promise<[string]>;
-
-    currencyId(overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    downRate(overrides?: CallOverrides): Promise<[BigNumber]>;
-
     fundStakeAccount(
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    maxBalance(overrides?: CallOverrides): Promise<[BigNumber]>;
+    getGasStakeFee(
+      overrides?: CallOverrides
+    ): Promise<[number, number] & { feeScale_: number; fee_: number }>;
 
     setRewardRates(
       _stakeTier: PromiseOrValue<BigNumberish>[],
@@ -400,6 +440,14 @@ export interface Stake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    stakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     unstake(
       amount: PromiseOrValue<BigNumberish>,
       stakeId: PromiseOrValue<BigNumberish>,
@@ -413,7 +461,12 @@ export interface Stake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    upRate(overrides?: CallOverrides): Promise<[BigNumber]>;
+    unstakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
 
     viewMinimumStakeDurationLeft(
       stakeId: PromiseOrValue<BigNumberish>,
@@ -434,18 +487,14 @@ export interface Stake extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  bountyAddress(overrides?: CallOverrides): Promise<string>;
-
-  currencyId(overrides?: CallOverrides): Promise<BigNumber>;
-
-  downRate(overrides?: CallOverrides): Promise<BigNumber>;
-
   fundStakeAccount(
     amount: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  maxBalance(overrides?: CallOverrides): Promise<BigNumber>;
+  getGasStakeFee(
+    overrides?: CallOverrides
+  ): Promise<[number, number] & { feeScale_: number; fee_: number }>;
 
   setRewardRates(
     _stakeTier: PromiseOrValue<BigNumberish>[],
@@ -468,6 +517,14 @@ export interface Stake extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  stakeVirtual(
+    staker: PromiseOrValue<string>,
+    amount: PromiseOrValue<BigNumberish>,
+    tier: PromiseOrValue<BigNumberish>,
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   unstake(
     amount: PromiseOrValue<BigNumberish>,
     stakeId: PromiseOrValue<BigNumberish>,
@@ -481,7 +538,12 @@ export interface Stake extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  upRate(overrides?: CallOverrides): Promise<BigNumber>;
+  unstakeVirtual(
+    staker: PromiseOrValue<string>,
+    amount: PromiseOrValue<BigNumberish>,
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
 
   viewMinimumStakeDurationLeft(
     stakeId: PromiseOrValue<BigNumberish>,
@@ -502,18 +564,14 @@ export interface Stake extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    bountyAddress(overrides?: CallOverrides): Promise<string>;
-
-    currencyId(overrides?: CallOverrides): Promise<BigNumber>;
-
-    downRate(overrides?: CallOverrides): Promise<BigNumber>;
-
     fundStakeAccount(
       amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    maxBalance(overrides?: CallOverrides): Promise<BigNumber>;
+    getGasStakeFee(
+      overrides?: CallOverrides
+    ): Promise<[number, number] & { feeScale_: number; fee_: number }>;
 
     setRewardRates(
       _stakeTier: PromiseOrValue<BigNumberish>[],
@@ -536,6 +594,14 @@ export interface Stake extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    stakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     unstake(
       amount: PromiseOrValue<BigNumberish>,
       stakeId: PromiseOrValue<BigNumberish>,
@@ -547,9 +613,14 @@ export interface Stake extends BaseContract {
       amount: PromiseOrValue<BigNumberish>,
       stakeId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<BigNumber>;
 
-    upRate(overrides?: CallOverrides): Promise<BigNumber>;
+    unstakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     viewMinimumStakeDurationLeft(
       stakeId: PromiseOrValue<BigNumberish>,
@@ -574,29 +645,20 @@ export interface Stake extends BaseContract {
       approved?: null
     ): ApprovalForAllEventFilter;
 
-    "BountyBalanceChange(uint256,uint8)"(
-      amount?: null,
-      direction?: null
-    ): BountyBalanceChangeEventFilter;
-    BountyBalanceChange(
-      amount?: null,
-      direction?: null
-    ): BountyBalanceChangeEventFilter;
+    "MemberBanned(address,uint32)"(
+      user?: PromiseOrValue<string> | null,
+      timestamp?: null
+    ): MemberBannedEventFilter;
+    MemberBanned(
+      user?: PromiseOrValue<string> | null,
+      timestamp?: null
+    ): MemberBannedEventFilter;
 
-    "BountyEvent(address,uint256,uint256,uint256,uint256)"(
-      receiver?: null,
-      bountyUp?: null,
-      bountyUpRate?: null,
-      bountiesDown?: null,
-      bountyDownRate?: null
-    ): BountyEventEventFilter;
-    BountyEvent(
-      receiver?: null,
-      bountyUp?: null,
-      bountyUpRate?: null,
-      bountiesDown?: null,
-      bountyDownRate?: null
-    ): BountyEventEventFilter;
+    "MemberLevelUpdated(tuple)"(leaf?: null): MemberLevelUpdatedEventFilter;
+    MemberLevelUpdated(leaf?: null): MemberLevelUpdatedEventFilter;
+
+    "MerkleRootUpdated(bytes32)"(newRoot?: null): MerkleRootUpdatedEventFilter;
+    MerkleRootUpdated(newRoot?: null): MerkleRootUpdatedEventFilter;
 
     "MigrationCancelled(address,uint32)"(
       cancellor?: null,
@@ -615,6 +677,15 @@ export interface Stake extends BaseContract {
       initiatior?: null,
       timeInitiatied?: null
     ): MigrationInitiatedEventFilter;
+
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+    OwnershipChanged(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
 
     "RewardRatesChanged(tuple[])"(
       _rewardRates?: null
@@ -683,18 +754,12 @@ export interface Stake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    bountyAddress(overrides?: CallOverrides): Promise<BigNumber>;
-
-    currencyId(overrides?: CallOverrides): Promise<BigNumber>;
-
-    downRate(overrides?: CallOverrides): Promise<BigNumber>;
-
     fundStakeAccount(
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    maxBalance(overrides?: CallOverrides): Promise<BigNumber>;
+    getGasStakeFee(overrides?: CallOverrides): Promise<BigNumber>;
 
     setRewardRates(
       _stakeTier: PromiseOrValue<BigNumberish>[],
@@ -717,6 +782,14 @@ export interface Stake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    stakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     unstake(
       amount: PromiseOrValue<BigNumberish>,
       stakeId: PromiseOrValue<BigNumberish>,
@@ -730,7 +803,12 @@ export interface Stake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    upRate(overrides?: CallOverrides): Promise<BigNumber>;
+    unstakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
 
     viewMinimumStakeDurationLeft(
       stakeId: PromiseOrValue<BigNumberish>,
@@ -752,18 +830,12 @@ export interface Stake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    bountyAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    currencyId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    downRate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
     fundStakeAccount(
       amount: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    maxBalance(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    getGasStakeFee(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setRewardRates(
       _stakeTier: PromiseOrValue<BigNumberish>[],
@@ -786,6 +858,14 @@ export interface Stake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    stakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     unstake(
       amount: PromiseOrValue<BigNumberish>,
       stakeId: PromiseOrValue<BigNumberish>,
@@ -799,7 +879,12 @@ export interface Stake extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    upRate(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    unstakeVirtual(
+      staker: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
 
     viewMinimumStakeDurationLeft(
       stakeId: PromiseOrValue<BigNumberish>,

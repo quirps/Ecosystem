@@ -7,8 +7,6 @@ import type {
   BigNumberish,
   BytesLike,
   CallOverrides,
-  ContractTransaction,
-  Overrides,
   PopulatedTransaction,
   Signer,
   utils,
@@ -163,8 +161,8 @@ export interface ERC1155Rewards extends BaseContract {
       ids: PromiseOrValue<BigNumberish>[],
       values: PromiseOrValue<BigNumberish>[],
       data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+      overrides?: CallOverrides
+    ): Promise<[string]>;
 
     onERC1155Received(
       operator: PromiseOrValue<string>,
@@ -172,8 +170,8 @@ export interface ERC1155Rewards extends BaseContract {
       id: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BigNumberish>,
       data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+      overrides?: CallOverrides
+    ): Promise<[string]>;
 
     supportsInterface(
       interfaceId: PromiseOrValue<BytesLike>,
@@ -187,8 +185,8 @@ export interface ERC1155Rewards extends BaseContract {
     ids: PromiseOrValue<BigNumberish>[],
     values: PromiseOrValue<BigNumberish>[],
     data: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+    overrides?: CallOverrides
+  ): Promise<string>;
 
   onERC1155Received(
     operator: PromiseOrValue<string>,
@@ -196,8 +194,8 @@ export interface ERC1155Rewards extends BaseContract {
     id: PromiseOrValue<BigNumberish>,
     value: PromiseOrValue<BigNumberish>,
     data: PromiseOrValue<BytesLike>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+    overrides?: CallOverrides
+  ): Promise<string>;
 
   supportsInterface(
     interfaceId: PromiseOrValue<BytesLike>,
@@ -279,7 +277,7 @@ export interface ERC1155Rewards extends BaseContract {
       ids: PromiseOrValue<BigNumberish>[],
       values: PromiseOrValue<BigNumberish>[],
       data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     onERC1155Received(
@@ -288,7 +286,7 @@ export interface ERC1155Rewards extends BaseContract {
       id: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BigNumberish>,
       data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     supportsInterface(
@@ -304,7 +302,7 @@ export interface ERC1155Rewards extends BaseContract {
       ids: PromiseOrValue<BigNumberish>[],
       values: PromiseOrValue<BigNumberish>[],
       data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     onERC1155Received(
@@ -313,7 +311,7 @@ export interface ERC1155Rewards extends BaseContract {
       id: PromiseOrValue<BigNumberish>,
       value: PromiseOrValue<BigNumberish>,
       data: PromiseOrValue<BytesLike>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     supportsInterface(

@@ -13,11 +13,7 @@ import type {
   Signer,
   utils,
 } from "ethers";
-import type {
-  FunctionFragment,
-  Result,
-  EventFragment,
-} from "@ethersproject/abi";
+import type { FunctionFragment, Result } from "@ethersproject/abi";
 import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
@@ -45,11 +41,10 @@ export interface DiamondDeployInterface extends utils.Interface {
   functions: {
     "deploy(address,uint256,bytes,(address,uint8,bytes4[])[])": FunctionFragment;
     "registryAddress()": FunctionFragment;
-    "setRegistry(address)": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic: "deploy" | "registryAddress" | "setRegistry"
+    nameOrSignatureOrTopic: "deploy" | "registryAddress"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -65,34 +60,15 @@ export interface DiamondDeployInterface extends utils.Interface {
     functionFragment: "registryAddress",
     values?: undefined
   ): string;
-  encodeFunctionData(
-    functionFragment: "setRegistry",
-    values: [PromiseOrValue<string>]
-  ): string;
 
   decodeFunctionResult(functionFragment: "deploy", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "registryAddress",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "setRegistry",
-    data: BytesLike
-  ): Result;
 
-  events: {
-    "NewDiamond(bytes)": EventFragment;
-  };
-
-  getEvent(nameOrSignatureOrTopic: "NewDiamond"): EventFragment;
+  events: {};
 }
-
-export interface NewDiamondEventObject {
-  bytecode: string;
-}
-export type NewDiamondEvent = TypedEvent<[string], NewDiamondEventObject>;
-
-export type NewDiamondEventFilter = TypedEventFilter<NewDiamondEvent>;
 
 export interface DiamondDeploy extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -130,11 +106,6 @@ export interface DiamondDeploy extends BaseContract {
     ): Promise<ContractTransaction>;
 
     registryAddress(overrides?: CallOverrides): Promise<[string]>;
-
-    setRegistry(
-      _registry: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
   };
 
   deploy(
@@ -147,11 +118,6 @@ export interface DiamondDeploy extends BaseContract {
 
   registryAddress(overrides?: CallOverrides): Promise<string>;
 
-  setRegistry(
-    _registry: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
-
   callStatic: {
     deploy(
       owner: PromiseOrValue<string>,
@@ -162,17 +128,9 @@ export interface DiamondDeploy extends BaseContract {
     ): Promise<string>;
 
     registryAddress(overrides?: CallOverrides): Promise<string>;
-
-    setRegistry(
-      _registry: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<void>;
   };
 
-  filters: {
-    "NewDiamond(bytes)"(bytecode?: null): NewDiamondEventFilter;
-    NewDiamond(bytecode?: null): NewDiamondEventFilter;
-  };
+  filters: {};
 
   estimateGas: {
     deploy(
@@ -184,11 +142,6 @@ export interface DiamondDeploy extends BaseContract {
     ): Promise<BigNumber>;
 
     registryAddress(overrides?: CallOverrides): Promise<BigNumber>;
-
-    setRegistry(
-      _registry: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -201,10 +154,5 @@ export interface DiamondDeploy extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     registryAddress(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    setRegistry(
-      _registry: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<PopulatedTransaction>;
   };
 }

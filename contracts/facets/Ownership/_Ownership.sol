@@ -12,6 +12,7 @@ contract iOwnership is iERC2771Recipient {
     event MigrationInitiated(address initiatior, uint32 timeInitiatied);
     event MigrationCancelled(address cancellor, uint32 timeCancelled);
     event OwnershipChanged(address oldOwner, address newOwner); 
+    
     modifier onlyOwner(){
         msgSender() == _ecosystemOwner();
         _;

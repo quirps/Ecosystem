@@ -43,21 +43,9 @@ const _abi = [
         type: "uint256[]",
       },
       {
-        components: [
-          {
-            internalType: "uint256",
-            name: "minAmount",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "maxAmount",
-            type: "uint256",
-          },
-        ],
-        internalType: "struct LibEventFactory.TicketDetail[]",
-        name: "_ticketDetails",
-        type: "tuple[]",
+        internalType: "uint256",
+        name: "_maxEntriesPerUser",
+        type: "uint256",
       },
     ],
     name: "createEvent",

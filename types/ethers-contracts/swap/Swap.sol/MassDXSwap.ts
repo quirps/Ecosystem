@@ -28,6 +28,20 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
+export declare namespace MassDXSwap {
+  export type SwapStruct = {
+    token: PromiseOrValue<string>;
+    isEther: PromiseOrValue<boolean>;
+    amount: PromiseOrValue<BigNumberish>;
+  };
+
+  export type SwapStructOutput = [string, boolean, BigNumber] & {
+    token: string;
+    isEther: boolean;
+    amount: BigNumber;
+  };
+}
+
 export declare namespace IPOCreate {
   export type OffChainPurchaseStruct = {
     user: PromiseOrValue<string>;
@@ -59,30 +73,6 @@ export declare namespace IPOCreate {
     ecosystemAddress: string;
     IPOFundAddress: string;
   };
-
-  export type OutputCurrencyStruct = {
-    isBaseCurrency: PromiseOrValue<boolean>;
-    tokenAddress: PromiseOrValue<string>;
-  };
-
-  export type OutputCurrencyStructOutput = [boolean, string] & {
-    isBaseCurrency: boolean;
-    tokenAddress: string;
-  };
-}
-
-export declare namespace MassDXSwap {
-  export type SwapStruct = {
-    token: PromiseOrValue<string>;
-    isEther: PromiseOrValue<boolean>;
-    amount: PromiseOrValue<BigNumberish>;
-  };
-
-  export type SwapStructOutput = [string, boolean, BigNumber] & {
-    token: string;
-    isEther: boolean;
-    amount: BigNumber;
-  };
 }
 
 export interface MassDXSwapInterface extends utils.Interface {
@@ -91,7 +81,9 @@ export interface MassDXSwapInterface extends utils.Interface {
     "getOffchainPurchase(uint256,bytes32[],(address,uint256,uint256,bool))": FunctionFragment;
     "getOffchainPurchaseOwner(uint256,address[],uint256[])": FunctionFragment;
     "getOnChainPurchase(uint256,uint256)": FunctionFragment;
-    "setIPO(uint256,bytes32,uint256,uint256,uint256,uint32,(address,address,address),(bool,address))": FunctionFragment;
+    "onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)": FunctionFragment;
+    "onERC1155Received(address,address,uint256,uint256,bytes)": FunctionFragment;
+    "setIPO(uint256,bytes32,uint256,uint256,uint256,uint32,(address,address,address),address)": FunctionFragment;
     "swap((address,bool,uint256),(address,bool,uint256),uint256[],uint256,bool)": FunctionFragment;
     "uploadIPOMerkleRoot(uint256,bytes32)": FunctionFragment;
   };
@@ -102,6 +94,8 @@ export interface MassDXSwapInterface extends utils.Interface {
       | "getOffchainPurchase"
       | "getOffchainPurchaseOwner"
       | "getOnChainPurchase"
+      | "onERC1155BatchReceived"
+      | "onERC1155Received"
       | "setIPO"
       | "swap"
       | "uploadIPOMerkleRoot"
@@ -136,6 +130,26 @@ export interface MassDXSwapInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
+    functionFragment: "onERC1155BatchReceived",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>[],
+      PromiseOrValue<BigNumberish>[],
+      PromiseOrValue<BytesLike>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "onERC1155Received",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setIPO",
     values: [
       PromiseOrValue<BigNumberish>,
@@ -145,7 +159,7 @@ export interface MassDXSwapInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       IPOCreate.EcosystemStruct,
-      IPOCreate.OutputCurrencyStruct
+      PromiseOrValue<string>
     ]
   ): string;
   encodeFunctionData(
@@ -179,6 +193,14 @@ export interface MassDXSwapInterface extends utils.Interface {
     functionFragment: "getOnChainPurchase",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "onERC1155BatchReceived",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "onERC1155Received",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "setIPO", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "swap", data: BytesLike): Result;
   decodeFunctionResult(
@@ -192,8 +214,9 @@ export interface MassDXSwapInterface extends utils.Interface {
     "IPOPurchaseConsumed(address,uint256,bool)": EventFragment;
     "MigrationCancelled(address,uint32)": EventFragment;
     "MigrationInitiated(address,uint32)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
     "SwapCancelled(address,uint256,uint256)": EventFragment;
-    "SwapOrderSubmitted(address,address,address,uint256)": EventFragment;
+    "SwapOrderSubmitted(address,tuple,tuple,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "Fill"): EventFragment;
@@ -201,6 +224,7 @@ export interface MassDXSwapInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "IPOPurchaseConsumed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationInitiated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SwapCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SwapOrderSubmitted"): EventFragment;
 }
@@ -268,6 +292,18 @@ export type MigrationInitiatedEvent = TypedEvent<
 export type MigrationInitiatedEventFilter =
   TypedEventFilter<MigrationInitiatedEvent>;
 
+export interface OwnershipChangedEventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChangedEvent = TypedEvent<
+  [string, string],
+  OwnershipChangedEventObject
+>;
+
+export type OwnershipChangedEventFilter =
+  TypedEventFilter<OwnershipChangedEvent>;
+
 export interface SwapCancelledEventObject {
   marketMaker: string;
   ratio: BigNumber;
@@ -282,12 +318,12 @@ export type SwapCancelledEventFilter = TypedEventFilter<SwapCancelledEvent>;
 
 export interface SwapOrderSubmittedEventObject {
   swapIntiaitor: string;
-  inputSwapToken: string;
-  outputSwapToken: string;
-  inputSwapAmount: BigNumber;
+  inputSwapToken: MassDXSwap.SwapStructOutput;
+  outputSwapToken: MassDXSwap.SwapStructOutput;
+  scaledRatio: BigNumber;
 }
 export type SwapOrderSubmittedEvent = TypedEvent<
-  [string, string, string, BigNumber],
+  [string, MassDXSwap.SwapStructOutput, MassDXSwap.SwapStructOutput, BigNumber],
   SwapOrderSubmittedEventObject
 >;
 
@@ -348,6 +384,24 @@ export interface MassDXSwap extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    onERC1155BatchReceived(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      ids: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BigNumberish>[],
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    onERC1155Received(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<BigNumberish>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
     setIPO(
       IPOid: PromiseOrValue<BigNumberish>,
       _merkleRoot: PromiseOrValue<BytesLike>,
@@ -356,7 +410,7 @@ export interface MassDXSwap extends BaseContract {
       _ratio: PromiseOrValue<BigNumberish>,
       _deadline: PromiseOrValue<BigNumberish>,
       _ecosystem: IPOCreate.EcosystemStruct,
-      _outputCurrency: IPOCreate.OutputCurrencyStruct,
+      _inputTokenAddress: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -403,6 +457,24 @@ export interface MassDXSwap extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  onERC1155BatchReceived(
+    operator: PromiseOrValue<string>,
+    from: PromiseOrValue<string>,
+    ids: PromiseOrValue<BigNumberish>[],
+    values: PromiseOrValue<BigNumberish>[],
+    data: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  onERC1155Received(
+    operator: PromiseOrValue<string>,
+    from: PromiseOrValue<string>,
+    id: PromiseOrValue<BigNumberish>,
+    value: PromiseOrValue<BigNumberish>,
+    data: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
   setIPO(
     IPOid: PromiseOrValue<BigNumberish>,
     _merkleRoot: PromiseOrValue<BytesLike>,
@@ -411,7 +483,7 @@ export interface MassDXSwap extends BaseContract {
     _ratio: PromiseOrValue<BigNumberish>,
     _deadline: PromiseOrValue<BigNumberish>,
     _ecosystem: IPOCreate.EcosystemStruct,
-    _outputCurrency: IPOCreate.OutputCurrencyStruct,
+    _inputTokenAddress: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -458,6 +530,24 @@ export interface MassDXSwap extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    onERC1155BatchReceived(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      ids: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BigNumberish>[],
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    onERC1155Received(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<BigNumberish>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     setIPO(
       IPOid: PromiseOrValue<BigNumberish>,
       _merkleRoot: PromiseOrValue<BytesLike>,
@@ -466,7 +556,7 @@ export interface MassDXSwap extends BaseContract {
       _ratio: PromiseOrValue<BigNumberish>,
       _deadline: PromiseOrValue<BigNumberish>,
       _ecosystem: IPOCreate.EcosystemStruct,
-      _outputCurrency: IPOCreate.OutputCurrencyStruct,
+      _inputTokenAddress: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -542,6 +632,15 @@ export interface MassDXSwap extends BaseContract {
       timeInitiatied?: null
     ): MigrationInitiatedEventFilter;
 
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+    OwnershipChanged(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+
     "SwapCancelled(address,uint256,uint256)"(
       marketMaker?: null,
       ratio?: null,
@@ -553,17 +652,17 @@ export interface MassDXSwap extends BaseContract {
       amount?: null
     ): SwapCancelledEventFilter;
 
-    "SwapOrderSubmitted(address,address,address,uint256)"(
+    "SwapOrderSubmitted(address,tuple,tuple,uint256)"(
       swapIntiaitor?: null,
       inputSwapToken?: null,
       outputSwapToken?: null,
-      inputSwapAmount?: null
+      scaledRatio?: null
     ): SwapOrderSubmittedEventFilter;
     SwapOrderSubmitted(
       swapIntiaitor?: null,
       inputSwapToken?: null,
       outputSwapToken?: null,
-      inputSwapAmount?: null
+      scaledRatio?: null
     ): SwapOrderSubmittedEventFilter;
   };
 
@@ -595,6 +694,24 @@ export interface MassDXSwap extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    onERC1155BatchReceived(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      ids: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BigNumberish>[],
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    onERC1155Received(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<BigNumberish>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     setIPO(
       IPOid: PromiseOrValue<BigNumberish>,
       _merkleRoot: PromiseOrValue<BytesLike>,
@@ -603,7 +720,7 @@ export interface MassDXSwap extends BaseContract {
       _ratio: PromiseOrValue<BigNumberish>,
       _deadline: PromiseOrValue<BigNumberish>,
       _ecosystem: IPOCreate.EcosystemStruct,
-      _outputCurrency: IPOCreate.OutputCurrencyStruct,
+      _inputTokenAddress: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -651,6 +768,24 @@ export interface MassDXSwap extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    onERC1155BatchReceived(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      ids: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BigNumberish>[],
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    onERC1155Received(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<BigNumberish>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     setIPO(
       IPOid: PromiseOrValue<BigNumberish>,
       _merkleRoot: PromiseOrValue<BytesLike>,
@@ -659,7 +794,7 @@ export interface MassDXSwap extends BaseContract {
       _ratio: PromiseOrValue<BigNumberish>,
       _deadline: PromiseOrValue<BigNumberish>,
       _ecosystem: IPOCreate.EcosystemStruct,
-      _outputCurrency: IPOCreate.OutputCurrencyStruct,
+      _inputTokenAddress: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

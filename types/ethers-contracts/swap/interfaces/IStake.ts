@@ -42,7 +42,8 @@ export interface IStakeInterface extends utils.Interface {
     "batchStake(address[],uint256[],uint8[],uint256[])": FunctionFragment;
     "fundStakeAccount(uint256)": FunctionFragment;
     "setRewardRates(uint8[],(uint16,uint16,uint16)[])": FunctionFragment;
-    "stake(address,uint256,uint8,uint256)": FunctionFragment;
+    "stake(uint256,uint8,uint256)": FunctionFragment;
+    "stakeContract(address,uint256,uint8,uint256)": FunctionFragment;
     "unstake(address,uint256,uint256)": FunctionFragment;
   };
 
@@ -52,6 +53,7 @@ export interface IStakeInterface extends utils.Interface {
       | "fundStakeAccount"
       | "setRewardRates"
       | "stake"
+      | "stakeContract"
       | "unstake"
   ): FunctionFragment;
 
@@ -74,6 +76,14 @@ export interface IStakeInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "stake",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "stakeContract",
     values: [
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>,
@@ -100,6 +110,10 @@ export interface IStakeInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "stake", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "stakeContract",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "unstake", data: BytesLike): Result;
 
   events: {};
@@ -152,6 +166,13 @@ export interface IStake extends BaseContract {
     ): Promise<ContractTransaction>;
 
     stake(
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    stakeContract(
       user: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       tier: PromiseOrValue<BigNumberish>,
@@ -187,6 +208,13 @@ export interface IStake extends BaseContract {
   ): Promise<ContractTransaction>;
 
   stake(
+    amount: PromiseOrValue<BigNumberish>,
+    tier: PromiseOrValue<BigNumberish>,
+    stakeId: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  stakeContract(
     user: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
     tier: PromiseOrValue<BigNumberish>,
@@ -222,6 +250,13 @@ export interface IStake extends BaseContract {
     ): Promise<void>;
 
     stake(
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    stakeContract(
       user: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       tier: PromiseOrValue<BigNumberish>,
@@ -260,6 +295,13 @@ export interface IStake extends BaseContract {
     ): Promise<BigNumber>;
 
     stake(
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    stakeContract(
       user: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       tier: PromiseOrValue<BigNumberish>,
@@ -296,6 +338,13 @@ export interface IStake extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     stake(
+      amount: PromiseOrValue<BigNumberish>,
+      tier: PromiseOrValue<BigNumberish>,
+      stakeId: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    stakeContract(
       user: PromiseOrValue<string>,
       amount: PromiseOrValue<BigNumberish>,
       tier: PromiseOrValue<BigNumberish>,

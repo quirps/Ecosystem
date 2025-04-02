@@ -27,15 +27,31 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
+export declare namespace LibMemberLevel {
+  export type LeafStruct = {
+    memberAddress: PromiseOrValue<string>;
+    level: PromiseOrValue<BigNumberish>;
+    timestamp: PromiseOrValue<BigNumberish>;
+  };
+
+  export type LeafStructOutput = [string, number, number] & {
+    memberAddress: string;
+    level: number;
+    timestamp: number;
+  };
+}
+
 export declare namespace TicketCreate {
   export type TicketMetaStruct = {
     title: PromiseOrValue<string>;
     description: PromiseOrValue<string>;
+    imageHash: PromiseOrValue<string>;
   };
 
-  export type TicketMetaStructOutput = [string, string] & {
+  export type TicketMetaStructOutput = [string, string, string] & {
     title: string;
     description: string;
+    imageHash: string;
   };
 }
 
@@ -50,13 +66,13 @@ export declare namespace LibERC1155TransferConstraints {
     isActive: boolean;
   };
 
-  export type MemberRankDependencyStruct = {
-    minimumRank: PromiseOrValue<BigNumberish>;
+  export type MemberLevelDependencyStruct = {
+    minimumLevel: PromiseOrValue<BigNumberish>;
     isActive: PromiseOrValue<boolean>;
   };
 
-  export type MemberRankDependencyStructOutput = [number, boolean] & {
-    minimumRank: number;
+  export type MemberLevelDependencyStructOutput = [number, boolean] & {
+    minimumLevel: number;
     isActive: boolean;
   };
 
@@ -70,39 +86,49 @@ export declare namespace LibERC1155TransferConstraints {
     isActive: boolean;
   };
 
+  export type RoyaltyFeeStruct = {
+    fee: PromiseOrValue<BigNumberish>;
+    isActive: PromiseOrValue<boolean>;
+  };
+
+  export type RoyaltyFeeStructOutput = [number, boolean] & {
+    fee: number;
+    isActive: boolean;
+  };
+
   export type ConstraintsStruct = {
     transferLimit: LibERC1155TransferConstraints.TransferLimitStruct;
-    memberRankDependency: LibERC1155TransferConstraints.MemberRankDependencyStruct;
+    minimumMembershipLevel: LibERC1155TransferConstraints.MemberLevelDependencyStruct;
     expireable: LibERC1155TransferConstraints.ExpireableStruct;
+    royaltyFee: LibERC1155TransferConstraints.RoyaltyFeeStruct;
   };
 
   export type ConstraintsStructOutput = [
     LibERC1155TransferConstraints.TransferLimitStructOutput,
-    LibERC1155TransferConstraints.MemberRankDependencyStructOutput,
-    LibERC1155TransferConstraints.ExpireableStructOutput
+    LibERC1155TransferConstraints.MemberLevelDependencyStructOutput,
+    LibERC1155TransferConstraints.ExpireableStructOutput,
+    LibERC1155TransferConstraints.RoyaltyFeeStructOutput
   ] & {
     transferLimit: LibERC1155TransferConstraints.TransferLimitStructOutput;
-    memberRankDependency: LibERC1155TransferConstraints.MemberRankDependencyStructOutput;
+    minimumMembershipLevel: LibERC1155TransferConstraints.MemberLevelDependencyStructOutput;
     expireable: LibERC1155TransferConstraints.ExpireableStructOutput;
+    royaltyFee: LibERC1155TransferConstraints.RoyaltyFeeStructOutput;
   };
 }
 
 export interface TicketCreateInterface extends utils.Interface {
   functions: {
-    "setExpireable(uint256)": FunctionFragment;
-    "ticketCreate(uint192,(string,string),((uint256,bool),(uint32,bool),(uint32,bool)))": FunctionFragment;
-    "ticketCreateBatch(uint192[],(string,string)[],((uint256,bool),(uint32,bool),(uint32,bool))[])": FunctionFragment;
+    "expireable(uint256)": FunctionFragment;
+    "ticketCreate(uint256,(string,string,string),((uint256,bool),(uint32,bool),(uint32,bool),(uint24,bool)))": FunctionFragment;
+    "ticketCreateBatch(uint256[],(string,string,string)[],((uint256,bool),(uint32,bool),(uint32,bool),(uint24,bool))[])": FunctionFragment;
   };
 
   getFunction(
-    nameOrSignatureOrTopic:
-      | "setExpireable"
-      | "ticketCreate"
-      | "ticketCreateBatch"
+    nameOrSignatureOrTopic: "expireable" | "ticketCreate" | "ticketCreateBatch"
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "setExpireable",
+    functionFragment: "expireable",
     values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
@@ -122,10 +148,7 @@ export interface TicketCreateInterface extends utils.Interface {
     ]
   ): string;
 
-  decodeFunctionResult(
-    functionFragment: "setExpireable",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "expireable", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "ticketCreate",
     data: BytesLike
@@ -136,19 +159,60 @@ export interface TicketCreateInterface extends utils.Interface {
   ): Result;
 
   events: {
+    "MemberBanned(address,uint32)": EventFragment;
+    "MemberLevelUpdated(tuple)": EventFragment;
+    "MerkleRootUpdated(bytes32)": EventFragment;
     "MigrationCancelled(address,uint32)": EventFragment;
     "MigrationInitiated(address,uint32)": EventFragment;
-    "TicketsCreated(uint256,uint192,tuple)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
+    "TicketsCreated(uint256,uint256,tuple)": EventFragment;
     "TransferBatch(address,address,address,uint256[],uint256[])": EventFragment;
     "TransferSingle(address,address,address,uint256,uint256)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "MemberBanned"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MemberLevelUpdated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MerkleRootUpdated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationInitiated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "TicketsCreated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "TransferBatch"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "TransferSingle"): EventFragment;
 }
+
+export interface MemberBannedEventObject {
+  user: string;
+  timestamp: number;
+}
+export type MemberBannedEvent = TypedEvent<
+  [string, number],
+  MemberBannedEventObject
+>;
+
+export type MemberBannedEventFilter = TypedEventFilter<MemberBannedEvent>;
+
+export interface MemberLevelUpdatedEventObject {
+  leaf: LibMemberLevel.LeafStructOutput;
+}
+export type MemberLevelUpdatedEvent = TypedEvent<
+  [LibMemberLevel.LeafStructOutput],
+  MemberLevelUpdatedEventObject
+>;
+
+export type MemberLevelUpdatedEventFilter =
+  TypedEventFilter<MemberLevelUpdatedEvent>;
+
+export interface MerkleRootUpdatedEventObject {
+  newRoot: string;
+}
+export type MerkleRootUpdatedEvent = TypedEvent<
+  [string],
+  MerkleRootUpdatedEventObject
+>;
+
+export type MerkleRootUpdatedEventFilter =
+  TypedEventFilter<MerkleRootUpdatedEvent>;
 
 export interface MigrationCancelledEventObject {
   cancellor: string;
@@ -173,6 +237,18 @@ export type MigrationInitiatedEvent = TypedEvent<
 
 export type MigrationInitiatedEventFilter =
   TypedEventFilter<MigrationInitiatedEvent>;
+
+export interface OwnershipChangedEventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChangedEvent = TypedEvent<
+  [string, string],
+  OwnershipChangedEventObject
+>;
+
+export type OwnershipChangedEventFilter =
+  TypedEventFilter<OwnershipChangedEvent>;
 
 export interface TicketsCreatedEventObject {
   arg0: BigNumber;
@@ -241,10 +317,10 @@ export interface TicketCreate extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    setExpireable(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
+    expireable(
+      ticketId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<[void]>;
 
     ticketCreate(
       _amount: PromiseOrValue<BigNumberish>,
@@ -261,10 +337,10 @@ export interface TicketCreate extends BaseContract {
     ): Promise<ContractTransaction>;
   };
 
-  setExpireable(
-    arg0: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
+  expireable(
+    ticketId: PromiseOrValue<BigNumberish>,
+    overrides?: CallOverrides
+  ): Promise<void>;
 
   ticketCreate(
     _amount: PromiseOrValue<BigNumberish>,
@@ -281,8 +357,8 @@ export interface TicketCreate extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    setExpireable(
-      arg0: PromiseOrValue<BigNumberish>,
+    expireable(
+      ticketId: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -302,6 +378,21 @@ export interface TicketCreate extends BaseContract {
   };
 
   filters: {
+    "MemberBanned(address,uint32)"(
+      user?: PromiseOrValue<string> | null,
+      timestamp?: null
+    ): MemberBannedEventFilter;
+    MemberBanned(
+      user?: PromiseOrValue<string> | null,
+      timestamp?: null
+    ): MemberBannedEventFilter;
+
+    "MemberLevelUpdated(tuple)"(leaf?: null): MemberLevelUpdatedEventFilter;
+    MemberLevelUpdated(leaf?: null): MemberLevelUpdatedEventFilter;
+
+    "MerkleRootUpdated(bytes32)"(newRoot?: null): MerkleRootUpdatedEventFilter;
+    MerkleRootUpdated(newRoot?: null): MerkleRootUpdatedEventFilter;
+
     "MigrationCancelled(address,uint32)"(
       cancellor?: null,
       timeCancelled?: null
@@ -320,7 +411,16 @@ export interface TicketCreate extends BaseContract {
       timeInitiatied?: null
     ): MigrationInitiatedEventFilter;
 
-    "TicketsCreated(uint256,uint192,tuple)"(
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+    OwnershipChanged(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+
+    "TicketsCreated(uint256,uint256,tuple)"(
       arg0?: null,
       arg1?: null,
       arg2?: null
@@ -363,9 +463,9 @@ export interface TicketCreate extends BaseContract {
   };
 
   estimateGas: {
-    setExpireable(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    expireable(
+      ticketId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     ticketCreate(
@@ -384,9 +484,9 @@ export interface TicketCreate extends BaseContract {
   };
 
   populateTransaction: {
-    setExpireable(
-      arg0: PromiseOrValue<BigNumberish>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    expireable(
+      ticketId: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     ticketCreate(

@@ -39,12 +39,30 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "uint96",
-        name: "_recoveryTime",
-        type: "uint96",
+        internalType: "string",
+        name: "username",
+        type: "string",
       },
     ],
-    name: "initializor",
+    name: "setUsernameAddressPair",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string[]",
+        name: "username",
+        type: "string[]",
+      },
+      {
+        internalType: "address[]",
+        name: "userAddress",
+        type: "address[]",
+      },
+    ],
+    name: "setUsernameOwner",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -56,25 +74,51 @@ const _abi = [
         name: "username",
         type: "string",
       },
+    ],
+    name: "setUsernamePair",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+    ],
+    name: "usernameRecovery",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
       {
         components: [
           {
-            internalType: "uint256",
-            name: "domain",
-            type: "uint256",
+            internalType: "string",
+            name: "username",
+            type: "string",
           },
           {
-            internalType: "uint256",
-            name: "nonce",
-            type: "uint256",
+            internalType: "address",
+            name: "userAddress",
+            type: "address",
           },
         ],
-        internalType: "struct LibMemberRegistry.SignatureVerfication",
-        name: "_signature",
+        internalType: "struct LibMemberRegistry.Leaf",
+        name: "_leaf",
         type: "tuple",
       },
+      {
+        internalType: "bytes32[]",
+        name: "_merkleProof",
+        type: "bytes32[]",
+      },
     ],
-    name: "verifyUsername",
+    name: "verifyAndUsername",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

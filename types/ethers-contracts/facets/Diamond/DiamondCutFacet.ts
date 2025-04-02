@@ -84,26 +84,48 @@ export interface DiamondCutFacetInterface extends utils.Interface {
 
   events: {
     "DiamondCut(tuple[],address,bytes)": EventFragment;
+    "DiamondCut(tuple[],address,bytes)": EventFragment;
     "MigrationCancelled(address,uint32)": EventFragment;
     "MigrationInitiated(address,uint32)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "DiamondCut"): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "DiamondCut(tuple[],address,bytes)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "DiamondCut(tuple[],address,bytes)"
+  ): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationInitiated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipChanged"): EventFragment;
 }
 
-export interface DiamondCutEventObject {
+export interface DiamondCut_tuple_array_address_bytes_EventObject {
   _diamondCut: IDiamondCut.FacetCutStructOutput[];
   _init: string;
   _calldata: string;
 }
-export type DiamondCutEvent = TypedEvent<
+export type DiamondCut_tuple_array_address_bytes_Event = TypedEvent<
   [IDiamondCut.FacetCutStructOutput[], string, string],
-  DiamondCutEventObject
+  DiamondCut_tuple_array_address_bytes_EventObject
 >;
 
-export type DiamondCutEventFilter = TypedEventFilter<DiamondCutEvent>;
+export type DiamondCut_tuple_array_address_bytes_EventFilter =
+  TypedEventFilter<DiamondCut_tuple_array_address_bytes_Event>;
+
+export interface DiamondCut_tuple_array_address_bytes_EventObject {
+  _diamondCut: IDiamondCut.FacetCutStructOutput[];
+  _init: string;
+  _calldata: string;
+}
+export type DiamondCut_tuple_array_address_bytes_Event = TypedEvent<
+  [IDiamondCut.FacetCutStructOutput[], string, string],
+  DiamondCut_tuple_array_address_bytes_EventObject
+>;
+
+export type DiamondCut_tuple_array_address_bytes_EventFilter =
+  TypedEventFilter<DiamondCut_tuple_array_address_bytes_Event>;
 
 export interface MigrationCancelledEventObject {
   cancellor: string;
@@ -128,6 +150,18 @@ export type MigrationInitiatedEvent = TypedEvent<
 
 export type MigrationInitiatedEventFilter =
   TypedEventFilter<MigrationInitiatedEvent>;
+
+export interface OwnershipChangedEventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChangedEvent = TypedEvent<
+  [string, string],
+  OwnershipChangedEventObject
+>;
+
+export type OwnershipChangedEventFilter =
+  TypedEventFilter<OwnershipChangedEvent>;
 
 export interface DiamondCutFacet extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -205,12 +239,12 @@ export interface DiamondCutFacet extends BaseContract {
       _diamondCut?: null,
       _init?: null,
       _calldata?: null
-    ): DiamondCutEventFilter;
-    DiamondCut(
+    ): DiamondCut_tuple_array_address_bytes_EventFilter;
+    "DiamondCut(tuple[],address,bytes)"(
       _diamondCut?: null,
       _init?: null,
       _calldata?: null
-    ): DiamondCutEventFilter;
+    ): DiamondCut_tuple_array_address_bytes_EventFilter;
 
     "MigrationCancelled(address,uint32)"(
       cancellor?: null,
@@ -229,6 +263,15 @@ export interface DiamondCutFacet extends BaseContract {
       initiatior?: null,
       timeInitiatied?: null
     ): MigrationInitiatedEventFilter;
+
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+    OwnershipChanged(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
   };
 
   estimateGas: {

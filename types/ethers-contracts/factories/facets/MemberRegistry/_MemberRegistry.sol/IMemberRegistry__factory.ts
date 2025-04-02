@@ -68,6 +68,25 @@ const _abi = [
     inputs: [
       {
         indexed: false,
+        internalType: "address",
+        name: "oldOwner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipChanged",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
         internalType: "string",
         name: "username",
         type: "string",
@@ -142,7 +161,7 @@ const _abi = [
 ] as const;
 
 const _bytecode =
-  "0x608060405234801561001057600080fd5b5060b98061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060275760003560e01c806261441814602c575b600080fd5b60326046565b604051603d9190606a565b60405180910390f35b6212750081565b600063ffffffff82169050919050565b606481604d565b82525050565b6000602082019050607d6000830184605d565b9291505056fea2646970667358221220c5ff84a70893b7f642562f42a8b229652760797913768c9a864afb2ba42a4cb264736f6c63430008090033";
+  "0x6080604052348015600e575f5ffd5b50608180601a5f395ff3fe6080604052348015600e575f5ffd5b50600436106025575f3560e01c8062614418146029575b5f5ffd5b60326212750081565b60405163ffffffff909116815260200160405180910390f3fea2646970667358221220ceebe84c624dd58e050d8fe1df88f0dd14debd2b11d77079898fa2cba64bdf8e64736f6c634300081c0033";
 
 type IMemberRegistryConstructorParams =
   | [signer?: Signer]

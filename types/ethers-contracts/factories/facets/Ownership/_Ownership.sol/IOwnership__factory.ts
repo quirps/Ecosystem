@@ -63,10 +63,29 @@ const _abi = [
     name: "MigrationInitiated",
     type: "event",
   },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "oldOwner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipChanged",
+    type: "event",
+  },
 ] as const;
 
 const _bytecode =
-  "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220ac8200f1aadc3263dfcad6232929833e281d8d32e198d7e50b1bac95f6c67cd664736f6c63430008090033";
+  "0x6080604052348015600e575f5ffd5b50603e80601a5f395ff3fe60806040525f5ffdfea264697066735822122006cf7e55e9ea9c07eab1bcb73611c582dfcec482f5532d3941489451d690363064736f6c634300081c0033";
 
 type IOwnershipConstructorParams =
   | [signer?: Signer]

@@ -3,4 +3,5 @@
 /* eslint-disable */
 export * as ipoSol from "./IPO.sol";
 export * as swapSol from "./Swap.sol";
+export * as uniswapSol from "./Uniswap.sol";
 export * as interfaces from "./interfaces";

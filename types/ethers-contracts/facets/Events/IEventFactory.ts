@@ -23,21 +23,9 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
-export declare namespace LibEventFactory {
-  export type TicketDetailStruct = {
-    minAmount: PromiseOrValue<BigNumberish>;
-    maxAmount: PromiseOrValue<BigNumberish>;
-  };
-
-  export type TicketDetailStructOutput = [BigNumber, BigNumber] & {
-    minAmount: BigNumber;
-    maxAmount: BigNumber;
-  };
-}
-
 export interface IEventFactoryInterface extends utils.Interface {
   functions: {
-    "createEvent(uint32,uint32,uint256,uint256,string,uint256[],(uint256,uint256)[])": FunctionFragment;
+    "createEvent(uint32,uint32,uint256,uint256,string,uint256[],uint256)": FunctionFragment;
     "deactivateEvent(uint256,bytes32)": FunctionFragment;
     "extendEvent(uint256,uint32)": FunctionFragment;
     "redeemTickets(uint256,uint256[],uint256[])": FunctionFragment;
@@ -66,7 +54,7 @@ export interface IEventFactoryInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>[],
-      LibEventFactory.TicketDetailStruct[]
+      PromiseOrValue<BigNumberish>
     ]
   ): string;
   encodeFunctionData(
@@ -170,7 +158,7 @@ export interface IEventFactory extends BaseContract {
       _maxEntries: PromiseOrValue<BigNumberish>,
       _imageUri: PromiseOrValue<string>,
       _ticketIds: PromiseOrValue<BigNumberish>[],
-      _ticketDetails: LibEventFactory.TicketDetailStruct[],
+      _maxEntriesPerUser: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -222,7 +210,7 @@ export interface IEventFactory extends BaseContract {
     _maxEntries: PromiseOrValue<BigNumberish>,
     _imageUri: PromiseOrValue<string>,
     _ticketIds: PromiseOrValue<BigNumberish>[],
-    _ticketDetails: LibEventFactory.TicketDetailStruct[],
+    _maxEntriesPerUser: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -274,7 +262,7 @@ export interface IEventFactory extends BaseContract {
       _maxEntries: PromiseOrValue<BigNumberish>,
       _imageUri: PromiseOrValue<string>,
       _ticketIds: PromiseOrValue<BigNumberish>[],
-      _ticketDetails: LibEventFactory.TicketDetailStruct[],
+      _maxEntriesPerUser: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -329,7 +317,7 @@ export interface IEventFactory extends BaseContract {
       _maxEntries: PromiseOrValue<BigNumberish>,
       _imageUri: PromiseOrValue<string>,
       _ticketIds: PromiseOrValue<BigNumberish>[],
-      _ticketDetails: LibEventFactory.TicketDetailStruct[],
+      _maxEntriesPerUser: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -382,7 +370,7 @@ export interface IEventFactory extends BaseContract {
       _maxEntries: PromiseOrValue<BigNumberish>,
       _imageUri: PromiseOrValue<string>,
       _ticketIds: PromiseOrValue<BigNumberish>[],
-      _ticketDetails: LibEventFactory.TicketDetailStruct[],
+      _maxEntriesPerUser: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

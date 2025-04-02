@@ -97,11 +97,13 @@ export declare namespace TicketCreate {
   export type TicketMetaStruct = {
     title: PromiseOrValue<string>;
     description: PromiseOrValue<string>;
+    imageHash: PromiseOrValue<string>;
   };
 
-  export type TicketMetaStructOutput = [string, string] & {
+  export type TicketMetaStructOutput = [string, string, string] & {
     title: string;
     description: string;
+    imageHash: string;
   };
 }
 
@@ -136,20 +138,33 @@ export declare namespace LibERC1155TransferConstraints {
     isActive: boolean;
   };
 
+  export type RoyaltyFeeStruct = {
+    fee: PromiseOrValue<BigNumberish>;
+    isActive: PromiseOrValue<boolean>;
+  };
+
+  export type RoyaltyFeeStructOutput = [number, boolean] & {
+    fee: number;
+    isActive: boolean;
+  };
+
   export type ConstraintsStruct = {
     transferLimit: LibERC1155TransferConstraints.TransferLimitStruct;
     minimumMembershipLevel: LibERC1155TransferConstraints.MemberLevelDependencyStruct;
     expireable: LibERC1155TransferConstraints.ExpireableStruct;
+    royaltyFee: LibERC1155TransferConstraints.RoyaltyFeeStruct;
   };
 
   export type ConstraintsStructOutput = [
     LibERC1155TransferConstraints.TransferLimitStructOutput,
     LibERC1155TransferConstraints.MemberLevelDependencyStructOutput,
-    LibERC1155TransferConstraints.ExpireableStructOutput
+    LibERC1155TransferConstraints.ExpireableStructOutput,
+    LibERC1155TransferConstraints.RoyaltyFeeStructOutput
   ] & {
     transferLimit: LibERC1155TransferConstraints.TransferLimitStructOutput;
     minimumMembershipLevel: LibERC1155TransferConstraints.MemberLevelDependencyStructOutput;
     expireable: LibERC1155TransferConstraints.ExpireableStructOutput;
+    royaltyFee: LibERC1155TransferConstraints.RoyaltyFeeStructOutput;
   };
 }
 
@@ -175,6 +190,7 @@ export interface EcosystemInterface extends utils.Interface {
     "batchSetLevels((address,uint32,uint32)[])": FunctionFragment;
     "getMemberLevel(address)": FunctionFragment;
     "getMemberLevelStruct(address)": FunctionFragment;
+    "setMemberLevel(address,uint32)": FunctionFragment;
     "verifyAndSetLevel((address,uint32,uint32),bytes32[])": FunctionFragment;
     "cancelVerify(string)": FunctionFragment;
     "finalizeRecovery(string)": FunctionFragment;
@@ -189,6 +205,7 @@ export interface EcosystemInterface extends utils.Interface {
     "setModeratorRanks(address[],uint8[])": FunctionFragment;
     "ecosystemOwner()": FunctionFragment;
     "isEcosystemOwnerVerify(address)": FunctionFragment;
+    "owner()": FunctionFragment;
     "setEcosystemOwner(address)": FunctionFragment;
     "batchStake(address[],uint256[],uint8[],uint256[])": FunctionFragment;
     "fundStakeAccount(uint256)": FunctionFragment;
@@ -203,8 +220,8 @@ export interface EcosystemInterface extends utils.Interface {
     "viewMinimumStakeDurationLeft(uint256)": FunctionFragment;
     "viewReward(uint256)": FunctionFragment;
     "expireable(uint256)": FunctionFragment;
-    "ticketCreate(uint256,(string,string),((uint256,bool),(uint32,bool),(uint32,bool)))": FunctionFragment;
-    "ticketCreateBatch(uint256[],(string,string)[],((uint256,bool),(uint32,bool),(uint32,bool))[])": FunctionFragment;
+    "ticketCreate(uint256,(string,string,string),((uint256,bool),(uint32,bool),(uint32,bool),(uint24,bool)))": FunctionFragment;
+    "ticketCreateBatch(uint256[],(string,string,string)[],((uint256,bool),(uint32,bool),(uint32,bool),(uint24,bool))[])": FunctionFragment;
     "balanceOf(address,uint256)": FunctionFragment;
     "balanceOf(address)": FunctionFragment;
     "balanceOfBatch(address[],uint256[])": FunctionFragment;
@@ -253,6 +270,7 @@ export interface EcosystemInterface extends utils.Interface {
       | "batchSetLevels"
       | "getMemberLevel"
       | "getMemberLevelStruct"
+      | "setMemberLevel"
       | "verifyAndSetLevel"
       | "cancelVerify"
       | "finalizeRecovery"
@@ -267,6 +285,7 @@ export interface EcosystemInterface extends utils.Interface {
       | "setModeratorRanks"
       | "ecosystemOwner"
       | "isEcosystemOwnerVerify"
+      | "owner"
       | "setEcosystemOwner"
       | "batchStake"
       | "fundStakeAccount"
@@ -409,6 +428,10 @@ export interface EcosystemInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "setMemberLevel",
+    values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]
+  ): string;
+  encodeFunctionData(
     functionFragment: "verifyAndSetLevel",
     values: [LibMemberLevel.LeafStruct, PromiseOrValue<BytesLike>[]]
   ): string;
@@ -464,6 +487,7 @@ export interface EcosystemInterface extends utils.Interface {
     functionFragment: "isEcosystemOwnerVerify",
     values: [PromiseOrValue<string>]
   ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "setEcosystemOwner",
     values: [PromiseOrValue<string>]
@@ -769,6 +793,10 @@ export interface EcosystemInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "setMemberLevel",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "verifyAndSetLevel",
     data: BytesLike
   ): Result;
@@ -824,6 +852,7 @@ export interface EcosystemInterface extends utils.Interface {
     functionFragment: "isEcosystemOwnerVerify",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setEcosystemOwner",
     data: BytesLike
@@ -957,6 +986,16 @@ export interface EcosystemInterface extends utils.Interface {
     "MigrationInitiated(address,uint32)": EventFragment;
     "MigrationInitiated(address,uint32)": EventFragment;
     "MigrationInitiated(address,uint32)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
     "RoyaltyFeeAccessed(address,uint256,uint256,uint256)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
     "ApprovalForAll(address,address,bool)": EventFragment;
@@ -1071,6 +1110,36 @@ export interface EcosystemInterface extends utils.Interface {
   ): EventFragment;
   getEvent(
     nameOrSignatureOrTopic: "MigrationInitiated(address,uint32)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "OwnershipChanged(address,address)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "OwnershipChanged(address,address)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "OwnershipChanged(address,address)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "OwnershipChanged(address,address)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "OwnershipChanged(address,address)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "OwnershipChanged(address,address)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "OwnershipChanged(address,address)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "OwnershipChanged(address,address)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "OwnershipChanged(address,address)"
+  ): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "OwnershipChanged(address,address)"
   ): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RoyaltyFeeAccessed"): EventFragment;
   getEvent(
@@ -1424,6 +1493,126 @@ export type MigrationInitiated_address_uint32_Event = TypedEvent<
 
 export type MigrationInitiated_address_uint32_EventFilter =
   TypedEventFilter<MigrationInitiated_address_uint32_Event>;
+
+export interface OwnershipChanged_address_address_EventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChanged_address_address_Event = TypedEvent<
+  [string, string],
+  OwnershipChanged_address_address_EventObject
+>;
+
+export type OwnershipChanged_address_address_EventFilter =
+  TypedEventFilter<OwnershipChanged_address_address_Event>;
+
+export interface OwnershipChanged_address_address_EventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChanged_address_address_Event = TypedEvent<
+  [string, string],
+  OwnershipChanged_address_address_EventObject
+>;
+
+export type OwnershipChanged_address_address_EventFilter =
+  TypedEventFilter<OwnershipChanged_address_address_Event>;
+
+export interface OwnershipChanged_address_address_EventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChanged_address_address_Event = TypedEvent<
+  [string, string],
+  OwnershipChanged_address_address_EventObject
+>;
+
+export type OwnershipChanged_address_address_EventFilter =
+  TypedEventFilter<OwnershipChanged_address_address_Event>;
+
+export interface OwnershipChanged_address_address_EventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChanged_address_address_Event = TypedEvent<
+  [string, string],
+  OwnershipChanged_address_address_EventObject
+>;
+
+export type OwnershipChanged_address_address_EventFilter =
+  TypedEventFilter<OwnershipChanged_address_address_Event>;
+
+export interface OwnershipChanged_address_address_EventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChanged_address_address_Event = TypedEvent<
+  [string, string],
+  OwnershipChanged_address_address_EventObject
+>;
+
+export type OwnershipChanged_address_address_EventFilter =
+  TypedEventFilter<OwnershipChanged_address_address_Event>;
+
+export interface OwnershipChanged_address_address_EventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChanged_address_address_Event = TypedEvent<
+  [string, string],
+  OwnershipChanged_address_address_EventObject
+>;
+
+export type OwnershipChanged_address_address_EventFilter =
+  TypedEventFilter<OwnershipChanged_address_address_Event>;
+
+export interface OwnershipChanged_address_address_EventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChanged_address_address_Event = TypedEvent<
+  [string, string],
+  OwnershipChanged_address_address_EventObject
+>;
+
+export type OwnershipChanged_address_address_EventFilter =
+  TypedEventFilter<OwnershipChanged_address_address_Event>;
+
+export interface OwnershipChanged_address_address_EventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChanged_address_address_Event = TypedEvent<
+  [string, string],
+  OwnershipChanged_address_address_EventObject
+>;
+
+export type OwnershipChanged_address_address_EventFilter =
+  TypedEventFilter<OwnershipChanged_address_address_Event>;
+
+export interface OwnershipChanged_address_address_EventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChanged_address_address_Event = TypedEvent<
+  [string, string],
+  OwnershipChanged_address_address_EventObject
+>;
+
+export type OwnershipChanged_address_address_EventFilter =
+  TypedEventFilter<OwnershipChanged_address_address_Event>;
+
+export interface OwnershipChanged_address_address_EventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChanged_address_address_Event = TypedEvent<
+  [string, string],
+  OwnershipChanged_address_address_EventObject
+>;
+
+export type OwnershipChanged_address_address_EventFilter =
+  TypedEventFilter<OwnershipChanged_address_address_Event>;
 
 export interface RoyaltyFeeAccessedEventObject {
   sender: string;
@@ -2169,6 +2358,12 @@ export interface Ecosystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[number, number] & { level: number; timestamp: number }>;
 
+    setMemberLevel(
+      user: PromiseOrValue<string>,
+      level: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     verifyAndSetLevel(
       _leaf: LibMemberLevel.LeafStruct,
       _merkleProof: PromiseOrValue<BytesLike>[],
@@ -2239,6 +2434,8 @@ export interface Ecosystem extends BaseContract {
       _tenativeOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<[void]>;
+
+    owner(overrides?: CallOverrides): Promise<[string] & { owner_: string }>;
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
@@ -2596,6 +2793,12 @@ export interface Ecosystem extends BaseContract {
     overrides?: CallOverrides
   ): Promise<[number, number] & { level: number; timestamp: number }>;
 
+  setMemberLevel(
+    user: PromiseOrValue<string>,
+    level: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   verifyAndSetLevel(
     _leaf: LibMemberLevel.LeafStruct,
     _merkleProof: PromiseOrValue<BytesLike>[],
@@ -2664,6 +2867,8 @@ export interface Ecosystem extends BaseContract {
     _tenativeOwner: PromiseOrValue<string>,
     overrides?: CallOverrides
   ): Promise<void>;
+
+  owner(overrides?: CallOverrides): Promise<string>;
 
   setEcosystemOwner(
     _newOwner: PromiseOrValue<string>,
@@ -3021,6 +3226,12 @@ export interface Ecosystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[number, number] & { level: number; timestamp: number }>;
 
+    setMemberLevel(
+      user: PromiseOrValue<string>,
+      level: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     verifyAndSetLevel(
       _leaf: LibMemberLevel.LeafStruct,
       _merkleProof: PromiseOrValue<BytesLike>[],
@@ -3089,6 +3300,8 @@ export interface Ecosystem extends BaseContract {
       _tenativeOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    owner(overrides?: CallOverrides): Promise<string>;
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
@@ -3426,6 +3639,46 @@ export interface Ecosystem extends BaseContract {
       initiatior?: null,
       timeInitiatied?: null
     ): MigrationInitiated_address_uint32_EventFilter;
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChanged_address_address_EventFilter;
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChanged_address_address_EventFilter;
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChanged_address_address_EventFilter;
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChanged_address_address_EventFilter;
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChanged_address_address_EventFilter;
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChanged_address_address_EventFilter;
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChanged_address_address_EventFilter;
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChanged_address_address_EventFilter;
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChanged_address_address_EventFilter;
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChanged_address_address_EventFilter;
 
     "RoyaltyFeeAccessed(address,uint256,uint256,uint256)"(
       sender?: null,
@@ -3861,6 +4114,12 @@ export interface Ecosystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    setMemberLevel(
+      user: PromiseOrValue<string>,
+      level: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     verifyAndSetLevel(
       _leaf: LibMemberLevel.LeafStruct,
       _merkleProof: PromiseOrValue<BytesLike>[],
@@ -3929,6 +4188,8 @@ export interface Ecosystem extends BaseContract {
       _tenativeOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,
@@ -4285,6 +4546,12 @@ export interface Ecosystem extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    setMemberLevel(
+      user: PromiseOrValue<string>,
+      level: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
     verifyAndSetLevel(
       _leaf: LibMemberLevel.LeafStruct,
       _merkleProof: PromiseOrValue<BytesLike>[],
@@ -4353,6 +4620,8 @@ export interface Ecosystem extends BaseContract {
       _tenativeOwner: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     setEcosystemOwner(
       _newOwner: PromiseOrValue<string>,

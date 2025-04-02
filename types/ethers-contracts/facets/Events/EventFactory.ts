@@ -27,21 +27,9 @@ import type {
   PromiseOrValue,
 } from "../../common";
 
-export declare namespace LibEventFactory {
-  export type TicketDetailStruct = {
-    minAmount: PromiseOrValue<BigNumberish>;
-    maxAmount: PromiseOrValue<BigNumberish>;
-  };
-
-  export type TicketDetailStructOutput = [BigNumber, BigNumber] & {
-    minAmount: BigNumber;
-    maxAmount: BigNumber;
-  };
-}
-
 export interface EventFactoryInterface extends utils.Interface {
   functions: {
-    "createEvent(uint32,uint32,uint256,uint256,string,uint256[],(uint256,uint256)[])": FunctionFragment;
+    "createEvent(uint32,uint32,uint256,uint256,string,uint256[],uint256)": FunctionFragment;
     "deactivateEvent(uint256,bytes32)": FunctionFragment;
     "extendEvent(uint256,uint32)": FunctionFragment;
     "redeemTickets(uint256,uint256[],uint256[])": FunctionFragment;
@@ -70,7 +58,7 @@ export interface EventFactoryInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<string>,
       PromiseOrValue<BigNumberish>[],
-      LibEventFactory.TicketDetailStruct[]
+      PromiseOrValue<BigNumberish>
     ]
   ): string;
   encodeFunctionData(
@@ -141,13 +129,14 @@ export interface EventFactoryInterface extends utils.Interface {
     "ApprovalForAll(address,address,bool)": EventFragment;
     "EventActivated(uint256)": EventFragment;
     "EventDeactivated(uint256)": EventFragment;
-    "EventDetails(uint256,uint32,uint32,uint256,uint256,string,uint8)": EventFragment;
+    "EventDetails(uint256,uint32,uint32,uint256,uint256,string,uint256,uint8)": EventFragment;
     "EventExtended(uint256,uint32)": EventFragment;
     "ImageUriUpdated(uint256,string)": EventFragment;
     "MigrationCancelled(address,uint32)": EventFragment;
     "MigrationInitiated(address,uint32)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
     "RefundsEnabled(uint256,bytes32)": EventFragment;
-    "TicketDetails(uint256,uint256[],tuple[])": EventFragment;
+    "TicketDetails(uint256,uint256[])": EventFragment;
     "TicketRedeemed(uint256,uint256[],uint256[])": EventFragment;
     "TicketRefunded(uint256,uint256,uint256)": EventFragment;
     "TransferBatch(address,address,address,uint256[],uint256[])": EventFragment;
@@ -162,6 +151,7 @@ export interface EventFactoryInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "ImageUriUpdated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationInitiated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "RefundsEnabled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "TicketDetails"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "TicketRedeemed"): EventFragment;
@@ -210,10 +200,11 @@ export interface EventDetailsEventObject {
   minEntries: BigNumber;
   maxEntries: BigNumber;
   imageUri: string;
+  maxEntriesPerUser: BigNumber;
   status: number;
 }
 export type EventDetailsEvent = TypedEvent<
-  [BigNumber, number, number, BigNumber, BigNumber, string, number],
+  [BigNumber, number, number, BigNumber, BigNumber, string, BigNumber, number],
   EventDetailsEventObject
 >;
 
@@ -265,6 +256,18 @@ export type MigrationInitiatedEvent = TypedEvent<
 export type MigrationInitiatedEventFilter =
   TypedEventFilter<MigrationInitiatedEvent>;
 
+export interface OwnershipChangedEventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChangedEvent = TypedEvent<
+  [string, string],
+  OwnershipChangedEventObject
+>;
+
+export type OwnershipChangedEventFilter =
+  TypedEventFilter<OwnershipChangedEvent>;
+
 export interface RefundsEnabledEventObject {
   eventId: BigNumber;
   merkleRoot: string;
@@ -279,10 +282,9 @@ export type RefundsEnabledEventFilter = TypedEventFilter<RefundsEnabledEvent>;
 export interface TicketDetailsEventObject {
   eventId: BigNumber;
   ticketIds: BigNumber[];
-  ticketDetails: LibEventFactory.TicketDetailStructOutput[];
 }
 export type TicketDetailsEvent = TypedEvent<
-  [BigNumber, BigNumber[], LibEventFactory.TicketDetailStructOutput[]],
+  [BigNumber, BigNumber[]],
   TicketDetailsEventObject
 >;
 
@@ -374,7 +376,7 @@ export interface EventFactory extends BaseContract {
       _maxEntries: PromiseOrValue<BigNumberish>,
       _imageUri: PromiseOrValue<string>,
       _ticketIds: PromiseOrValue<BigNumberish>[],
-      _ticketDetails: LibEventFactory.TicketDetailStruct[],
+      _maxEntriesPerUser: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -426,7 +428,7 @@ export interface EventFactory extends BaseContract {
     _maxEntries: PromiseOrValue<BigNumberish>,
     _imageUri: PromiseOrValue<string>,
     _ticketIds: PromiseOrValue<BigNumberish>[],
-    _ticketDetails: LibEventFactory.TicketDetailStruct[],
+    _maxEntriesPerUser: PromiseOrValue<BigNumberish>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -478,7 +480,7 @@ export interface EventFactory extends BaseContract {
       _maxEntries: PromiseOrValue<BigNumberish>,
       _imageUri: PromiseOrValue<string>,
       _ticketIds: PromiseOrValue<BigNumberish>[],
-      _ticketDetails: LibEventFactory.TicketDetailStruct[],
+      _maxEntriesPerUser: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -541,13 +543,14 @@ export interface EventFactory extends BaseContract {
     "EventDeactivated(uint256)"(eventId?: null): EventDeactivatedEventFilter;
     EventDeactivated(eventId?: null): EventDeactivatedEventFilter;
 
-    "EventDetails(uint256,uint32,uint32,uint256,uint256,string,uint8)"(
+    "EventDetails(uint256,uint32,uint32,uint256,uint256,string,uint256,uint8)"(
       eventId?: null,
       startTime?: null,
       endTime?: null,
       minEntries?: null,
       maxEntries?: null,
       imageUri?: null,
+      maxEntriesPerUser?: null,
       status?: null
     ): EventDetailsEventFilter;
     EventDetails(
@@ -557,6 +560,7 @@ export interface EventFactory extends BaseContract {
       minEntries?: null,
       maxEntries?: null,
       imageUri?: null,
+      maxEntriesPerUser?: null,
       status?: null
     ): EventDetailsEventFilter;
 
@@ -593,6 +597,15 @@ export interface EventFactory extends BaseContract {
       timeInitiatied?: null
     ): MigrationInitiatedEventFilter;
 
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+    OwnershipChanged(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+
     "RefundsEnabled(uint256,bytes32)"(
       eventId?: null,
       merkleRoot?: null
@@ -602,16 +615,11 @@ export interface EventFactory extends BaseContract {
       merkleRoot?: null
     ): RefundsEnabledEventFilter;
 
-    "TicketDetails(uint256,uint256[],tuple[])"(
+    "TicketDetails(uint256,uint256[])"(
       eventId?: null,
-      ticketIds?: null,
-      ticketDetails?: null
+      ticketIds?: null
     ): TicketDetailsEventFilter;
-    TicketDetails(
-      eventId?: null,
-      ticketIds?: null,
-      ticketDetails?: null
-    ): TicketDetailsEventFilter;
+    TicketDetails(eventId?: null, ticketIds?: null): TicketDetailsEventFilter;
 
     "TicketRedeemed(uint256,uint256[],uint256[])"(
       eventId?: null,
@@ -674,7 +682,7 @@ export interface EventFactory extends BaseContract {
       _maxEntries: PromiseOrValue<BigNumberish>,
       _imageUri: PromiseOrValue<string>,
       _ticketIds: PromiseOrValue<BigNumberish>[],
-      _ticketDetails: LibEventFactory.TicketDetailStruct[],
+      _maxEntriesPerUser: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -727,7 +735,7 @@ export interface EventFactory extends BaseContract {
       _maxEntries: PromiseOrValue<BigNumberish>,
       _imageUri: PromiseOrValue<string>,
       _ticketIds: PromiseOrValue<BigNumberish>[],
-      _ticketDetails: LibEventFactory.TicketDetailStruct[],
+      _maxEntriesPerUser: PromiseOrValue<BigNumberish>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

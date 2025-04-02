@@ -95,10 +95,7 @@ module.exports = {
       deploy: "./deploy", // Specify deploy folder
       deployments: "./deployments", // Specify deployments folder
     },
-    typechain: {
-      outDir: 'typechain-types', // Output directory for typechain
-      target: 'ethers-v5', // Target ethers version
-    },
+  
   }
 }
 

@@ -58,16 +58,6 @@ export declare namespace IPOCreate {
     ecosystemAddress: string;
     IPOFundAddress: string;
   };
-
-  export type OutputCurrencyStruct = {
-    isBaseCurrency: PromiseOrValue<boolean>;
-    tokenAddress: PromiseOrValue<string>;
-  };
-
-  export type OutputCurrencyStructOutput = [boolean, string] & {
-    isBaseCurrency: boolean;
-    tokenAddress: string;
-  };
 }
 
 export interface IPOCreateInterface extends utils.Interface {
@@ -75,7 +65,9 @@ export interface IPOCreateInterface extends utils.Interface {
     "getOffchainPurchase(uint256,bytes32[],(address,uint256,uint256,bool))": FunctionFragment;
     "getOffchainPurchaseOwner(uint256,address[],uint256[])": FunctionFragment;
     "getOnChainPurchase(uint256,uint256)": FunctionFragment;
-    "setIPO(uint256,bytes32,uint256,uint256,uint256,uint32,(address,address,address),(bool,address))": FunctionFragment;
+    "onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)": FunctionFragment;
+    "onERC1155Received(address,address,uint256,uint256,bytes)": FunctionFragment;
+    "setIPO(uint256,bytes32,uint256,uint256,uint256,uint32,(address,address,address),address)": FunctionFragment;
     "uploadIPOMerkleRoot(uint256,bytes32)": FunctionFragment;
   };
 
@@ -84,6 +76,8 @@ export interface IPOCreateInterface extends utils.Interface {
       | "getOffchainPurchase"
       | "getOffchainPurchaseOwner"
       | "getOnChainPurchase"
+      | "onERC1155BatchReceived"
+      | "onERC1155Received"
       | "setIPO"
       | "uploadIPOMerkleRoot"
   ): FunctionFragment;
@@ -109,6 +103,26 @@ export interface IPOCreateInterface extends utils.Interface {
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
+    functionFragment: "onERC1155BatchReceived",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>[],
+      PromiseOrValue<BigNumberish>[],
+      PromiseOrValue<BytesLike>
+    ]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "onERC1155Received",
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "setIPO",
     values: [
       PromiseOrValue<BigNumberish>,
@@ -118,7 +132,7 @@ export interface IPOCreateInterface extends utils.Interface {
       PromiseOrValue<BigNumberish>,
       PromiseOrValue<BigNumberish>,
       IPOCreate.EcosystemStruct,
-      IPOCreate.OutputCurrencyStruct
+      PromiseOrValue<string>
     ]
   ): string;
   encodeFunctionData(
@@ -138,6 +152,14 @@ export interface IPOCreateInterface extends utils.Interface {
     functionFragment: "getOnChainPurchase",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "onERC1155BatchReceived",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "onERC1155Received",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "setIPO", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "uploadIPOMerkleRoot",
@@ -149,12 +171,14 @@ export interface IPOCreateInterface extends utils.Interface {
     "IPOPurchaseConsumed(address,uint256,bool)": EventFragment;
     "MigrationCancelled(address,uint32)": EventFragment;
     "MigrationInitiated(address,uint32)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "IPOCreated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "IPOPurchaseConsumed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationInitiated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipChanged"): EventFragment;
 }
 
 export interface IPOCreatedEventObject {
@@ -206,6 +230,18 @@ export type MigrationInitiatedEvent = TypedEvent<
 export type MigrationInitiatedEventFilter =
   TypedEventFilter<MigrationInitiatedEvent>;
 
+export interface OwnershipChangedEventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChangedEvent = TypedEvent<
+  [string, string],
+  OwnershipChangedEventObject
+>;
+
+export type OwnershipChangedEventFilter =
+  TypedEventFilter<OwnershipChangedEvent>;
+
 export interface IPOCreate extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
@@ -253,6 +289,24 @@ export interface IPOCreate extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    onERC1155BatchReceived(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      ids: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BigNumberish>[],
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
+    onERC1155Received(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<BigNumberish>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
     setIPO(
       IPOid: PromiseOrValue<BigNumberish>,
       _merkleRoot: PromiseOrValue<BytesLike>,
@@ -261,7 +315,7 @@ export interface IPOCreate extends BaseContract {
       _ratio: PromiseOrValue<BigNumberish>,
       _deadline: PromiseOrValue<BigNumberish>,
       _ecosystem: IPOCreate.EcosystemStruct,
-      _outputCurrency: IPOCreate.OutputCurrencyStruct,
+      _inputTokenAddress: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -292,6 +346,24 @@ export interface IPOCreate extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  onERC1155BatchReceived(
+    operator: PromiseOrValue<string>,
+    from: PromiseOrValue<string>,
+    ids: PromiseOrValue<BigNumberish>[],
+    values: PromiseOrValue<BigNumberish>[],
+    data: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
+  onERC1155Received(
+    operator: PromiseOrValue<string>,
+    from: PromiseOrValue<string>,
+    id: PromiseOrValue<BigNumberish>,
+    value: PromiseOrValue<BigNumberish>,
+    data: PromiseOrValue<BytesLike>,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
   setIPO(
     IPOid: PromiseOrValue<BigNumberish>,
     _merkleRoot: PromiseOrValue<BytesLike>,
@@ -300,7 +372,7 @@ export interface IPOCreate extends BaseContract {
     _ratio: PromiseOrValue<BigNumberish>,
     _deadline: PromiseOrValue<BigNumberish>,
     _ecosystem: IPOCreate.EcosystemStruct,
-    _outputCurrency: IPOCreate.OutputCurrencyStruct,
+    _inputTokenAddress: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -331,6 +403,24 @@ export interface IPOCreate extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    onERC1155BatchReceived(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      ids: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BigNumberish>[],
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
+    onERC1155Received(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<BigNumberish>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     setIPO(
       IPOid: PromiseOrValue<BigNumberish>,
       _merkleRoot: PromiseOrValue<BytesLike>,
@@ -339,7 +429,7 @@ export interface IPOCreate extends BaseContract {
       _ratio: PromiseOrValue<BigNumberish>,
       _deadline: PromiseOrValue<BigNumberish>,
       _ecosystem: IPOCreate.EcosystemStruct,
-      _outputCurrency: IPOCreate.OutputCurrencyStruct,
+      _inputTokenAddress: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -390,6 +480,15 @@ export interface IPOCreate extends BaseContract {
       initiatior?: null,
       timeInitiatied?: null
     ): MigrationInitiatedEventFilter;
+
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+    OwnershipChanged(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
   };
 
   estimateGas: {
@@ -413,6 +512,24 @@ export interface IPOCreate extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    onERC1155BatchReceived(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      ids: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BigNumberish>[],
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    onERC1155Received(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<BigNumberish>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     setIPO(
       IPOid: PromiseOrValue<BigNumberish>,
       _merkleRoot: PromiseOrValue<BytesLike>,
@@ -421,7 +538,7 @@ export interface IPOCreate extends BaseContract {
       _ratio: PromiseOrValue<BigNumberish>,
       _deadline: PromiseOrValue<BigNumberish>,
       _ecosystem: IPOCreate.EcosystemStruct,
-      _outputCurrency: IPOCreate.OutputCurrencyStruct,
+      _inputTokenAddress: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -453,6 +570,24 @@ export interface IPOCreate extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
+    onERC1155BatchReceived(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      ids: PromiseOrValue<BigNumberish>[],
+      values: PromiseOrValue<BigNumberish>[],
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    onERC1155Received(
+      operator: PromiseOrValue<string>,
+      from: PromiseOrValue<string>,
+      id: PromiseOrValue<BigNumberish>,
+      value: PromiseOrValue<BigNumberish>,
+      data: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     setIPO(
       IPOid: PromiseOrValue<BigNumberish>,
       _merkleRoot: PromiseOrValue<BytesLike>,
@@ -461,7 +596,7 @@ export interface IPOCreate extends BaseContract {
       _ratio: PromiseOrValue<BigNumberish>,
       _deadline: PromiseOrValue<BigNumberish>,
       _ecosystem: IPOCreate.EcosystemStruct,
-      _outputCurrency: IPOCreate.OutputCurrencyStruct,
+      _inputTokenAddress: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 

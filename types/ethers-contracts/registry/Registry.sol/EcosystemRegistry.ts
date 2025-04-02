@@ -43,16 +43,19 @@ export declare namespace EcosystemRegistry {
   export type VersionStruct = {
     exists: PromiseOrValue<boolean>;
     uploadedTimestamp: PromiseOrValue<BigNumberish>;
+    diamondDeployAddress: PromiseOrValue<string>;
     facetCuts: IDiamondCut.FacetCutStruct[];
   };
 
   export type VersionStructOutput = [
     boolean,
     number,
+    string,
     IDiamondCut.FacetCutStructOutput[]
   ] & {
     exists: boolean;
     uploadedTimestamp: number;
+    diamondDeployAddress: string;
     facetCuts: IDiamondCut.FacetCutStructOutput[];
   };
 }
@@ -78,7 +81,7 @@ export interface EcosystemRegistryInterface extends utils.Interface {
     "getVersion(bytes32)": FunctionFragment;
     "owner()": FunctionFragment;
     "registerOptimizationFacet(uint240,bytes2,bytes,bytes)": FunctionFragment;
-    "uploadVersion(bytes32,(address,uint8,bytes4[])[])": FunctionFragment;
+    "uploadVersion(bytes32,address,(address,uint8,bytes4[])[])": FunctionFragment;
     "versions(bytes32)": FunctionFragment;
   };
 
@@ -122,7 +125,11 @@ export interface EcosystemRegistryInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "uploadVersion",
-    values: [PromiseOrValue<BytesLike>, IDiamondCut.FacetCutStruct[]]
+    values: [
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<string>,
+      IDiamondCut.FacetCutStruct[]
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "versions",
@@ -150,9 +157,10 @@ export interface EcosystemRegistryInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "versions", data: BytesLike): Result;
 
   events: {
-    "EcosystemDeployed(address,address,bytes32)": EventFragment;
+    "EcosystemDeployed(address,address,bytes32,string)": EventFragment;
     "MigrationCancelled(address,uint32)": EventFragment;
     "MigrationInitiated(address,uint32)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
     "VersionUpgraded(bytes32,bytes32,address)": EventFragment;
     "VersionUploaded(bytes32)": EventFragment;
   };
@@ -160,6 +168,7 @@ export interface EcosystemRegistryInterface extends utils.Interface {
   getEvent(nameOrSignatureOrTopic: "EcosystemDeployed"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationInitiated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "VersionUpgraded"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "VersionUploaded"): EventFragment;
 }
@@ -168,9 +177,10 @@ export interface EcosystemDeployedEventObject {
   user: string;
   ecosystem: string;
   versionNumber: string;
+  name: string;
 }
 export type EcosystemDeployedEvent = TypedEvent<
-  [string, string, string],
+  [string, string, string, string],
   EcosystemDeployedEventObject
 >;
 
@@ -200,6 +210,18 @@ export type MigrationInitiatedEvent = TypedEvent<
 
 export type MigrationInitiatedEventFilter =
   TypedEventFilter<MigrationInitiatedEvent>;
+
+export interface OwnershipChangedEventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChangedEvent = TypedEvent<
+  [string, string],
+  OwnershipChangedEventObject
+>;
+
+export type OwnershipChangedEventFilter =
+  TypedEventFilter<OwnershipChangedEvent>;
 
 export interface VersionUpgradedEventObject {
   newVersion: string;
@@ -284,6 +306,7 @@ export interface EcosystemRegistry extends BaseContract {
 
     uploadVersion(
       versionNumber: PromiseOrValue<BytesLike>,
+      diamondDeployAddress: PromiseOrValue<string>,
       facetCuts: IDiamondCut.FacetCutStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
@@ -292,7 +315,11 @@ export interface EcosystemRegistry extends BaseContract {
       arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<
-      [boolean, number] & { exists: boolean; uploadedTimestamp: number }
+      [boolean, number, string] & {
+        exists: boolean;
+        uploadedTimestamp: number;
+        diamondDeployAddress: string;
+      }
     >;
   };
 
@@ -326,6 +353,7 @@ export interface EcosystemRegistry extends BaseContract {
 
   uploadVersion(
     versionNumber: PromiseOrValue<BytesLike>,
+    diamondDeployAddress: PromiseOrValue<string>,
     facetCuts: IDiamondCut.FacetCutStruct[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
@@ -334,7 +362,11 @@ export interface EcosystemRegistry extends BaseContract {
     arg0: PromiseOrValue<BytesLike>,
     overrides?: CallOverrides
   ): Promise<
-    [boolean, number] & { exists: boolean; uploadedTimestamp: number }
+    [boolean, number, string] & {
+      exists: boolean;
+      uploadedTimestamp: number;
+      diamondDeployAddress: string;
+    }
   >;
 
   callStatic: {
@@ -368,6 +400,7 @@ export interface EcosystemRegistry extends BaseContract {
 
     uploadVersion(
       versionNumber: PromiseOrValue<BytesLike>,
+      diamondDeployAddress: PromiseOrValue<string>,
       facetCuts: IDiamondCut.FacetCutStruct[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -376,20 +409,26 @@ export interface EcosystemRegistry extends BaseContract {
       arg0: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
     ): Promise<
-      [boolean, number] & { exists: boolean; uploadedTimestamp: number }
+      [boolean, number, string] & {
+        exists: boolean;
+        uploadedTimestamp: number;
+        diamondDeployAddress: string;
+      }
     >;
   };
 
   filters: {
-    "EcosystemDeployed(address,address,bytes32)"(
+    "EcosystemDeployed(address,address,bytes32,string)"(
       user?: null,
       ecosystem?: null,
-      versionNumber?: null
+      versionNumber?: null,
+      name?: null
     ): EcosystemDeployedEventFilter;
     EcosystemDeployed(
       user?: null,
       ecosystem?: null,
-      versionNumber?: null
+      versionNumber?: null,
+      name?: null
     ): EcosystemDeployedEventFilter;
 
     "MigrationCancelled(address,uint32)"(
@@ -409,6 +448,15 @@ export interface EcosystemRegistry extends BaseContract {
       initiatior?: null,
       timeInitiatied?: null
     ): MigrationInitiatedEventFilter;
+
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+    OwnershipChanged(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
 
     "VersionUpgraded(bytes32,bytes32,address)"(
       newVersion?: null,
@@ -458,6 +506,7 @@ export interface EcosystemRegistry extends BaseContract {
 
     uploadVersion(
       versionNumber: PromiseOrValue<BytesLike>,
+      diamondDeployAddress: PromiseOrValue<string>,
       facetCuts: IDiamondCut.FacetCutStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
@@ -499,6 +548,7 @@ export interface EcosystemRegistry extends BaseContract {
 
     uploadVersion(
       versionNumber: PromiseOrValue<BytesLike>,
+      diamondDeployAddress: PromiseOrValue<string>,
       facetCuts: IDiamondCut.FacetCutStruct[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;

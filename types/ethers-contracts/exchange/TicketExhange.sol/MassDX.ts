@@ -261,6 +261,7 @@ export interface MassDXInterface extends utils.Interface {
   events: {
     "MigrationCancelled(address,uint32)": EventFragment;
     "MigrationInitiated(address,uint32)": EventFragment;
+    "OwnershipChanged(address,address)": EventFragment;
     "SaleCancelled(uint96)": EventFragment;
     "SaleCreated(tuple)": EventFragment;
     "SaleExecuted(uint96,uint256,address,uint256,uint256)": EventFragment;
@@ -270,6 +271,7 @@ export interface MassDXInterface extends utils.Interface {
 
   getEvent(nameOrSignatureOrTopic: "MigrationCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "MigrationInitiated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipChanged"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SaleCancelled"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SaleCreated"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "SaleExecuted"): EventFragment;
@@ -300,6 +302,18 @@ export type MigrationInitiatedEvent = TypedEvent<
 
 export type MigrationInitiatedEventFilter =
   TypedEventFilter<MigrationInitiatedEvent>;
+
+export interface OwnershipChangedEventObject {
+  oldOwner: string;
+  newOwner: string;
+}
+export type OwnershipChangedEvent = TypedEvent<
+  [string, string],
+  OwnershipChangedEventObject
+>;
+
+export type OwnershipChangedEventFilter =
+  TypedEventFilter<OwnershipChangedEvent>;
 
 export interface SaleCancelledEventObject {
   arg0: BigNumber;
@@ -771,6 +785,15 @@ export interface MassDX extends BaseContract {
       initiatior?: null,
       timeInitiatied?: null
     ): MigrationInitiatedEventFilter;
+
+    "OwnershipChanged(address,address)"(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
+    OwnershipChanged(
+      oldOwner?: null,
+      newOwner?: null
+    ): OwnershipChangedEventFilter;
 
     "SaleCancelled(uint96)"(arg0?: null): SaleCancelledEventFilter;
     SaleCancelled(arg0?: null): SaleCancelledEventFilter;

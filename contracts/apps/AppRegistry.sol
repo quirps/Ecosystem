@@ -50,6 +50,8 @@ contract MiniAppRegistry {
     event OwnerNeededSet(bool required);
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
     event AppDeactivated(string _appName);   
+    // ======== Errors =======
+    error DeactivatingNonExistantApp(); 
     // ======== Modifiers ========
 
     modifier onlyOwner() {
@@ -187,6 +189,7 @@ contract MiniAppRegistry {
      * @return description The app's description.
      * @return imageUri The app's image URI.
      * @return bytecodeDeployer The address of the app's deployer contract.
+     * @return isActive app is live and hasn't been deactivated.
      */
     function retrieveApp(string calldata _appName)
         external
@@ -195,7 +198,8 @@ contract MiniAppRegistry {
             string memory name,
             string memory description,
             string memory imageUri,
-            address bytecodeDeployer
+            address bytecodeDeployer,
+            bool isActive
         )
     {
         bytes32 nameHash = keccak256(abi.encodePacked(_appName));
@@ -206,7 +210,8 @@ contract MiniAppRegistry {
             app.name,
             app.description,
             app.imageUri,
-            app.bytecodeDeployer
+            app.bytecodeDeployer,
+            app.isActive
         );
     }
 
@@ -218,6 +223,8 @@ contract MiniAppRegistry {
      * @return imageUri The app's image URI.
      * @return bytecodeDeployer The address of the app's deployer contract.
      * @return exists Whether an app with this hash exists.
+     * @return isActive app is live and hasn't been deactivated.
+
      */
     function retrieveAppByHash(bytes32 _nameHash)
         external
@@ -227,7 +234,8 @@ contract MiniAppRegistry {
             string memory description,
             string memory imageUri,
             address bytecodeDeployer,
-            bool exists
+            bool exists,
+            bool isActive
         )
     {
         AppInfo storage app = appInfoMap[_nameHash];
@@ -237,7 +245,8 @@ contract MiniAppRegistry {
             app.description,
             app.imageUri,
             app.bytecodeDeployer,
-            app.exists
+            app.exists,
+            app.isActive
         );
     }
 
@@ -271,6 +280,9 @@ contract MiniAppRegistry {
     ) external onlyOwner {
         bytes32 nameHash = keccak256(abi.encodePacked(_appName));
         AppInfo storage app = appInfoMap[nameHash];
+        if(! app.exists ){
+            revert DeactivatingNonExistantApp();
+        }
         app.isActive = false;
         emit AppDeactivated(_appName);        
     }

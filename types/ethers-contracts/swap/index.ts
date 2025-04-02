@@ -5,5 +5,7 @@ import type * as ipoSol from "./IPO.sol";
 export type { ipoSol };
 import type * as swapSol from "./Swap.sol";
 export type { swapSol };
+import type * as uniswapSol from "./Uniswap.sol";
+export type { uniswapSol };
 import type * as interfaces from "./interfaces";
 export type { interfaces };

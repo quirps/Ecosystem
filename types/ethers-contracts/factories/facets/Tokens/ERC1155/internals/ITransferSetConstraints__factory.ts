@@ -11,22 +11,177 @@ import type {
 
 const _abi = [
   {
+    inputs: [],
+    name: "MigrationAlreadyCompleted",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "MigrationAlreadyInitiated",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "MigrationNotInitiated",
+    type: "error",
+  },
+  {
     inputs: [
       {
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
         internalType: "uint256",
-        name: "",
+        name: "ticketId",
         type: "uint256",
       },
     ],
-    name: "setExpireable",
+    name: "NonTransferableError",
+    type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
+        name: "timestamp",
+        type: "uint32",
+      },
+    ],
+    name: "MemberBanned",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "memberAddress",
+            type: "address",
+          },
+          {
+            internalType: "uint32",
+            name: "level",
+            type: "uint32",
+          },
+          {
+            internalType: "uint32",
+            name: "timestamp",
+            type: "uint32",
+          },
+        ],
+        indexed: false,
+        internalType: "struct LibMemberLevel.Leaf",
+        name: "leaf",
+        type: "tuple",
+      },
+    ],
+    name: "MemberLevelUpdated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "newRoot",
+        type: "bytes32",
+      },
+    ],
+    name: "MerkleRootUpdated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "cancellor",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
+        name: "timeCancelled",
+        type: "uint32",
+      },
+    ],
+    name: "MigrationCancelled",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "initiatior",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
+        name: "timeInitiatied",
+        type: "uint32",
+      },
+    ],
+    name: "MigrationInitiated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "address",
+        name: "oldOwner",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "newOwner",
+        type: "address",
+      },
+    ],
+    name: "OwnershipChanged",
+    type: "event",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "ticketId",
+        type: "uint256",
+      },
+    ],
+    name: "expireable",
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "view",
     type: "function",
   },
 ] as const;
 
 const _bytecode =
-  "0x608060405234801561001057600080fd5b5060dc8061001f6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c80636dca9aab14602d575b600080fd5b60436004803603810190603f9190607e565b6045565b005b50565b600080fd5b6000819050919050565b605e81604d565b8114606857600080fd5b50565b6000813590506078816057565b92915050565b60006020828403121560915760906048565b5b6000609d84828501606b565b9150509291505056fea26469706673582212205a7ef756fac04975e682a986f71505da02f0f81ed1f888a9d8437027ee6968eb64736f6c63430008090033";
+  "0x6080604052348015600e575f5ffd5b506101598061001c5f395ff3fe608060405234801561000f575f5ffd5b5060043610610029575f3560e01c806345b5fd721461002d575b5f5ffd5b61004061003b36600461010c565b610042565b005b5f8181527f7a8949a66712f1d1ae515adbd4b0835db540861dfc3638f5ebc928c2d0736d2660205260409020547f7a8949a66712f1d1ae515adbd4b0835db540861dfc3638f5ebc928c2d0736d249063ffffffff164281106101075760405162461bcd60e51b815260206004820152603460248201527f457870697265643a20446561646c696e6520666f72207469636b657420636f6e60448201527339bab6b83a34b7b7103430b9903830b9b9b2b21760611b606482015260840160405180910390fd5b505050565b5f6020828403121561011c575f5ffd5b503591905056fea2646970667358221220fd94f9d704ecebecf6fc074ff6a6596eaf6ac037e6dd45c33f955c30dc9bec6b64736f6c634300081c0033";
 
 type ITransferSetConstraintsConstructorParams =
   | [signer?: Signer]

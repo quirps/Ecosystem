@@ -4,7 +4,6 @@
 import type {
   BaseContract,
   BigNumber,
-  BigNumberish,
   BytesLike,
   CallOverrides,
   ContractTransaction,
@@ -24,14 +23,14 @@ import type {
 } from "../../common";
 
 export declare namespace LibMemberRegistry {
-  export type SignatureVerficationStruct = {
-    domain: PromiseOrValue<BigNumberish>;
-    nonce: PromiseOrValue<BigNumberish>;
+  export type LeafStruct = {
+    username: PromiseOrValue<string>;
+    userAddress: PromiseOrValue<string>;
   };
 
-  export type SignatureVerficationStructOutput = [BigNumber, BigNumber] & {
-    domain: BigNumber;
-    nonce: BigNumber;
+  export type LeafStructOutput = [string, string] & {
+    username: string;
+    userAddress: string;
   };
 }
 
@@ -39,16 +38,22 @@ export interface IMemberRegistryInterface extends utils.Interface {
   functions: {
     "cancelVerify(string)": FunctionFragment;
     "finalizeRecovery(string)": FunctionFragment;
-    "initializor(uint96)": FunctionFragment;
-    "verifyUsername(string,(uint256,uint256))": FunctionFragment;
+    "setUsernameAddressPair(string)": FunctionFragment;
+    "setUsernameOwner(string[],address[])": FunctionFragment;
+    "setUsernamePair(string)": FunctionFragment;
+    "usernameRecovery(string)": FunctionFragment;
+    "verifyAndUsername((string,address),bytes32[])": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
       | "cancelVerify"
       | "finalizeRecovery"
-      | "initializor"
-      | "verifyUsername"
+      | "setUsernameAddressPair"
+      | "setUsernameOwner"
+      | "setUsernamePair"
+      | "usernameRecovery"
+      | "verifyAndUsername"
   ): FunctionFragment;
 
   encodeFunctionData(
@@ -60,15 +65,24 @@ export interface IMemberRegistryInterface extends utils.Interface {
     values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "initializor",
-    values: [PromiseOrValue<BigNumberish>]
+    functionFragment: "setUsernameAddressPair",
+    values: [PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
-    functionFragment: "verifyUsername",
-    values: [
-      PromiseOrValue<string>,
-      LibMemberRegistry.SignatureVerficationStruct
-    ]
+    functionFragment: "setUsernameOwner",
+    values: [PromiseOrValue<string>[], PromiseOrValue<string>[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setUsernamePair",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "usernameRecovery",
+    values: [PromiseOrValue<string>]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "verifyAndUsername",
+    values: [LibMemberRegistry.LeafStruct, PromiseOrValue<BytesLike>[]]
   ): string;
 
   decodeFunctionResult(
@@ -80,11 +94,23 @@ export interface IMemberRegistryInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "initializor",
+    functionFragment: "setUsernameAddressPair",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "verifyUsername",
+    functionFragment: "setUsernameOwner",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setUsernamePair",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "usernameRecovery",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "verifyAndUsername",
     data: BytesLike
   ): Result;
 
@@ -128,14 +154,30 @@ export interface IMemberRegistry extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    initializor(
-      _recoveryTime: PromiseOrValue<BigNumberish>,
+    setUsernameAddressPair(
+      username: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
-    verifyUsername(
+    setUsernameOwner(
+      username: PromiseOrValue<string>[],
+      userAddress: PromiseOrValue<string>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    setUsernamePair(
       username: PromiseOrValue<string>,
-      _signature: LibMemberRegistry.SignatureVerficationStruct,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    usernameRecovery(
+      username: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
+    verifyAndUsername(
+      _leaf: LibMemberRegistry.LeafStruct,
+      _merkleProof: PromiseOrValue<BytesLike>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
   };
@@ -150,14 +192,30 @@ export interface IMemberRegistry extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  initializor(
-    _recoveryTime: PromiseOrValue<BigNumberish>,
+  setUsernameAddressPair(
+    username: PromiseOrValue<string>,
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
-  verifyUsername(
+  setUsernameOwner(
+    username: PromiseOrValue<string>[],
+    userAddress: PromiseOrValue<string>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  setUsernamePair(
     username: PromiseOrValue<string>,
-    _signature: LibMemberRegistry.SignatureVerficationStruct,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  usernameRecovery(
+    username: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
+  verifyAndUsername(
+    _leaf: LibMemberRegistry.LeafStruct,
+    _merkleProof: PromiseOrValue<BytesLike>[],
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -172,14 +230,30 @@ export interface IMemberRegistry extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    initializor(
-      _recoveryTime: PromiseOrValue<BigNumberish>,
+    setUsernameAddressPair(
+      username: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    verifyUsername(
+    setUsernameOwner(
+      username: PromiseOrValue<string>[],
+      userAddress: PromiseOrValue<string>[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setUsernamePair(
       username: PromiseOrValue<string>,
-      _signature: LibMemberRegistry.SignatureVerficationStruct,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    usernameRecovery(
+      username: PromiseOrValue<string>,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    verifyAndUsername(
+      _leaf: LibMemberRegistry.LeafStruct,
+      _merkleProof: PromiseOrValue<BytesLike>[],
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -197,14 +271,30 @@ export interface IMemberRegistry extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    initializor(
-      _recoveryTime: PromiseOrValue<BigNumberish>,
+    setUsernameAddressPair(
+      username: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
-    verifyUsername(
+    setUsernameOwner(
+      username: PromiseOrValue<string>[],
+      userAddress: PromiseOrValue<string>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    setUsernamePair(
       username: PromiseOrValue<string>,
-      _signature: LibMemberRegistry.SignatureVerficationStruct,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    usernameRecovery(
+      username: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
+    verifyAndUsername(
+      _leaf: LibMemberRegistry.LeafStruct,
+      _merkleProof: PromiseOrValue<BytesLike>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
   };
@@ -220,14 +310,30 @@ export interface IMemberRegistry extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    initializor(
-      _recoveryTime: PromiseOrValue<BigNumberish>,
+    setUsernameAddressPair(
+      username: PromiseOrValue<string>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
-    verifyUsername(
+    setUsernameOwner(
+      username: PromiseOrValue<string>[],
+      userAddress: PromiseOrValue<string>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setUsernamePair(
       username: PromiseOrValue<string>,
-      _signature: LibMemberRegistry.SignatureVerficationStruct,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    usernameRecovery(
+      username: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    verifyAndUsername(
+      _leaf: LibMemberRegistry.LeafStruct,
+      _merkleProof: PromiseOrValue<BytesLike>[],
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
   };
