@@ -19,28 +19,28 @@ library LibMemberLevel {
     }
 
     struct Leaf {
-        address memberAddress;
-        uint32 level;
+        address memberAddress; 
+        int64 level;
         uint32 timestamp;
     }
 
     struct MemberLevel{
-        uint32 level;
+        int64 level;
         uint32 timestamp;
     }
     
-    type level is uint32;
+    type level is int64;
 
     function memberLevelStorage() internal pure returns (MemberLevelStorage storage ms_) { 
         bytes32 position = MEMBER_STORAGE_POSITION;
         assembly {
             ms_.slot := position
         }
-    }
+    } 
 
-    function permissionedChangeLevel( uint32 _level, address member) internal {
+    function permissionedChangeLevel( int64 _level, address member) internal {
         MemberLevelStorage storage ms = memberLevelStorage();
-        ms.memberLevel[ member ] = MemberLevel( uint32( block.timestamp ), _level ); 
+        ms.memberLevel[ member ] = MemberLevel( _level, uint32( block.timestamp ) ); 
     }
   
  

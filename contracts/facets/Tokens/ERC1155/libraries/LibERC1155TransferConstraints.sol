@@ -6,7 +6,7 @@ library LibERC1155TransferConstraints{
 
 struct ConstraintStorage{
     mapping(uint256 => uint256) tranfserLimit; 
-    mapping(uint256 => uint32) minimumMemberLevel; 
+    mapping(uint256 => int64) minimumMemberLevel; 
     mapping(uint256 => uint32) expireTime;
     mapping(uint256 => uint24) royaltyFee;
     mapping(uint128  => uint128) ticketIntervalNonce;
@@ -38,10 +38,9 @@ function erc1155ConstraintStorage() internal pure returns (ConstraintStorage sto
     struct TransferLimit{
         uint256 maxTransfers;
         bool isActive;
-    }
- 
+    } 
     struct MemberLevelDependency{
-        uint32 minimumLevel;
+        int64 minimumLevel;
         bool isActive;
     }
 

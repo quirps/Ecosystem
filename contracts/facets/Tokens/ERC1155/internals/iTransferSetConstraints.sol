@@ -27,7 +27,7 @@ contract  iTransferSetConstraints is iOwnership, iMembers {
     function minimumMembershipLevel(uint256 ticketId, address to) internal view {
         LibERC1155TransferConstraints.ConstraintStorage storage cs = 
         LibERC1155TransferConstraints.erc1155ConstraintStorage();
-        uint32 _memberLevel = _getMemberLevel( to ); 
+        int64 _memberLevel = _getMemberLevel( to ); 
  
         if( cs.minimumMemberLevel[ ticketId ] > _memberLevel){   
             revert("Member level not sufficient enough for transfer.");
@@ -59,8 +59,8 @@ contract  iTransferSetConstraints is iOwnership, iMembers {
  
     // Check Minimum Membership Level (bit 1)
     if ((bitMap & (1 << 1)) != 0) {
-        uint256 minRank = cs.minimumMemberLevel[_tokenId];
-        uint256 senderRank = _getMemberLevel( msgSender() ); // Implement this 
+        int64 minRank = cs.minimumMemberLevel[_tokenId];   
+        int64 senderRank = _getMemberLevel( msgSender() ); // Implement this 
         require(senderRank >= minRank, "Insufficient membership level");
     }
 
