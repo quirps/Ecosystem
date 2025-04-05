@@ -1,118 +1,150 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.19; // Use a consistent recent version
 
-import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import "@openzeppelin/contracts/access/Ownable.sol"; // Or custom access control
-import { ReentrancyGuardContract } from "../ReentrancyGuard.sol"; 
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { IEventFacet } from "../facets/Events/IEventFactory.sol"; // Adjust path if needed
+import { LibEventFactory } from "../facets/Events/LibEventFactory.sol"; // Adjust path if needed
+ 
+/**
+ * @title PollApp
+ * @notice Handles logic for simple polling events within a specific ecosystem instance.
+ * @dev Meant to be deployed per ecosystem. Calls back to the parent EventFacet
+ * for core checks and token interactions. Users must approve this contract
+ * to spend their voting tickets (if burning is required).
+ */
+contract PollApp is Ownable {
 
-interface IEcosystem {
-    function getMemberLevel(address _user) external view returns (uint256);
-    // function ecosystemOwner() external view returns (address); // Assuming Ownable uses this logic
-}
+    // --- State Variables ---
 
-contract Poll is Ownable, ReentrancyGuardContract {
-    IEcosystem public immutable ecosystemContract;
-    IERC1155 public immutable tokenContract;
+    // Address of the parent Ecosystem Diamond's EventFacet interface
+    address public immutable EVENT_FACET_ADDRESS;
 
-    string public eventName;
-    string public question;
-    string[] public options; // Keep strings short or use bytes32 for options
+    // Poll configuration per eventId within this app's context
+    mapping(uint256 => uint8) public numOptions; // eventId => number of choices
 
-    uint256 public startTime;
-    uint256 public endTime;
+    // Vote tallies per eventId and optionIndex
+    mapping(uint256 => mapping(uint8 => uint256)) public voteCounts;
 
-    // Requirements
-    uint256 public requiredLevel;
-    uint256 public requiredTokenId;
-    bool public spendTicket; // If true, spend 1 ticket; if false, just check balance >= 1
+    // Tracking who has voted per eventId
+    mapping(uint256 => mapping(address => bool)) public hasVoted;
 
-    mapping(uint256 => uint256) public votesPerOptionIndex;
-    mapping(address => bool) public hasVoted;
-    uint256 public totalVotes;
+    // --- Events ---
 
-    event Voted(address indexed voter, uint256 indexed optionIndex);
-    event PollEnded(uint256 timestamp);
+    event PollInitialized(uint256 indexed eventId, uint8 numOptions, address indexed initializer);
+    event Voted(uint256 indexed eventId, address indexed voter, uint8 optionIndex);
 
-    modifier withinEventWindow() {
-        require(block.timestamp >= startTime, "Poll: Not started");
-        require(block.timestamp < endTime, "Poll: Ended");
-        _;
+    // --- Errors ---
+
+    error PollAlreadyInitialized(uint256 eventId);
+    error PollNotInitialized(uint256 eventId);
+    error InvalidOptionIndex(uint256 eventId, uint8 received, uint8 maxAllowed);
+    error AlreadyVoted(uint256 eventId, address voter);
+    error CoreParticipationFailed(uint256 eventId, address user);
+    error InvalidNumberOfOptions(uint8 numOptions);
+    error NotEventCreator(uint256 eventId, address caller, address expectedCreator);
+    error ZeroAddress();
+
+
+    // --- Constructor ---
+
+    /**
+     * @param _eventFacetAddress The address of the parent Ecosystem Diamond proxy.
+     */
+    constructor(address _eventFacetAddress) Ownable(msg.sender) {
+        if (_eventFacetAddress == address(0)) revert ZeroAddress();
+        EVENT_FACET_ADDRESS = _eventFacetAddress;
     }
 
-    constructor(
-        address _ecosystemAddress,
-        address _tokenAddress,
-        address _initialOwner,
-        string memory _eventName,
-        string memory _question,
-        string[] memory _options,
-        uint256 _startTime,
-        uint256 _endTime,
-        uint256 _requiredLevel,
-        uint256 _requiredTokenId,
-        bool _spendTicket
-    ) Ownable(_initialOwner) {
-        require(_ecosystemAddress != address(0), "Invalid ecosystem address");
-        require(_tokenAddress != address(0), "Invalid token address");
-        require(_startTime < _endTime, "Invalid times");
-        require(_options.length >= 2, "Need at least 2 options");
+    // --- Setup Function ---
 
-        ecosystemContract = IEcosystem(_ecosystemAddress);
-        tokenContract = IERC1155(_tokenAddress);
-        eventName = _eventName;
-        question = _question;
-        options = _options;
-        startTime = _startTime;
-        endTime = _endTime;
-        requiredLevel = _requiredLevel;
-        requiredTokenId = _requiredTokenId;
-        spendTicket = _spendTicket;
-    } 
+    /**
+     * @notice Initializes the poll settings for a specific event.
+     * @dev Must be called once by the event creator before voting can begin.
+     * Fetches creator address from the parent EventFacet.
+     * @param eventId The ID of the event created on the EventFacet.
+     * @param _numOptions The total number of voting options (e.g., 2 for Yes/No). Min 2.
+     */
+    function initializePoll(uint256 eventId, uint8 _numOptions) external {
+        // 1. Check if already initialized for this event within this app instance
+        if (numOptions[eventId] != 0) revert PollAlreadyInitialized(eventId);
 
-    function vote(uint256 _optionIndex) external withinEventWindow ReentrancyGuard {
-        address voter = msg.sender; // In meta-tx context, this might be recovered signer
-        require(!hasVoted[voter], "Poll: Already voted");
-        require(_optionIndex < options.length, "Poll: Invalid option");
+        // 2. Check valid number of options
+        if (_numOptions < 2) revert InvalidNumberOfOptions(_numOptions);
 
-        // Check Requirements
-        if (requiredLevel > 0) {
-            require(ecosystemContract.getMemberLevel(voter) >= requiredLevel, "Poll: Insufficient level");
-        }
-        if (requiredTokenId > 0) { // Assuming Token ID 0 is invalid/unused
-            uint256 balance = tokenContract.balanceOf(voter, requiredTokenId);
-            require(balance >= 1, "Poll: Insufficient tokens");
+        // 3. Access Control: Only the creator of the event on the Facet can initialize
+        // Requires EVENT_FACET_ADDRESS to be correctly set and accessible
+        IEventFacet eventFacet = IEventFacet(EVENT_FACET_ADDRESS);
+        // Fetch only the creator address using the specific getter
+        (address creator,,,) = eventFacet.getEventCoreInfo(eventId);
+        if (msg.sender != creator) revert NotEventCreator(eventId, msg.sender, creator);
 
-            if (spendTicket) {
-                // Requires voter to have approved this contract beforehand
-                // OR use permit-style signature if supported by token
-                tokenContract.safeTransferFrom(voter, address(this), requiredTokenId, 1, "");
-                // Consider transferring to address(0) to burn, or to owner/treasury
-            }
-        }
+        // 4. Store settings
+        numOptions[eventId] = _numOptions;
 
-        // Record Vote
-        hasVoted[voter] = true;
-        votesPerOptionIndex[_optionIndex]++;
-        totalVotes++;
-
-        emit Voted(voter, _optionIndex);
+        // 5. Emit event
+        emit PollInitialized(eventId, _numOptions, msg.sender);
     }
 
-    // Function for owner to manually trigger end if needed, e.g., after endTime
-    function manualEndPoll() external onlyOwner {
-         require(block.timestamp >= endTime, "Poll: Not ended yet");
-         // Can add logic here if needed, like snapshotting final results
-         emit PollEnded(block.timestamp);
-         // Could potentially self-destruct or transfer remaining tokens if needed
+
+    // --- User-Facing Function ---
+
+    /**
+     * @notice Allows a user to cast their vote for a specific poll event.
+     * @dev User calls this function directly on this PollApp instance.
+     * It verifies core participation rules (including token interaction like Burn)
+     * via the parent EventFacet before recording the vote locally.
+     * @param eventId The ID of the poll event configured on the EventFacet.
+     * @param ticketId The ID of the ERC1155 voting ticket.
+     * @param amount The amount of the ticket required (must match event config on Facet).
+     * @param optionIndex The index of the option the user is voting for (0-based).
+     */
+    function castVote(uint256 eventId, uint256 ticketId, uint256 amount, uint8 optionIndex) external {
+        // 1. Define expected interaction (typically Burn for voting)
+        LibEventFactory.TicketInteraction expectedInteraction = LibEventFactory.TicketInteraction.Burn;
+
+        // 2. Verify core participation via EventFacet
+        // Note: User (msg.sender) must have approved THIS PollApp contract address
+        //       for the specified ticketId and amount on the parent Diamond's ERC1155.
+        IEventFacet eventFacet = IEventFacet(EVENT_FACET_ADDRESS);
+        bool success = eventFacet.verifyAndProcessParticipation(
+            eventId,
+            msg.sender, // The user casting the vote
+            ticketId,
+            amount,
+            expectedInteraction
+        );
+
+        // 3. Check Facet Verification Result
+        if (!success) revert CoreParticipationFailed(eventId, msg.sender);
+
+        // 4. Local Poll Validations (Checks specific to this app's state)
+        uint8 _numOptions = numOptions[eventId];
+        if (_numOptions == 0) revert PollNotInitialized(eventId);
+        if (optionIndex >= _numOptions) revert InvalidOptionIndex(eventId, optionIndex, _numOptions - 1);
+        if (hasVoted[eventId][msg.sender]) revert AlreadyVoted(eventId, msg.sender);
+
+        // 5. Record Vote Locally
+        voteCounts[eventId][optionIndex]++;
+        hasVoted[eventId][msg.sender] = true;
+
+        // 6. Emit Event
+        emit Voted(eventId, msg.sender, optionIndex);
     }
 
-    // View functions for results
-    function getOptionCount() external view returns (uint256) {
-        return options.length;
+    // --- Getter Functions ---
+
+    function getVoteCount(uint256 eventId, uint8 optionIndex) external view returns (uint256) {
+        // Optional check: if (optionIndex >= numOptions[eventId]) return 0;
+        return voteCounts[eventId][optionIndex];
     }
 
-     function getVotesForOption(uint256 _optionIndex) external view returns (uint256) {
-         require(_optionIndex < options.length, "Poll: Invalid option");
-         return votesPerOptionIndex[_optionIndex];
-     }
+    function getNumOptions(uint256 eventId) external view returns (uint8) {
+        return numOptions[eventId];
+    }
+
+    function getHasVoted(uint256 eventId, address user) external view returns (bool) {
+        return hasVoted[eventId][user];
+    }
+
+    // No setter for EVENT_FACET_ADDRESS as it's immutable
 }

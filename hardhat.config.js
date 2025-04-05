@@ -23,6 +23,7 @@ WALLET_BASE_AMOUNT = "10000000000000000000000000000" // 10**30
  */
 module.exports = {
   
+
   sources: ["./contracts", "./node_modules/registry/contracts"],
   solidity: '0.8.28',
   diamondAbi: {
@@ -39,6 +40,12 @@ module.exports = {
     },
     strict: false
   },
+  paths: {
+    // ... sources, tests, cache, artifacts ...
+    deploy: "deploy",
+    deployments: "deployments",
+    imports: "imports" // Needed by hardhat-deploy external feature
+  },
   solidity : {
     version : "0.8.28",
     settings: {
@@ -54,6 +61,12 @@ module.exports = {
         runs: 200
       }
     },
+     overrides: {
+       "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2Mock.sol": {
+         version: "0.8.7", // Specify compiler if needed
+         settings: { /* ... */ }
+       }
+     }
   },
   gasReporter: {
     enabled: true,

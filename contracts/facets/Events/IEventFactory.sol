@@ -1,69 +1,134 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.19;
 
-import {LibEventFactory} from "./LibEventFactory.sol"; 
-/// @title IEventFacet
-/// @dev Interface for the event management facet
-interface IEventFactory {
-    /// @notice Sets the Merkle root for the specified event.
-    /// @dev Only callable by the owner or authorized addresses.
-    /// @param eventId The ID of the event to set the Merkle root for.
-    /// @param merkleRoot The new Merkle root.
-    function setMerkleRoot(uint256 eventId, bytes32 merkleRoot) external;
+import { LibEventFactory } from "./LibEventFactory.sol";
 
-    /// @notice Sets a new image URI for the specified event.
-    /// @dev Only callable by the owner or authorized addresses.
-    /// @param eventId The ID of the event to set the image URI for.
-    /// @param imageUri The new image URI as a string.
-    function setImageUri(uint256 eventId, string memory imageUri) external;
+interface IEventFacet {
 
-    /// @notice Deactivates the specified event and optionally updates the Merkle root.
-    /// @dev Only callable by the owner or authorized addresses. Can be used to deactivate an event prematurely.
-    /// @param eventId The ID of the event to deactivate.
-    /// @param root Optionally, a new Merkle root to set. Pass bytes32(0) to not update the Merkle root.
-    function deactivateEvent(uint256 eventId, bytes32 root) external;
+    // --- Events ---
+    // (Keep EventCreated, EventTicketRequirementsSet, EventStatusChanged, etc.)
+    // (UserParticipated event is no longer emitted from here)
+     event EventCreated(
+        uint256 indexed eventId,
+        address indexed creator,
+        bytes32 indexed eventType,
+        address logicContract,
+        uint32 startTime,
+        uint32 endTime,
+        uint64 minMemberLevel,
+        string imageUri,
+        string metadataUri
+    );
+    event EventTicketRequirementsSet(uint256 indexed eventId, LibEventFactory.TicketRequirement[] requirements);
+    event EventStatusChanged(uint256 indexed eventId, LibEventFactory.EventStatus newStatus);
+    event EventRefundsEnabled(uint256 indexed eventId, bytes32 merkleRoot);
+    event EventTicketRefunded(uint256 indexed eventId, address indexed user, uint256 ticketId, uint256 amount); // Keep if refund logic remains
+    event EventExtended(uint256 indexed eventId, uint32 addedTime); // Keep if needed
+    event ImageUriUpdated(uint256 indexed eventId, string imageUri);
+    event MetadataUriUpdated(uint256 indexed eventId, string metadataUri);
 
-    /// @notice Extends the duration of the specified event by the added time.
-    /// @dev Only callable by the owner or authorized addresses. The event time extension should respect any set maximum limits.
-    /// @param eventId The ID of the event to extend.
-    /// @param addedTime The additional time to add to the event's duration, in seconds.
-    function extendEvent(uint256 eventId, uint32 addedTime) external;
 
-    /// @notice Creates a new event
-    /// @dev External function that allows for the creation of a new event
-    /// @param _startTime The start time of the event
-    /// @param _endTime The end time of the event
-    /// @param _minEntries The minimum number of entries for the event
-    /// @param _maxEntries The maximum number of entries for the event
-    /// @param _imageUri The URI for the event's image
-    /// @return The ID of the created event
+    // --- External Functions ---
+
+    // Create Event (remains the same signature as before)
     function createEvent(
-        uint32 _startTime,
-        uint32 _endTime,
-        uint256 _minEntries,
-        uint256 _maxEntries,
-        string calldata _imageUri, 
-        uint256[] memory _ticketIds,
-        uint256 _maxEntriesPerUser
-    ) external returns (uint256);
+        bytes32 eventType,
+        address logicContract,
+        uint32 startTime,
+        uint32 endTime,
+        uint64 minMemberLevel,
+        uint256 maxEntriesPerUser,
+        string memory imageUri,
+        string memory metadataUri,
+        LibEventFactory.TicketRequirement[] calldata requirements
+    ) external returns (uint256 eventId);
 
-    /// @notice Allows the redemption of multiple tickets for an event
-    /// @dev Batch process to redeem multiple tickets at once
-    /// @param eventId The ID of the event
-    /// @param ticketIds The IDs of the tickets to be redeemed
-    /// @param amounts The amounts corresponding to each ticket to be redeemed
-    function redeemTickets(uint256 eventId, uint256[] calldata ticketIds, uint256[] calldata amounts) external;
+    /**
+     * @notice Verifies participation criteria and executes required token interaction.
+     * @dev Called BY logic apps to ensure core rules are met before they proceed.
+     * Requires the user to have approved the calling logic app for token transfers.
+     * @param eventId The event ID.
+     * @param user The participating user address.
+     * @param ticketId The ticket ID being used.
+     * @param amount The amount of the ticket being used.
+     * @param expectedInteraction The type of token interaction required by the logic app.
+     * @return success Boolean indicating if core verification and interaction succeeded.
+     */
+    function verifyAndProcessParticipation(
+        uint256 eventId,
+        address user,
+        uint256 ticketId,
+        uint256 amount,
+        LibEventFactory.TicketInteraction expectedInteraction
+    ) external returns (bool success);
 
-    /// @notice Allows the refund of tickets
-    /// @dev Batch process to refund multiple tickets at once. We refund a user
-          ///   if they can prove their addre
-    /// @param eventId The ID of the event
-    /// @param ticketIds The IDs of the tickets to be refunded
-    /// @param lowerBound Lower bound address 
-    /// @param upperBound upper bound address 
-    /// @param merkleProof Lower bound address 
 
-    function refundTicketsWithProof(uint256 eventId, uint256[] calldata ticketIds, address lowerBound, 
-        address upperBound, 
-        bytes32[] calldata merkleProof) external;
+    // --- Event Management Functions ---
+    // (Keep cancelEvent, updateEventURIs, setRefundMerkleRoot signatures as before)
+    function cancelEvent(uint256 eventId, bytes32 refundMerkleRoot) external;
+    function updateEventURIs(uint256 eventId, string calldata imageUri, string calldata metadataUri) external;
+    function setRefundMerkleRoot(uint256 eventId, bytes32 root) external;
+
+
+    // --- Refund Functions ---
+    // Keep claimRefundWithProof signature if logic remains, otherwise remove.
+    // function claimRefundWithProof(...) external;
+
+
+    // --- Getter Functions ---
+    // (Keep getEventDetails, getEventTicketRequirements, getEventStatus, getLogicContract signatures as before)
+     function getEventDetails(uint256 eventId) external view returns (
+        address creator,
+        bytes32 eventType,
+        address logicContract,
+        uint32 startTime,
+        uint32 endTime,
+        uint64 minMemberLevel,
+        uint256 maxEntriesPerUser,
+        string memory imageUri,
+        string memory metadataUri,
+        LibEventFactory.EventStatus status,
+        uint256 currentEntries, // Revisit definition if needed
+        bytes32 merkleRoot
+    );
+   
+    // In IEventFacet.sol
+
+
+    function getEventCoreInfo(uint256 eventId) external view returns (
+        address creator,
+        bytes32 eventType,
+        address logicContract,
+        LibEventFactory.EventStatus status
+    );
+
+    function getEventTimeInfo(uint256 eventId) external view returns (
+        uint32 startTime,
+        uint32 endTime
+    );
+
+    function getEventLimitInfo(uint256 eventId) external view returns (
+        int64 minMemberLevel,      // Corrected type
+        uint256 maxEntriesPerUser
+    );
+
+    function getEventURIs(uint256 eventId) external view returns (
+        string memory imageUri, 
+        string memory metadataUri
+    );
+
+    function getEventStateInfo(uint256 eventId) external view returns (
+        // uint256 currentEntries, // Decide how/if to expose this
+        bytes32 merkleRoot
+    );
+
+    // Keep getEventTicketRequirements, getEventStatus, getLogicContract as they are okay
+     function getEventTicketRequirements(uint256 eventId) external view returns (LibEventFactory.TicketRequirement[] memory);
+     function getEventStatus(uint256 eventId) external view returns (LibEventFactory.EventStatus);
+     function getLogicContract(uint256 eventId) external view returns (address);
+
+
+    // ... other functions/events ...
+
+
 }

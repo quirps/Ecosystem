@@ -15,7 +15,7 @@ contract DiamondDeploy {
     }
 
     function deploy(address owner, uint256 _salt, bytes calldata _bytecode, IDiamondCut.FacetCut[] memory _facetCuts) external returns (address diamond_) {
-        //require(msg.sender == registryAddress,"Must be initiated from the MassDX registry.");
+        require(msg.sender == registryAddress,"Must be initiated from the MassDX registry.");
         
         // Initialize a variable to hold the deployed address
         address deployedAddress; //fksdf

@@ -177,30 +177,17 @@ app.get('/version', async (req, res) => {
          resource.ecosystemABI = ecoArtifact.abi; // Assign the ABI array
 
         // 2. Check access and read Consolidated Artifact for Diamond bytecode
-        try {
-            await fs.access(consolidatedArtifactFile);
-            const consolidatedBuffer = await fs.readFile(consolidatedArtifactFile);
-            const artifacts = JSON.parse(consolidatedBuffer.toString('utf-8')); // Parse the JSON
-
-            if (artifacts && artifacts.DiamondDeploy && typeof artifacts.DiamondDeploy.bytecode === 'string') {
-                 resource.diamondBytecode = artifacts.DiamondDeploy.bytecode;
-                 // Successfully retrieved both ABI and Bytecode
-                 return res.status(200).json(resource);
-            } else {
-                console.error(`DiamondDeploy bytecode missing or invalid in ${consolidatedArtifactFile}`);
-                 // ABI found, but bytecode missing. Return error specific to bytecode.
-                 return res.status(404).json({ error: 'Diamond deployment bytecode not found or invalid in consolidated artifacts.' });
-            }
-        } catch (consolidatedError) {
-            // Handle errors specific to the consolidated artifact file
-            if (consolidatedError.code === 'ENOENT') {
-                console.error(`Consolidated artifact file not found: ${consolidatedArtifactFile}`);
-                // ABI found, but consolidated file missing. Return specific error.
-                return res.status(404).json({ error: 'Consolidated deployment artifacts file not found.' });
-            } else {
-                console.error(`Error accessing consolidated artifacts ${consolidatedArtifactFile}:`, consolidatedError);
-                return res.status(500).json({ error: 'Error accessing consolidated deployment artifacts.' });
-            }
+        const bytecode = await getDiamondBytecodeIdiomatic();
+        if (bytecode) {
+            // Use the bytecode...
+            console.log("Diamond Bytecode:", bytecode.substring(0, 66) + "..."); // Print snippet
+            resource.diamondBytecode = bytecode;
+            // If you were in an Express handler context like before:
+             return res.status(200).json(resource);
+        } else {
+            console.log("Failed to retrieve Diamond bytecode.");
+            // If you were in an Express handler context:
+             return res.status(404).json({ error: "Failed to retrieve Diamond bytecode." });
         }
 
     } catch (ecoAbiError) {
@@ -214,6 +201,41 @@ app.get('/version', async (req, res) => {
         }
     }
 });
+
+async function getDiamondBytecodeIdiomatic() {
+  try {
+      // 1. Use hre.artifacts.readArtifact() to get the artifact object
+      //    Provide the *Contract Name* (not the file name)
+      const diamondArtifact = await hre.artifacts.readArtifact("Diamond");
+
+      // 2. Access the bytecode directly from the artifact object
+      const bytecode = diamondArtifact.bytecode;
+
+      // 3. Validate the bytecode (optional but good practice)
+      if (typeof bytecode === 'string' && bytecode !== '0x') {
+          console.log("Successfully retrieved Diamond bytecode using hre.artifacts.");
+
+          // You can also access the ABI easily:
+          // const abi = diamondArtifact.abi;
+          // console.log("ABI:", abi);
+
+          return bytecode; // Return the bytecode
+      } else {
+          console.error("Diamond bytecode is missing, invalid, or empty in the artifact.");
+          return null; // Indicate failure
+      }
+
+  } catch (error) {
+      // hre.artifacts.readArtifact throws an error if the artifact doesn't exist
+      console.error("Error reading Diamond artifact:", error.message);
+      // Handle cases where the artifact might not be found (e.g., compilation failed, wrong name)
+      if (error.message.includes("Artifact for contract \"Diamond\" not found")) {
+           console.error("Make sure the 'Diamond' contract is compiled successfully.");
+      }
+      return null; // Indicate failure
+  }
+}
+
 
 // Endpoint to serve specific TypeChain factory files
 app.get('/types/factories/:factoryName', async (req, res) => {

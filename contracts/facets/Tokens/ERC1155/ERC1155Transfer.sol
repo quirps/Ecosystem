@@ -71,4 +71,36 @@ contract ERC1155Transfer is    iERC1155Transfer {
         return es.operatorApprovals[account][operator];
     }
     
+     /**
+     * @dev See {IERC1155-balanceOf}.
+     *
+     * Requirements:
+     *
+     * - `account` cannot be the zero address.
+     */
+    function balanceOf(address account, uint256 id) public view    returns (uint256) {
+        _balanceOf(account,id);
+    } 
+
+    /**
+     * @dev See {IERC1155-balanceOfBatch}.
+     * 
+     * Requirements:
+     *
+     * - `accounts` and `ids` must have the same length.
+     */
+    function balanceOfBatch(
+        address[] memory accounts,
+        uint256[] memory ids
+    ) public view  returns (uint256[] memory) {
+        require(accounts.length == ids.length, "ERC1155: accounts and ids length mismatch");
+
+        uint256[] memory batchBalances = new uint256[](accounts.length);
+
+        for (uint256 i = 0; i < accounts.length; ++i) {
+            batchBalances[i] = _balanceOf(accounts[i], ids[i]); 
+        }
+
+        return batchBalances;
+    }
 }

@@ -18,7 +18,7 @@ import { iOwnership } from "../Ownership/_Ownership.sol"; // Assumed for onlyOwn
 contract iMembers is iOwnership {
 
     /// @notice Represents the level assigned to banned members.
-    int64 public constant BANNED_LEVEL = type(int64).min; 
+    int64 internal constant BANNED_LEVEL = type(int64).min;  
 
     // --- Events ---
 

@@ -21,8 +21,6 @@ contract iERC1155Transfer is iERC1155ContractTransfer, iERC2771Recipient {
         require(to != address(0), "ERC1155: transfer to the zero address");
         LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
         address operator = msgSender(); 
-        uint256[] memory ids = LibERC1155._asSingletonArray(id);
-        uint256[] memory amounts = LibERC1155._asSingletonArray(amount);
 
         uint256 fromBalance = es.balance[id][from];
         require(fromBalance >= amount, "ERC1155: insufficient balance for transfer");
@@ -81,6 +79,11 @@ contract iERC1155Transfer is iERC1155ContractTransfer, iERC2771Recipient {
         emit ApprovalForAll(owner, operator, approved);
     }
 
-    
+    function _balanceOf(address account, uint256 id) internal view returns (uint256 amount_){
+        require(account != address(0), "ERC1155: address zero is not a valid owner");
+        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();        
+        return es.balance[id][account]; 
+    }
+     
 }
 

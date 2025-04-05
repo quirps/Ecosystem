@@ -16,7 +16,25 @@
         //     ],
         //     "type": "node"
         // },
-        
+        {
+          "type": "node",
+          "request": "launch",
+          "name": "Debug Hardhat Deploy",
+          "runtimeExecutable": "npx", // or "npx.cmd" on Windows
+          "runtimeArgs": [
+            "hardhat",
+            "deploy",
+            "--network",
+            "hardhat", // Target your testing network
+            "--tags",
+            "DebugIncrementalUploadDeploy",
+          ],
+          "console": "integratedTerminal",
+          "skipFiles": [ // Optional: Avoid stepping into library code
+            "<node_internals>/**",
+            "node_modules/**"
+          ]
+        },
        
         
               {

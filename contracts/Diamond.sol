@@ -8,19 +8,32 @@ pragma solidity ^0.8.0;
 * Implementation of a diamond.
 /******************************************************************************/
 
-import { LibDiamond } from "./facets/Diamond/LibDiamond.sol";
-import { IDiamondCut } from "./facets/Diamond/IDiamondCut.sol";
+import {LibDiamond} from "./facets/Diamond/LibDiamond.sol";
+import {IDiamondCut} from "./facets/Diamond/IDiamondCut.sol";
 
-import {LibOwnership} from "./facets/Ownership/LibOwnership.sol"; 
-import {iOwnership} from "./facets/Ownership/_Ownership.sol";  
+import {LibOwnership} from "./facets/Ownership/LibOwnership.sol";
+import {iOwnership} from "./facets/Ownership/_Ownership.sol";
 
 import "hardhat/console.sol";
-contract Diamond is iOwnership{    
+contract Diamond is iOwnership {
+    constructor(address _owner, address _registry, IDiamondCut.FacetCut[] memory _cuts) payable {
+        LibOwnership._setRegistry(_registry);
+        LibOwnership._setEcosystemOwner(_owner);
+        LibDiamond.diamondCut(_cuts, address(0), "");
+    }
+ 
+    function getOwner() external view returns (address owner_) {
+        owner_ = _ecosystemOwner();
+    }
 
-    constructor(address _owner, address _registry, IDiamondCut.FacetCut[] memory _cuts) payable {    
-        LibOwnership._setRegistry( _registry );    
-        LibOwnership._setEcosystemOwner( _owner ); 
-        LibDiamond.diamondCut(_cuts, address(0), "");        
+    function getFacetAddresses() external view returns (address[] memory facetAddresses_){
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        facetAddresses_ = ds.facetAddresses;
+    }
+
+    function getSelectors ( address facetAddress) external view returns (bytes4[] memory selectors_){
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        return ds.facetFunctionSelectors[ facetAddress ].functionSelectors;  
     }
 
     // Find facet for function that is called and execute the
@@ -46,12 +59,12 @@ contract Diamond is iOwnership{
             returndatacopy(0, 0, returndatasize())
             // return any return value or error back to the caller
             switch result
-                case 0 {
-                    revert(0, returndatasize())
-                }
-                default {
-                    return(0, returndatasize())
-                }
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
+            }
         }
     }
 

@@ -8,7 +8,7 @@ import { iMemberRegistry } from "./_MemberRegistry.sol";
 /// @notice Provides external functions to interact with the Member Registry system.
 /// Handles access control and forwards calls to the internal logic functions.
 /// Inherits from iMemberRegistry to access internal functions and state via LibMemberRegistry.
-contract MemberRegistryFacet is iMemberRegistry {
+contract MemberRegistry is iMemberRegistry {
 
     // --- Owner Functions ---
     // (Functions from previous response: setRegistryMerkleRoot, setDefaultRecoveryStake, setUserSpecificRecoveryStake, batchSetUsernames)

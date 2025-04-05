@@ -1053,27 +1053,22 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
-        components: [
-          {
-            internalType: "address",
-            name: "memberAddress",
-            type: "address",
-          },
-          {
-            internalType: "uint32",
-            name: "level",
-            type: "uint32",
-          },
-          {
-            internalType: "uint32",
-            name: "timestamp",
-            type: "uint32",
-          },
-        ],
+        indexed: true,
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
         indexed: false,
-        internalType: "struct LibMemberLevel.Leaf",
-        name: "leaf",
-        type: "tuple",
+        internalType: "int64",
+        name: "level",
+        type: "int64",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
+        name: "timestamp",
+        type: "uint32",
       },
     ],
     name: "MemberLevelUpdated",
@@ -1150,6 +1145,19 @@ const _abi = [
     type: "event",
   },
   {
+    inputs: [],
+    name: "BANNED_LEVEL",
+    outputs: [
+      {
+        internalType: "int64",
+        name: "",
+        type: "int64",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "address",
@@ -1172,9 +1180,9 @@ const _abi = [
             type: "address",
           },
           {
-            internalType: "uint32",
+            internalType: "int64",
             name: "level",
-            type: "uint32",
+            type: "int64",
           },
           {
             internalType: "uint32",
@@ -1193,6 +1201,19 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "getBannedLevel",
+    outputs: [
+      {
+        internalType: "int64",
+        name: "",
+        type: "int64",
+      },
+    ],
+    stateMutability: "pure",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "address",
@@ -1203,9 +1224,9 @@ const _abi = [
     name: "getMemberLevel",
     outputs: [
       {
-        internalType: "uint32",
-        name: "memberLevel_",
-        type: "uint32",
+        internalType: "int64",
+        name: "",
+        type: "int64",
       },
     ],
     stateMutability: "view",
@@ -1222,14 +1243,21 @@ const _abi = [
     name: "getMemberLevelStruct",
     outputs: [
       {
-        internalType: "uint32",
-        name: "level",
-        type: "uint32",
-      },
-      {
-        internalType: "uint32",
-        name: "timestamp",
-        type: "uint32",
+        components: [
+          {
+            internalType: "int64",
+            name: "level",
+            type: "int64",
+          },
+          {
+            internalType: "uint32",
+            name: "timestamp",
+            type: "uint32",
+          },
+        ],
+        internalType: "struct LibMemberLevel.MemberLevel",
+        name: "",
+        type: "tuple",
       },
     ],
     stateMutability: "view",
@@ -1238,26 +1266,77 @@ const _abi = [
   {
     inputs: [
       {
-        components: [
-          {
-            internalType: "address",
-            name: "memberAddress",
-            type: "address",
-          },
-          {
-            internalType: "uint32",
-            name: "level",
-            type: "uint32",
-          },
-          {
-            internalType: "uint32",
-            name: "timestamp",
-            type: "uint32",
-          },
-        ],
-        internalType: "struct LibMemberLevel.Leaf",
-        name: "_leaf",
-        type: "tuple",
+        internalType: "address",
+        name: "_user",
+        type: "address",
+      },
+    ],
+    name: "getMemberLevelTimestamp",
+    outputs: [
+      {
+        internalType: "uint32",
+        name: "",
+        type: "uint32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getMerkleRoot",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        internalType: "int64",
+        name: "level",
+        type: "int64",
+      },
+    ],
+    name: "setMemberLevel",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "_merkleRoot",
+        type: "bytes32",
+      },
+    ],
+    name: "updateMemberMerkleRoot",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "int64",
+        name: "level",
+        type: "int64",
+      },
+      {
+        internalType: "uint32",
+        name: "timestamp",
+        type: "uint32",
       },
       {
         internalType: "bytes32[]",
@@ -1284,6 +1363,19 @@ const _abi = [
     inputs: [],
     name: "MigrationNotInitiated",
     type: "error",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "newStakeAmount",
+        type: "uint256",
+      },
+    ],
+    name: "DefaultRecoveryStakeUpdated",
+    type: "event",
   },
   {
     anonymous: false,
@@ -1352,9 +1444,9 @@ const _abi = [
         type: "string",
       },
       {
-        indexed: false,
+        indexed: true,
         internalType: "address",
-        name: "userAddress",
+        name: "initiatorOrTargetAddress",
         type: "address",
       },
       {
@@ -1363,8 +1455,33 @@ const _abi = [
         name: "recoveryStatus",
         type: "uint8",
       },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "stakeAmount",
+        type: "uint256",
+      },
     ],
     name: "RecoveryAction",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: "bytes32",
+        name: "newMerkleRoot",
+        type: "bytes32",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "timestamp",
+        type: "uint256",
+      },
+    ],
+    name: "RegistryMerkleRootUpdated",
     type: "event",
   },
   {
@@ -1377,7 +1494,7 @@ const _abi = [
         type: "string",
       },
       {
-        indexed: false,
+        indexed: true,
         internalType: "address",
         name: "userAddress",
         type: "address",
@@ -1391,19 +1508,50 @@ const _abi = [
     inputs: [
       {
         indexed: false,
-        internalType: "string[]",
+        internalType: "string",
         name: "username",
-        type: "string[]",
+        type: "string",
       },
       {
         indexed: false,
+        internalType: "uint256",
+        name: "newStakeAmount",
+        type: "uint256",
+      },
+    ],
+    name: "UserSpecificRecoveryStakeUpdated",
+    type: "event",
+  },
+  {
+    inputs: [],
+    name: "VERIFICATION_TIME",
+    outputs: [
+      {
+        internalType: "uint32",
+        name: "",
+        type: "uint32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string[]",
+        name: "usernames",
+        type: "string[]",
+      },
+      {
         internalType: "address[]",
-        name: "userAddress",
+        name: "userAddresses",
         type: "address[]",
       },
     ],
-    name: "UsersRegistered",
-    type: "event",
+    name: "batchSetUsernames",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
     inputs: [
@@ -1413,9 +1561,28 @@ const _abi = [
         type: "string",
       },
     ],
-    name: "cancelVerify",
+    name: "cancelRecovery",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_userAddress",
+        type: "address",
+      },
+    ],
+    name: "doesAddressHaveUsername",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {
@@ -1435,62 +1602,142 @@ const _abi = [
     inputs: [
       {
         internalType: "string",
-        name: "username",
+        name: "_username",
         type: "string",
       },
     ],
-    name: "setUsernameAddressPair",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
+    name: "getAddress",
+    outputs: [
       {
-        internalType: "string[]",
-        name: "username",
-        type: "string[]",
-      },
-      {
-        internalType: "address[]",
-        name: "userAddress",
-        type: "address[]",
+        internalType: "address",
+        name: "",
+        type: "address",
       },
     ],
-    name: "setUsernameOwner",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "username",
-        type: "string",
-      },
-    ],
-    name: "setUsernamePair",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "string",
-        name: "username",
-        type: "string",
-      },
-    ],
-    name: "usernameRecovery",
-    outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "view",
     type: "function",
   },
   {
     inputs: [],
-    name: "verificationTime",
+    name: "getDefaultRecoveryStake",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "_username",
+        type: "string",
+      },
+    ],
+    name: "getRecoveryInfo",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "userNewAddress",
+            type: "address",
+          },
+          {
+            internalType: "uint32",
+            name: "recoveryTimestamp",
+            type: "uint32",
+          },
+          {
+            internalType: "address",
+            name: "stakerAddress",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "stakedAmount",
+            type: "uint256",
+          },
+        ],
+        internalType: "struct LibMemberRegistry.Recovery",
+        name: "recoveryInfo",
+        type: "tuple",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getRegistryMerkleRoot",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getRegistryMerkleRootTimestamp",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "_username",
+        type: "string",
+      },
+    ],
+    name: "getUserSpecificRecoveryStake",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_userAddress",
+        type: "address",
+      },
+    ],
+    name: "getUsername",
+    outputs: [
+      {
+        internalType: "string",
+        name: "",
+        type: "string",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getVerificationTime",
     outputs: [
       {
         internalType: "uint32",
@@ -1499,6 +1746,82 @@ const _abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "username",
+        type: "string",
+      },
+    ],
+    name: "initiateUsernameRecovery",
+    outputs: [],
+    stateMutability: "payable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "_username",
+        type: "string",
+      },
+    ],
+    name: "isUsernameTaken",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_stakeAmount",
+        type: "uint256",
+      },
+    ],
+    name: "setDefaultRecoveryStake",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "_newRoot",
+        type: "bytes32",
+      },
+    ],
+    name: "setRegistryMerkleRoot",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "_username",
+        type: "string",
+      },
+      {
+        internalType: "uint256",
+        name: "_stakeAmount",
+        type: "uint256",
+      },
+    ],
+    name: "setUserSpecificRecoveryStake",
+    outputs: [],
+    stateMutability: "nonpayable",
     type: "function",
   },
   {
@@ -1526,7 +1849,7 @@ const _abi = [
         type: "bytes32[]",
       },
     ],
-    name: "verifyAndUsername",
+    name: "verifyAndRegisterUsername",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -1704,6 +2027,19 @@ const _abi = [
     type: "function",
   },
   {
+    inputs: [],
+    name: "owner",
+    outputs: [
+      {
+        internalType: "address",
+        name: "owner_",
+        type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "address",
@@ -1779,27 +2115,22 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
-        components: [
-          {
-            internalType: "address",
-            name: "memberAddress",
-            type: "address",
-          },
-          {
-            internalType: "uint32",
-            name: "level",
-            type: "uint32",
-          },
-          {
-            internalType: "uint32",
-            name: "timestamp",
-            type: "uint32",
-          },
-        ],
+        indexed: true,
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
         indexed: false,
-        internalType: "struct LibMemberLevel.Leaf",
-        name: "leaf",
-        type: "tuple",
+        internalType: "int64",
+        name: "level",
+        type: "int64",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
+        name: "timestamp",
+        type: "uint32",
       },
     ],
     name: "MemberLevelUpdated",
@@ -2028,6 +2359,19 @@ const _abi = [
     ],
     name: "TransferSingle",
     type: "event",
+  },
+  {
+    inputs: [],
+    name: "BANNED_LEVEL",
+    outputs: [
+      {
+        internalType: "int64",
+        name: "",
+        type: "int64",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
   },
   {
     inputs: [
@@ -2369,27 +2713,22 @@ const _abi = [
     anonymous: false,
     inputs: [
       {
-        components: [
-          {
-            internalType: "address",
-            name: "memberAddress",
-            type: "address",
-          },
-          {
-            internalType: "uint32",
-            name: "level",
-            type: "uint32",
-          },
-          {
-            internalType: "uint32",
-            name: "timestamp",
-            type: "uint32",
-          },
-        ],
+        indexed: true,
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
         indexed: false,
-        internalType: "struct LibMemberLevel.Leaf",
-        name: "leaf",
-        type: "tuple",
+        internalType: "int64",
+        name: "level",
+        type: "int64",
+      },
+      {
+        indexed: false,
+        internalType: "uint32",
+        name: "timestamp",
+        type: "uint32",
       },
     ],
     name: "MemberLevelUpdated",
@@ -2582,6 +2921,19 @@ const _abi = [
     type: "event",
   },
   {
+    inputs: [],
+    name: "BANNED_LEVEL",
+    outputs: [
+      {
+        internalType: "int64",
+        name: "",
+        type: "int64",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
     inputs: [
       {
         internalType: "uint256",
@@ -2645,9 +2997,9 @@ const _abi = [
           {
             components: [
               {
-                internalType: "uint32",
+                internalType: "int64",
                 name: "minimumLevel",
-                type: "uint32",
+                type: "int64",
               },
               {
                 internalType: "bool",
@@ -2756,9 +3108,9 @@ const _abi = [
           {
             components: [
               {
-                internalType: "uint32",
+                internalType: "int64",
                 name: "minimumLevel",
-                type: "uint32",
+                type: "int64",
               },
               {
                 internalType: "bool",

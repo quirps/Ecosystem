@@ -23,7 +23,7 @@ contract ERC1155Ecosystem is  iERC1155, IERC1155, IERC1155MetadataURI {
     using Strings for uint256;
     
     event URIChanged( string uri );
-    
+     
     /**
      * @dev See {IERC1155MetadataURI-uri}.
      *
@@ -70,38 +70,5 @@ contract ERC1155Ecosystem is  iERC1155, IERC1155, IERC1155MetadataURI {
     function burnBatch(address from, uint256[] memory ids, uint256[] memory amounts) external override {
         _burnBatch(from, ids, amounts);
     }
-    /**
-     * @dev See {IERC1155-balanceOf}.
-     *
-     * Requirements:
-     *
-     * - `account` cannot be the zero address.
-     */
-    function balanceOf(address account, uint256 id) public view  override  returns (uint256) {
-        require(account != address(0), "ERC1155: address zero is not a valid owner");
-        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();        
-        return es.balance[id][account];
-    }
-
-    /**
-     * @dev See {IERC1155-balanceOfBatch}.
-     *
-     * Requirements:
-     *
-     * - `accounts` and `ids` must have the same length.
-     */
-    function balanceOfBatch(
-        address[] memory accounts,
-        uint256[] memory ids
-    ) public view  override returns (uint256[] memory) {
-        require(accounts.length == ids.length, "ERC1155: accounts and ids length mismatch");
-
-        uint256[] memory batchBalances = new uint256[](accounts.length);
-
-        for (uint256 i = 0; i < accounts.length; ++i) {
-            batchBalances[i] = balanceOf(accounts[i], ids[i]);
-        }
-
-        return batchBalances;
-    }
+   
 }
