@@ -4,6 +4,7 @@ const cors = require('cors');
 const fs = require('fs').promises;
 const path = require('path');
 const { glob } = require('glob'); // Import glob
+const hre = require('hardhat')
 
 const app = express();
 const port = process.env.PORT || 3010; // Use environment variable or default

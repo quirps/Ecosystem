@@ -25,9 +25,10 @@
             "hardhat",
             "deploy",
             "--network",
-            "hardhat", // Target your testing network
-            "--tags",
-            "DebugIncrementalUploadDeploy",
+            "localhost", // Target your testing network
+          
+
+            
           ],
           "console": "integratedTerminal",
           "skipFiles": [ // Optional: Avoid stepping into library code

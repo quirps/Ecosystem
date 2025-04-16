@@ -10,7 +10,17 @@ library LibEventFactory {
         uint256 minAmount;
         uint256 maxAmount;
     }
-
+ struct CreateEventParams {
+        address creator;
+        bytes32 eventType;
+        uint32 startTime;
+        uint32 endTime;
+        int64 minMemberLevel;
+        uint256 maxEntriesPerUser;
+        string imageUri;
+        string metadataUri;
+        TicketRequirement[] requirements; // Assuming TicketRequirement is defined elsewhere
+    }
      enum EventStatus {
         Pending,        // Created, before startTime
         RegistrationOpen, // After startTime, before participation cutoff (if any)

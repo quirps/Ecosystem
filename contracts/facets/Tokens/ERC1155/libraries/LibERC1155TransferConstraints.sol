@@ -27,15 +27,7 @@ function erc1155ConstraintStorage() internal pure returns (ConstraintStorage sto
         Expireable expireable;
         RoyaltyFee royaltyFee;
     }
-    struct MaxAmount{
-        uint256 maxAmount;
-        bool isActive;
-    }
-    struct RoyaltyFee{
-        uint24 fee;
-        bool isActive;
-    }
-    struct TransferLimit{
+     struct TransferLimit{
         uint256 maxTransfers;
         bool isActive;
     } 
@@ -43,13 +35,23 @@ function erc1155ConstraintStorage() internal pure returns (ConstraintStorage sto
         int64 minimumLevel;
         bool isActive;
     }
-
-    //Blacklist contained in MemberRankDependency, rank 0 is blacklist, 
-    //set min rank as 1 or greater
-    struct Expireable{
+     struct Expireable{
         uint32 expireTime;
         bool isActive;
     }
+    struct RoyaltyFee{
+        uint24 fee;
+        bool isActive;
+    }
+ 
+    struct MaxAmount{
+        uint256 maxAmount;
+        bool isActive;
+    }
+
+    //Blacklist contained in MemberRankDependency, rank 0 is blacklist, 
+    //set min rank as 1 or greater
+ 
 
     // struct MemberRankTieredDelay{
     //     LibMembers.rank minimumRank;

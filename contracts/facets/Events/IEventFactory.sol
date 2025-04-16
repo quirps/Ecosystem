@@ -8,17 +8,19 @@ interface IEventFacet {
     // --- Events ---
     // (Keep EventCreated, EventTicketRequirementsSet, EventStatusChanged, etc.)
     // (UserParticipated event is no longer emitted from here)
-     event EventCreated(
+
+        event EventCreated(
         uint256 indexed eventId,
         address indexed creator,
         bytes32 indexed eventType,
-        address logicContract,
         uint32 startTime,
         uint32 endTime,
-        uint64 minMemberLevel,
+        int64 minMemberLevel, 
         string imageUri,
-        string metadataUri
+        string metadataUri // Added
+        // Removed min/max entries from event, handled by logic or core checks
     );
+    
     event EventTicketRequirementsSet(uint256 indexed eventId, LibEventFactory.TicketRequirement[] requirements);
     event EventStatusChanged(uint256 indexed eventId, LibEventFactory.EventStatus newStatus);
     event EventRefundsEnabled(uint256 indexed eventId, bytes32 merkleRoot);
@@ -32,15 +34,7 @@ interface IEventFacet {
 
     // Create Event (remains the same signature as before)
     function createEvent(
-        bytes32 eventType,
-        address logicContract,
-        uint32 startTime,
-        uint32 endTime,
-        uint64 minMemberLevel,
-        uint256 maxEntriesPerUser,
-        string memory imageUri,
-        string memory metadataUri,
-        LibEventFactory.TicketRequirement[] calldata requirements
+        LibEventFactory.CreateEventParams calldata createEventParams
     ) external returns (uint256 eventId);
 
     /**
@@ -66,6 +60,7 @@ interface IEventFacet {
     // --- Event Management Functions ---
     // (Keep cancelEvent, updateEventURIs, setRefundMerkleRoot signatures as before)
     function cancelEvent(uint256 eventId, bytes32 refundMerkleRoot) external;
+    function endEvent(uint256 eventId) external;
     function updateEventURIs(uint256 eventId, string calldata imageUri, string calldata metadataUri) external;
     function setRefundMerkleRoot(uint256 eventId, bytes32 root) external;
 
@@ -93,6 +88,7 @@ interface IEventFacet {
     );
    
     // In IEventFacet.sol
+    function getEventCreator(uint256 eventId) external view returns (address creator);
 
 
     function getEventCoreInfo(uint256 eventId) external view returns (

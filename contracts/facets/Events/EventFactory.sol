@@ -30,28 +30,13 @@ contract EventFacet is  iEventFactory, ReentrancyGuardContract {
      * @notice Creates a new event, checking if an app is installed for the given type.
      * @dev Only callable by the contract owner (or designated creator role).
      */
+     
     function createEvent(
-        bytes32 eventType,
-        // no logicContract param
-        uint32 startTime,
-        uint32 endTime,
-        int64 minMemberLevel, // Corrected type
-        uint256 maxEntriesPerUser,
-        string memory imageUri,
-        string memory metadataUri,
-        LibEventFactory.TicketRequirement[] calldata requirements
+        LibEventFactory.CreateEventParams calldata createEventParams
     ) external  onlyOwner returns (uint256 eventId) { // Apply access control
         // Calls internal function from iEventFactory 
-        eventId = _createEvent(
-            msg.sender, // Set creator as msg.sender (or pass if needed)
-            eventType,
-            startTime, 
-            endTime,
-            minMemberLevel,
-            maxEntriesPerUser,
-            imageUri,
-            metadataUri,
-            requirements
+        eventId = _createEvent( 
+           createEventParams
         );
         // Event emitted by _createEvent
     }
@@ -88,6 +73,9 @@ contract EventFacet is  iEventFactory, ReentrancyGuardContract {
      */
     function cancelEvent(uint256 eventId, bytes32 refundMerkleRoot) external  onlyOwner { // Apply access control
         _cancelEvent(eventId, refundMerkleRoot); // Call internal logic
+    }
+    function endEvent(uint256 eventId) external  onlyOwner { // Apply access control
+        _endEvent(eventId); // Call internal logic
     }
 
     /**
@@ -135,6 +123,11 @@ contract EventFacet is  iEventFactory, ReentrancyGuardContract {
     {
         LibEventFactory.EventDetail storage eventDetail = LibEventFactory.eventStorage().events[eventId];
         return (eventDetail.startTime, eventDetail.endTime);
+    }
+
+    function getEventCreator(uint256 eventId) external view returns (address creator_){
+        LibEventFactory.EventDetail storage _event = LibEventFactory.getEventDetail( eventId );
+        creator_ = _event.creator;
     }
 
     function getEventLimitInfo(uint256 eventId)

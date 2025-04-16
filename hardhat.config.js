@@ -13,6 +13,9 @@ const FACETS = [
     'DiamondCutFacet', 'DiamondInit', 'DiamondLoupeFacet', 'ERC1155Ecosystem', 'ERC1155Transfer','ERC1155ReceiverEcosystem','ERC20Ecosystem', 'MemberRegistry',
     'Members', 'Moderator', 'OwnershipFacet', 'EventFactory', 'Stake','ERC2981','TicketCreate',
 ]
+const INTERFACES = [
+  'IEventFacet'
+]
 WALLET_BASE_AMOUNT = "10000000000000000000000000000" // 10**30
 
 // You need to export an object to set up your config
@@ -30,13 +33,13 @@ module.exports = {
     // (required) The name of your Diamond ABI
     name: "Ecosystem",
     filter: function (abiElement, index, fullAbi, fullyQualifiedName) {
-     let startIndex = fullyQualifiedName.indexOf(':') 
-     let currentContract = fullyQualifiedName.substr(startIndex + 1)
-     if ( FACETS.includes(currentContract) && fullyQualifiedName.includes('contracts/facets') ){
-     }
-      // 'contracts/facets/DiamondLoupeFacet.sol:DiamondLoupeFacet'
-      // console.log(abiElement.name)
-      return FACETS.includes(currentContract) && fullyQualifiedName.includes('contracts/facets');
+      let startIndex = fullyQualifiedName.indexOf(':') 
+      let currentContract = fullyQualifiedName.substr(startIndex + 1)
+    
+      return (
+        (FACETS.includes(currentContract) && fullyQualifiedName.includes('contracts/facets')) ||
+        (INTERFACES.includes(currentContract) && fullyQualifiedName.includes('contracts/facets'))
+      );
     },
     strict: false
   },
@@ -73,7 +76,7 @@ module.exports = {
     currency: 'CHF',
     gasPrice: 21
   },
-  defaultNetwork: "hardhat",
+  defaultNetwork: "localhost",
   networks: {
       hardhat: {
      accounts: getWallets('hardhat'),
@@ -99,6 +102,12 @@ module.exports = {
       // Example: Specify different deployers per network
       // 1: "0xYourMainnetDeployerAddress", // Mainnet (chainId 1)
       // 11155111: "0xYourSepoliaDeployerAddress", // Sepolia
+    },
+    user1 : {
+      default : 1
+    },
+    user2 : {
+      default : 2
     },
     paths: {
       sources: "./contracts",

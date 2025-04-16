@@ -5,6 +5,7 @@ import { LibEventFactory } from "./LibEventFactory.sol";
 import { MerkleProof } from "../../libraries/utils/MerkleProof.sol";
 import { IERC1155 } from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import { iERC1155Transfer } from "../Tokens/ERC1155/internals/iERC1155Transfer.sol"; 
+import { iERC1155 } from "../Tokens/ERC1155/internals/iERC1155.sol";
 import { iAppRegistry } from "../AppRegistry/_AppRegistry.sol"; // Adjust path
 import { iOwnership } from "../Ownership/_Ownership.sol";
 import "hardhat/console.sol";
@@ -15,7 +16,7 @@ interface IMemberGetter {
 }
  
 
-contract iEventFactory is iOwnership, iAppRegistry, iERC1155Transfer{    
+contract iEventFactory is iOwnership, iAppRegistry, iERC1155Transfer, iERC1155{    
 
 
     // --- Events ---
@@ -70,6 +71,7 @@ contract iEventFactory is iOwnership, iAppRegistry, iERC1155Transfer{
     event EventExtended(uint256 indexed eventId, uint32 addedTime);
     event ImageUriUpdated(uint256 indexed eventId, string imageUri);
     event MetadataUriUpdated(uint256 indexed eventId, string metadataUri); // Added
+    event EventEnded(uint256 indexed eventId);
 
     // --- Modifiers ---
     // (Keep existing modifiers: eventExists, onlyEventCreatorOrOwner, etc.)
@@ -101,61 +103,53 @@ contract iEventFactory is iOwnership, iAppRegistry, iERC1155Transfer{
     // --- Internal Functions ---
 
     function _createEvent(
-        address _creator,
-        bytes32 _eventType,
-        uint32 _startTime,
-        uint32 _endTime,
-        int64 _minMemberLevel,
-        uint256 _maxEntriesPerUser,
-        string memory _imageUri,
-        string memory _metadataUri,
-        LibEventFactory.TicketRequirement[] memory _requirements
+        LibEventFactory.CreateEventParams memory createEventParams
     ) internal returns (uint256) {
 
         // --- Check if an app is installed for this event type ---
         // Use helper inherited from iAppManagementInternal
-        require(_isAppInstalledForType(_eventType), "Event: No app installed for type");
+        require(_isAppInstalledForType(createEventParams.eventType), "Event: No app installed for type");
         // --- END CHECK --
 
         // ... implementation from previous step ...
         // (Ensures event is created with all necessary details including logicContract address)
          LibEventFactory.EventStorage storage es = LibEventFactory.eventStorage();
  
-        require(_endTime > _startTime && _startTime >= block.timestamp, "Event: Invalid times");
-        require(_requirements.length > 0, "Event: Must have ticket requirements");
-
-        es.eventNonce++;
+        require(createEventParams.endTime > uint32( block.timestamp ), "Event: Invalid times");
+        require(createEventParams.requirements.length > 0, "Event: Must have ticket requirements");
+  
+        es.eventNonce++; 
         uint256 eventId = es.eventNonce; // Use nonce for simpler ID generation
 
         LibEventFactory.EventDetail storage newEvent = es.events[eventId];
-        newEvent.creator = _creator;
-        newEvent.eventType = _eventType;
-        newEvent.startTime = _startTime;
-        newEvent.endTime = _endTime;
-        newEvent.minMemberLevel = _minMemberLevel;
-        newEvent.maxEntriesPerUser = _maxEntriesPerUser;
-        newEvent.imageUri = _imageUri;
-        newEvent.metadataUri = _metadataUri;
+        newEvent.creator = createEventParams.creator;
+        newEvent.eventType = createEventParams.eventType;
+        newEvent.startTime = createEventParams.startTime;
+        newEvent.endTime = createEventParams.endTime;
+        newEvent.minMemberLevel = createEventParams.minMemberLevel;
+        newEvent.maxEntriesPerUser = createEventParams.maxEntriesPerUser;
+        newEvent.imageUri = createEventParams.imageUri;
+        newEvent.metadataUri = createEventParams.metadataUri;
         newEvent.status = LibEventFactory.EventStatus.Pending; // Always starts Pending
 
         // Store ticket requirements
-        for (uint i = 0; i < _requirements.length; i++) {
-             require(_requirements[i].tokenId != 0, "Event: Invalid ticketId in requirements");
-             require(_requirements[i].requiredAmount > 0, "Event: Invalid requiredAmount in requirements");
-             es.eventTicketRequirements[eventId].push(_requirements[i]);
+        for (uint i = 0; i < createEventParams.requirements.length; i++) {
+             require(createEventParams.requirements[i].tokenId != 0, "Event: Invalid ticketId in requirements");
+             require(createEventParams.requirements[i].requiredAmount > 0, "Event: Invalid requiredAmount in requirements");
+             es.eventTicketRequirements[eventId].push(createEventParams.requirements[i]);
         }
 
         emit EventCreated( 
             eventId,
-            _creator,
-            _eventType,
-            _startTime,
-            _endTime,
-            _minMemberLevel, // Added previously
-            _imageUri,
-            _metadataUri
+            createEventParams.creator,
+            createEventParams.eventType,
+            createEventParams.startTime,
+            createEventParams.endTime,
+            createEventParams.minMemberLevel, // Added previously
+            createEventParams.imageUri,
+            createEventParams.metadataUri
         );
-        emit EventTicketRequirementsSet(eventId, _requirements);
+        emit EventTicketRequirementsSet(eventId, createEventParams.requirements);
         emit EventStatusChanged(eventId, newEvent.status);
 
         return eventId;
@@ -213,7 +207,7 @@ function _verifyAndExecuteTokenInteraction(
     if (req.interactionType == LibEventFactory.TicketInteraction.Hold) {
         require(_balanceOf(_user, _ticketId) >= _amount, "Event: Insufficient balance (Hold)");
     } else if (req.interactionType == LibEventFactory.TicketInteraction.Burn) {
-        _safeTransferFrom(_user, address(0), _ticketId, _amount, "");
+        _burn(_user, _ticketId, _amount); 
     } else if (req.interactionType == LibEventFactory.TicketInteraction.Stake) {
         _safeTransferFrom(_user, msg.sender, _ticketId, _amount, ""); // Stake TO logic app (msg.sender)
     } else if (req.interactionType == LibEventFactory.TicketInteraction.RedeemToEvent) {
@@ -301,6 +295,19 @@ function _verifyAndExecuteTokenInteraction(
          if (refundMerkleRoot != bytes32(0)) {
              emit EventRefundsEnabled(eventId, refundMerkleRoot);
          }
+    }
+    function _endEvent(uint256 eventId) internal  onlyOwner { // Apply access control 
+         // ... implementation ...
+         LibEventFactory.EventDetail storage eventDetail = LibEventFactory.eventStorage().events[eventId];
+         require(
+             eventDetail.status != LibEventFactory.EventStatus.Completed &&
+             eventDetail.status != LibEventFactory.EventStatus.Cancelled,
+             "Event: Already finished or cancelled"
+         );
+
+         _updateEventStatus(eventId, LibEventFactory.EventStatus.Completed);
+
+         emit EventEnded(eventId);
     }
 
      function _setImageUri(uint256 eventId, string memory imageUri)
