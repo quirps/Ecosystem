@@ -39,7 +39,7 @@ contract iEventFactory is iOwnership, iAppRegistry, iERC1155Transfer, iERC1155{
     /// @dev Emitted when ticket requirements for an event are set or updated.
     event EventTicketRequirementsSet(
         uint256 indexed eventId,
-        LibEventFactory.TicketRequirement[] requirements
+        LibEventFactory.TicketRequirement requirements
     );
 
     /// @dev Emitted when an event's status changes.
@@ -116,7 +116,6 @@ contract iEventFactory is iOwnership, iAppRegistry, iERC1155Transfer, iERC1155{
          LibEventFactory.EventStorage storage es = LibEventFactory.eventStorage();
  
         require(createEventParams.endTime > uint32( block.timestamp ), "Event: Invalid times");
-        require(createEventParams.requirements.length > 0, "Event: Must have ticket requirements");
   
         es.eventNonce++; 
         uint256 eventId = es.eventNonce; // Use nonce for simpler ID generation
@@ -133,11 +132,9 @@ contract iEventFactory is iOwnership, iAppRegistry, iERC1155Transfer, iERC1155{
         newEvent.status = LibEventFactory.EventStatus.Pending; // Always starts Pending
 
         // Store ticket requirements
-        for (uint i = 0; i < createEventParams.requirements.length; i++) {
-             require(createEventParams.requirements[i].tokenId != 0, "Event: Invalid ticketId in requirements");
-             require(createEventParams.requirements[i].requiredAmount > 0, "Event: Invalid requiredAmount in requirements");
-             es.eventTicketRequirements[eventId].push(createEventParams.requirements[i]);
-        }
+        require(createEventParams.requirements.requiredAmount > 0, "Event: Invalid requiredAmount in requirements");
+        es.eventTicketRequirements[eventId] = createEventParams.requirements; 
+        
 
         emit EventCreated( 
             eventId,
@@ -175,7 +172,7 @@ function _verifyAndExecuteTokenInteraction(
     LibEventFactory.TicketInteraction _expectedInteraction
 ) internal eventExists(_eventId) {
     LibEventFactory.EventDetail storage eventDetail = LibEventFactory.eventStorage().events[_eventId];
-    LibEventFactory.TicketRequirement[] storage requirements = LibEventFactory.eventStorage().eventTicketRequirements[_eventId];
+    LibEventFactory.TicketRequirement storage requirements = LibEventFactory.eventStorage().eventTicketRequirements[_eventId];
 
     // ... [Checks 1, 2, 3 for Status, Time, Level, User Limits remain the same] ...
 
@@ -183,34 +180,30 @@ function _verifyAndExecuteTokenInteraction(
     bool requirementFound = false;
     uint256 requirementIndex = type(uint256).max; // Initialize with invalid index
 
-    for (uint i = 0; i < requirements.length; i++) {
-        // Use requirements[i] directly for checks within the loop
-        if (requirements[i].tokenId == _ticketId) {
-            require(_amount == requirements[i].requiredAmount, "Event: Incorrect amount for requirement");
-            require(requirements[i].interactionType == _expectedInteraction, "Event: Interaction type mismatch");
+    // Use requirements[i] directly for checks within the loop
+    if (requirements.tokenId == _ticketId) {
+        require(_amount >= requirements.requiredAmount, "Event: Insufficient amount for requirement.");
+        require(_amount <= requirements.maxAmount, "Event: Amount exceeding max entries.");
 
-            // If checks pass, store the index and break
-            requirementIndex = i;
-            requirementFound = true;
-            break;
-        }
+        require(requirements.interactionType == _expectedInteraction, "Event: Interaction type mismatch");
+        // If checks pass, store the index and break
+    }
+    else{
+        revert("Invalid redemption _ticketId.");
     }
     // Check if a valid requirement was found
-    require(requirementFound, "Event: Ticket ID not valid or requirement checks failed");
 
     // 5. Handle Ticket Interaction (using the found index)
-    // Now get the storage pointer using the validated index
-    LibEventFactory.TicketRequirement storage req = requirements[requirementIndex];
- 
+    // Now get the storage pointer using the validated index 
 
     // Use req.interactionType (pointer to the correct storage struct)
-    if (req.interactionType == LibEventFactory.TicketInteraction.Hold) {
+    if (requirements.interactionType == LibEventFactory.TicketInteraction.Hold) {
         require(_balanceOf(_user, _ticketId) >= _amount, "Event: Insufficient balance (Hold)");
-    } else if (req.interactionType == LibEventFactory.TicketInteraction.Burn) {
+    } else if (requirements.interactionType == LibEventFactory.TicketInteraction.Burn) {
         _burn(_user, _ticketId, _amount); 
-    } else if (req.interactionType == LibEventFactory.TicketInteraction.Stake) {
+    } else if (requirements.interactionType == LibEventFactory.TicketInteraction.Stake) {
         _safeTransferFrom(_user, msg.sender, _ticketId, _amount, ""); // Stake TO logic app (msg.sender)
-    } else if (req.interactionType == LibEventFactory.TicketInteraction.RedeemToEvent) {
+    } else if (requirements.interactionType == LibEventFactory.TicketInteraction.RedeemToEvent) {
         revert("Event: RedeemToEvent interaction not typical in this flow");
     }
 

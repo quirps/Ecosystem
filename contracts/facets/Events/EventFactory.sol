@@ -166,7 +166,7 @@ contract EventFacet is  iEventFactory, ReentrancyGuardContract {
 
     function getEventTicketRequirements(uint256 eventId)
         external view  eventExists(eventId)
-        returns (LibEventFactory.TicketRequirement[] memory)
+        returns (LibEventFactory.TicketRequirement memory)
     {
         // Read directly from LibEventFactory storage
         return LibEventFactory.eventStorage().eventTicketRequirements[eventId];

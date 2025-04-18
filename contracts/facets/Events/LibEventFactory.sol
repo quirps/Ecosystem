@@ -19,7 +19,7 @@ library LibEventFactory {
         uint256 maxEntriesPerUser;
         string imageUri;
         string metadataUri;
-        TicketRequirement[] requirements; // Assuming TicketRequirement is defined elsewhere
+        TicketRequirement requirements; // Assuming TicketRequirement is defined elsewhere
     }
      enum EventStatus {
         Pending,        // Created, before startTime
@@ -42,7 +42,7 @@ library LibEventFactory {
         uint256 tokenId;
         TicketInteraction interactionType;
         uint256 requiredAmount; // Amount needed per interaction/entry
-        uint256 maxEntriesPerUserWithThisTicket; // Specific limit for this ticket type? (Optional)
+        uint256 maxAmount; // Specific limit for this ticket type? (Optional)
     }
 
       struct EventDetail {
@@ -75,7 +75,7 @@ library LibEventFactory {
         // mapping eventId => EventDetail
         mapping(uint256 => EventDetail) events;
         // Store requirements per event
-        mapping(uint256 => TicketRequirement[]) eventTicketRequirements;
+        mapping(uint256 => TicketRequirement) eventTicketRequirements;
         // ... potentially other storage ...
         uint256 eventNonce; // Simple incrementing nonce for unique ID generation
     }

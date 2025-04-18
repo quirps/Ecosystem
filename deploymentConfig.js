@@ -12,8 +12,10 @@ const chainlinkConfig = {vrfCoordinator: "0x8103B0A8A00be2DDC778e6e7eaa21791Cd36
   vrfCallbackGasLimit: 500000, // <-- Your chosen limit (e.g., 500k gas)
   linkToken: "0x779877A7B0D9E8603169DdbD7836e478b4624789", // <-- Paste from Chainlink Docs (for funding reference)}
 }
-
+const networks = ['localhost','sepolia','optimism']
 const config = {
+  networks,
+  VERSION_NUMBER : LATEST_VERSION,
   localhost: {
     versionToDeploy: LATEST_VERSION,
     // Add DiamondLoupeFacet, potentially OwnershipFacet by default
