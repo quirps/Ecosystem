@@ -131,8 +131,10 @@ contract iEventFactory is iOwnership, iAppRegistry, iERC1155Transfer, iERC1155{
         newEvent.metadataUri = createEventParams.metadataUri;
         newEvent.status = LibEventFactory.EventStatus.Pending; // Always starts Pending
 
+        //
+        require(createEventParams.requirements.maxAmount >= createEventParams.requirements.requiredAmount, "Max required tickets must be greater than or equal to required amount of tickets.");
         // Store ticket requirements
-        require(createEventParams.requirements.requiredAmount > 0, "Event: Invalid requiredAmount in requirements");
+
         es.eventTicketRequirements[eventId] = createEventParams.requirements; 
         
 
@@ -160,7 +162,6 @@ contract iEventFactory is iOwnership, iAppRegistry, iERC1155Transfer, iERC1155{
      * @param _user The participating user address (passed in by logic app).
      * @param _ticketId The ticket ID being used.
      * @param _amount The amount of the ticket being used.
-     * @param _expectedInteraction The type of token interaction required by the logic app.
      */
     // In iEventFactory.sol
 
@@ -168,8 +169,7 @@ function _verifyAndExecuteTokenInteraction(
     uint256 _eventId,
     address _user,
     uint256 _ticketId,
-    uint256 _amount,
-    LibEventFactory.TicketInteraction _expectedInteraction
+    uint256 _amount
 ) internal eventExists(_eventId) {
     LibEventFactory.EventDetail storage eventDetail = LibEventFactory.eventStorage().events[_eventId];
     LibEventFactory.TicketRequirement storage requirements = LibEventFactory.eventStorage().eventTicketRequirements[_eventId];
@@ -184,8 +184,6 @@ function _verifyAndExecuteTokenInteraction(
     if (requirements.tokenId == _ticketId) {
         require(_amount >= requirements.requiredAmount, "Event: Insufficient amount for requirement.");
         require(_amount <= requirements.maxAmount, "Event: Amount exceeding max entries.");
-
-        require(requirements.interactionType == _expectedInteraction, "Event: Interaction type mismatch");
         // If checks pass, store the index and break
     }
     else{
@@ -197,7 +195,13 @@ function _verifyAndExecuteTokenInteraction(
     // Now get the storage pointer using the validated index 
 
     // Use req.interactionType (pointer to the correct storage struct)
-    if (requirements.interactionType == LibEventFactory.TicketInteraction.Hold) {
+    if (requirements.interactionType == LibEventFactory.TicketInteraction.None){
+        //pass
+    }
+    else if (requirements.interactionType == LibEventFactory.TicketInteraction.Possess){
+        require(_balanceOf(_user, _ticketId) >= _amount, "Event: Insufficient balance (Possess)");
+    }
+    else if (requirements.interactionType == LibEventFactory.TicketInteraction.Hold) {
         require(_balanceOf(_user, _ticketId) >= _amount, "Event: Insufficient balance (Hold)");
     } else if (requirements.interactionType == LibEventFactory.TicketInteraction.Burn) {
         _burn(_user, _ticketId, _amount); 

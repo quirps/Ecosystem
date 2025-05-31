@@ -93,12 +93,11 @@ contract RaffleApp is VRFConsumerBaseV2, Ownable {
         // User (msg.sender) must have approved THIS RaffleApp contract address
         // for the specified ticketId and amount if interaction is Burn or Stake.
         IEventFacet eventFacet = IEventFacet(EVENT_FACET_ADDRESS);
-        bool success = eventFacet.verifyAndProcessParticipation(
+        bool success = eventFacet.verifyAndProcessParticipation( 
             eventId,
             msg.sender, // The user calling enterRaffle
             ticketId,
-            amount,
-            expectedInteraction
+            amount 
         );
 
         // 3. Check Facet Verification Result

@@ -123,7 +123,7 @@ contract PollApp is Ownable {
     function createEventAndInitializePoll(
         PollConfig memory _optionConfig,
         LibEventFactory.CreateEventParams memory eventParams
-    ) external onlyAppCreator { // Ensures only authorized creators can setup polls
+    ) external onlyAppCreator returns ( uint256 eventId_) { // Ensures only authorized creators can setup polls
         // 1. Validate poll options
         uint8 numOptionsProvided = uint8(_optionConfig.pollOptions.length);
         if (numOptionsProvided < 2) revert InsufficientOptions(numOptionsProvided);
@@ -134,20 +134,20 @@ contract PollApp is Ownable {
         eventParams.creator = msg.sender;
 
         // 3. Call the Ecosystem contract to create the underlying event
-        uint256 eventId = IEventFacet(ECOSYSTEM_ADDRESS).createEvent(eventParams);
+        eventId_ = IEventFacet(ECOSYSTEM_ADDRESS).createEvent(eventParams);
 
         // 4. Check if poll somehow already initialized (safety check)
         // Accessing length of a non-existent array is 0
-        if (pollOptions[eventId].pollOptions.length != 0) revert PollAlreadyInitialized(eventId); 
+        if (pollOptions[eventId_].pollOptions.length != 0) revert PollAlreadyInitialized(eventId_); 
          // Also check status - should be Inactive before init
-        if (pollStatus[eventId] != PollStatus.Inactive) revert PollAlreadyInitialized(eventId);
+        if (pollStatus[eventId_] != PollStatus.Inactive) revert PollAlreadyInitialized(eventId_);
 
         // 5. Store poll settings locally using the new eventId
-        pollOptions[eventId] = _optionConfig;
-        pollStatus[eventId] = PollStatus.Active; // Mark poll as active
+        pollOptions[eventId_] = _optionConfig;
+        pollStatus[eventId_] = PollStatus.Active; // Mark poll as active
 
         // 6. Emit event
-        emit PollInitialized(eventId, _optionConfig, msg.sender);
+        emit PollInitialized(eventId_, _optionConfig, msg.sender);
     }
 
     // --- User-Facing Functions ---
@@ -170,9 +170,6 @@ contract PollApp is Ownable {
         // This check might be redundant if PollNotActive is checked first, but good for clarity
         if (numOptionsAvailable == 0) revert PollNotInitialized(eventId);
 
-        // 2. Define expected interaction (typically Burn for voting)
-        LibEventFactory.TicketInteraction expectedInteraction = LibEventFactory.TicketInteraction.Burn;
-
         // 3. Verify core participation via EventFacet
         // User (_msgSender()) must have approved THIS PollApp contract address for the ticketId/amount
         // on the parent Diamond's ERC1155 implementation.
@@ -181,8 +178,7 @@ contract PollApp is Ownable {
             eventId,
             msg.sender, // The user casting the vote
             ticketId,
-            amount,
-            expectedInteraction
+            amount 
         );
 
         // 4. Check Facet Verification Result

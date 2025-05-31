@@ -21,7 +21,7 @@ interface IEventFacet {
         // Removed min/max entries from event, handled by logic or core checks
     );
     
-    event EventTicketRequirementsSet(uint256 indexed eventId, LibEventFactory.TicketRequirement[] requirements);
+    event EventTicketRequirementsSet(uint256 indexed eventId, LibEventFactory.TicketRequirement requirements);
     event EventStatusChanged(uint256 indexed eventId, LibEventFactory.EventStatus newStatus);
     event EventRefundsEnabled(uint256 indexed eventId, bytes32 merkleRoot);
     event EventTicketRefunded(uint256 indexed eventId, address indexed user, uint256 ticketId, uint256 amount); // Keep if refund logic remains
@@ -45,15 +45,13 @@ interface IEventFacet {
      * @param user The participating user address.
      * @param ticketId The ticket ID being used.
      * @param amount The amount of the ticket being used.
-     * @param expectedInteraction The type of token interaction required by the logic app.
      * @return success Boolean indicating if core verification and interaction succeeded.
      */
     function verifyAndProcessParticipation(
         uint256 eventId,
         address user,
         uint256 ticketId,
-        uint256 amount,
-        LibEventFactory.TicketInteraction expectedInteraction
+        uint256 amount
     ) external returns (bool success);
 
 

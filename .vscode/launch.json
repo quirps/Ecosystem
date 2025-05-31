@@ -25,7 +25,7 @@
             "hardhat",
             "deploy",
             "--network",
-            "localhost", // Target your testing network
+            "hardhat", // Target your testing network
           
 
             

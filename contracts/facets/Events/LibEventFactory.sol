@@ -31,10 +31,12 @@ library LibEventFactory {
         Expired         // Reached endTime without completion/cancellation (grace period over)
     }
   enum TicketInteraction {
-        Hold,           // User must hold the ticket
+        Hold,           // User must temporarily transfer the ticket requirement 
         Burn,           // Ticket is burned upon participation
         Stake,          // Ticket is transferred to the logicContract for duration
-        RedeemToEvent   // Ticket is transferred to this core Event contract (like original _redeemTickets)
+        RedeemToEvent,   // Ticket is transferred to this core Event contract (like original _redeemTickets)
+        None, // No interaction needed
+        Possess // Must Possess the ticket requirement
     }
 
        // Store requirements per ticket for an event

@@ -98,8 +98,9 @@ contract EcosystemRegistry is iOwnership {
     function deployVersion(bytes32 versionNumber, string memory name, uint256 salt, bytes calldata diamondBytecode) public returns (address ecosystemAddress_) {
         Version storage _version = versions[versionNumber];
         // Step 1: Check version number validity
+        console.log(1);
         require(_version.exists, "Version is not valid or not active");
-         
+         console.log(2);
         ecosystemAddress_ = IDiamondDeploy(_version.diamondDeployAddress).deploy(msgSender(), salt, diamondBytecode, _version.facetCuts);
         // Step 4: Update the user's ecosystems
         Ecosystem memory newEcosystem = Ecosystem(name, ecosystemAddress_, versionNumber);

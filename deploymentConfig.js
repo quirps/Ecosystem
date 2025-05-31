@@ -1,7 +1,7 @@
 // deploymentConfig.js
 // Use bytes32 for version numbers, e.g., ethers.utils.formatBytes32String("1.0.0")
-
-const LATEST_VERSION = ethers.utils.formatBytes32String("1.0.0");
+const VERSION_NUMBER = "1.0.0"
+const LATEST_VERSION = ethers.utils.formatBytes32String(VERSION_NUMBER);
 const V1 = [
   'DiamondCutFacet', 'EventFacet','DiamondInit', 'DiamondLoupeFacet', 'ERC1155Ecosystem', 'ERC1155Transfer','ERC1155ReceiverEcosystem','ERC20Ecosystem', 'MemberRegistry',
   'Members', 'Moderator', 'OwnershipFacet', 'Stake','ERC2981','TicketCreate','AppRegistryLinkFacet','TieredPermission'
@@ -15,7 +15,7 @@ const chainlinkConfig = {vrfCoordinator: "0x8103B0A8A00be2DDC778e6e7eaa21791Cd36
 const networks = ['localhost','sepolia','optimism']
 const config = {
   networks,
-  VERSION_NUMBER : LATEST_VERSION,
+  VERSION_NUMBER,
   localhost: {
     versionToDeploy: LATEST_VERSION,
     // Add DiamondLoupeFacet, potentially OwnershipFacet by default
@@ -46,4 +46,4 @@ const config = {
 
 
 
-module.exports = config;
+module.exports  = config;

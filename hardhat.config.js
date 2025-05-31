@@ -85,6 +85,7 @@ module.exports = {
         blockGasLimit : 900719925474099,
       },
       sepolia: {
+        accounts: getWallets('hardhat'),
         url: "https://rpc-sepolia.rockx.com",
         accounts : ["401e06b76938af3a12335038ebc70fd6547a885fe19bceb4ae60d96bd69e9595"]
       },

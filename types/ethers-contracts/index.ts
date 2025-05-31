@@ -28,6 +28,8 @@ export type { RaffleApp } from "./contracts/apps/Raffle.sol/RaffleApp";
 export { RaffleApp__factory } from "./factories/contracts/apps/Raffle.sol/RaffleApp__factory";
 export type { RedemptionApp } from "./contracts/apps/Redemption.sol/RedemptionApp";
 export { RedemptionApp__factory } from "./factories/contracts/apps/Redemption.sol/RedemptionApp__factory";
+export type { BatchExecutor } from "./contracts/batchExecutor.sol/BatchExecutor";
+export { BatchExecutor__factory } from "./factories/contracts/batchExecutor.sol/BatchExecutor__factory";
 export type { DiamondDeploy } from "./contracts/deploy/diamondDeploy.sol/DiamondDeploy";
 export { DiamondDeploy__factory } from "./factories/contracts/deploy/diamondDeploy.sol/DiamondDeploy__factory";
 export type { IDiamondDeploy } from "./contracts/deploy/IDiamondDeploy";

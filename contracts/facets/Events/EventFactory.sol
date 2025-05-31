@@ -49,8 +49,7 @@ contract EventFacet is  iEventFactory, ReentrancyGuardContract {
         uint256 eventId,
         address user,
         uint256 ticketId,
-        uint256 amount,
-        LibEventFactory.TicketInteraction expectedInteraction
+        uint256 amount
     ) external  ReentrancyGuard eventExists(eventId) returns (bool success) {
         // Access Control: Check caller is the specific INSTALLED logic app for this event's TYPE
         bytes32 eventType = LibEventFactory.eventStorage().events[eventId].eventType;
@@ -60,7 +59,7 @@ contract EventFacet is  iEventFactory, ReentrancyGuardContract {
         require(msg.sender == expectedAppInstance, "EventFacet: Caller is not installed logic app for event type");
 
         // Call internal logic (inherited from iEventFactory) to perform checks + token interaction
-        _verifyAndExecuteTokenInteraction(eventId, user, ticketId, amount, expectedInteraction);
+        _verifyAndExecuteTokenInteraction(eventId, user, ticketId, amount);
 
         success = true;
     }

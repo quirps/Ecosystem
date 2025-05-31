@@ -79,8 +79,7 @@ contract RedemptionApp is Ownable {
             eventId,
             msg.sender, // The user redeeming
             ticketId,
-            amount,
-            expectedInteraction
+            amount
         );
 
         // 3. Check Facet Verification Result

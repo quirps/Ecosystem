@@ -5,6 +5,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const { glob } = require('glob'); // Import glob
 const hre = require('hardhat')
+const { exec } = require('child_process');
 
 const app = express();
 const port = process.env.PORT || 3010; // Use environment variable or default
@@ -18,6 +19,7 @@ const typechainFactoriesDir = path.join(__dirname, "./types/ethers-contracts")
 // Assuming server.js is in the root of your Hardhat project:
 const typechainBaseDir = path.join(__dirname, 'typechain-types');
 const ARTIFACTS_DIR = path.join( __dirname, "artifacts")
+const consolidatedArtifactFileName = "./server-artifacts/deployment-artifacts.json"
 // Fallback if 'factories' subdirectory doesn't exist
 const typechainFallbackDir = typechainBaseDir;
 // ---
@@ -37,6 +39,37 @@ app.use((req, res, next) => {
 
 // --- Routes ---
 
+app.get('/api/v1/deployment-state', async (req, res) => {
+    const rootPath = process.cwd(); // Assumes server is started from project root
+    const stateFilePath = path.join(rootPath, consolidatedArtifactFileName);
+    console.log(`[Server] Request received for ${consolidatedArtifactFileName}`); // Server-side log
+  
+    try {
+      // Asynchronously read the file content
+      const fileContent = await fs.readFile(stateFilePath, 'utf8');
+      console.log(`[Server] Successfully read ${stateFilePath}`);
+  
+      // Parse the JSON content
+      try {
+        const deploymentState = JSON.parse(fileContent);
+        console.log(`[Server] Successfully parsed JSON. Sending response.`);
+        // Send the parsed JSON object
+        res.status(200).json(deploymentState);
+      } catch (parseError) {
+        console.error(`[Server] Error parsing JSON from ${stateFilePath}:`, parseError);
+        res.status(500).json({ error: 'Failed to parse deployment state file.', details: parseError.message });
+      }
+    } catch (readError) {
+      // Handle file reading errors (e.g., file not found)
+      if (readError.code === 'ENOENT') {
+        console.warn(`[Server] Deployment state file not found at ${stateFilePath}`);
+        res.status(404).json({ error: `Deployment state file not found: ${consolidatedArtifactFileName}` });
+      } else {
+        console.error(`[Server] Error reading deployment state file ${stateFilePath}:`, readError);
+        res.status(500).json({ error: 'Failed to read deployment state file.', details: readError.message });
+      }
+    }
+  });
 // Root endpoint
 app.get('/', (req, res) => {
   res.status(200).send('Web3 Artifact Server is running!');
@@ -427,9 +460,24 @@ app.get('/types/factories/list', async (req, res) => {
        }
   }
 });
+
+
+
+app.get('/devInit', async (req, res) => {
+  exec('npx hardhat deploy', (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Execution error: ${error}`);
+      return res.status(500).send(`Error: ${stderr}`);
+    }
+    console.log(`Output: ${stdout}`);
+    res.send(`Deployment done:\n${stdout}`);
+  });
+});
 // --- End Routes ---
 
-
+app.get('/health', async (req,res)=>{
+    res.status(200).send("Web3 Server is running!")
+})
 // --- Error Handling ---
 // Basic 404 handler for undefined routes
 app.use((req, res, next) => {
@@ -445,7 +493,7 @@ app.use((err, req, res, next) => {
 
 
 // --- Start Server ---
-app.listen(port, () => {
+app.listen(port,'0.0.0.0', () => {
   console.log(`\nArtifact Server listening at http://localhost:${port}`);
   console.log(` -> Serving artifacts from: ${consolidatedArtifactFile}`);
   console.log(` -> Serving TypeChain factories from: ${typechainFactoriesDir}`);
