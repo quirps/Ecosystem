@@ -138,6 +138,10 @@ contract AppRegistry is Ownable {
         emit AppTypeStatusChanged(eventType, newStatus);
     }
 
+    function isAppExist( bytes32 eventType) external view returns( bool ) {
+        return s_appInfo[eventType].factoryAddress != address(0);
+
+    }
     // Add other management functions like updateMetadata if needed...
 
     // --- Installation (Called by Ecosystem Owner) ---

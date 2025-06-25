@@ -2,13 +2,14 @@
 /* global ethers task */
 
 const { getWallets } = require('./scripts/hardhatAccountGenerator.js')
+const dotenv = require('dotenv')
 const NUM_USERS  = 40;
 //require("hardhat-gas-reporter");
 require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-diamond-abi");
 require("hardhat-deploy");
 // require("./diamondABItest");
-
+dotenv.config()
 const FACETS = [
     'DiamondCutFacet', 'DiamondInit', 'DiamondLoupeFacet', 'ERC1155Ecosystem', 'ERC1155Transfer','ERC1155ReceiverEcosystem','ERC20Ecosystem', 'MemberRegistry',
     'Members', 'Moderator', 'OwnershipFacet', 'EventFactory', 'Stake','ERC2981','TicketCreate',
@@ -26,7 +27,7 @@ WALLET_BASE_AMOUNT = "10000000000000000000000000000" // 10**30
  */
 module.exports = {
   
-
+  etherscan:process.env.ETHERSCAN_API_KEY,
   sources: ["./contracts", "./node_modules/registry/contracts"],
   solidity: '0.8.28',
   diamondAbi: {
@@ -76,7 +77,7 @@ module.exports = {
     currency: 'CHF',
     gasPrice: 21
   },
-  defaultNetwork: "localhost",
+  defaultNetwork: "hardhat",
   networks: {
       hardhat: {
      accounts: getWallets('hardhat'),
@@ -85,9 +86,9 @@ module.exports = {
         blockGasLimit : 900719925474099,
       },
       sepolia: {
-        accounts: getWallets('hardhat'),
-        url: "https://rpc-sepolia.rockx.com",
-        accounts : ["401e06b76938af3a12335038ebc70fd6547a885fe19bceb4ae60d96bd69e9595"]
+        accounts: getWallets('localhost'),
+        url: "https://0xrpc.io/sep",
+        //accounts : ["401e06b76938af3a12335038ebc70fd6547a885fe19bceb4ae60d96bd69e9595"]
       },
     localhost: {
       accounts: getWallets('localhost'),
@@ -109,6 +110,9 @@ module.exports = {
     },
     user2 : {
       default : 2
+    },
+    user3 : {
+      default : 3
     },
     paths: {
       sources: "./contracts",

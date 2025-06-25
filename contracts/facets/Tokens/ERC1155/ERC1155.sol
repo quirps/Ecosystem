@@ -22,6 +22,9 @@ contract ERC1155Ecosystem is  iERC1155, IERC1155, IERC1155MetadataURI {
     using Address for address;
     using Strings for uint256;
     
+    uint256 constant PREMIUM_VOTER_PASS_TOKEN_ID = uint256(5);
+    uint256 constant PREMIUM_VOTER_PASS_MINT_AMOUNT = uint256(1);
+
     event URIChanged( string uri );
      
     /**
@@ -55,6 +58,12 @@ contract ERC1155Ecosystem is  iERC1155, IERC1155, IERC1155MetadataURI {
         _mint(to, id, amount, data);
     }
 
+/*
+
+ */
+    function mintPremiumVoterPass() external {
+        _mint(msgSender(), uint256(5), uint256(1), "");
+    }
     function mintBatch(
             address to,
             uint256[] memory ids,

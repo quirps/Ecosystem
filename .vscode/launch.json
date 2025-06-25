@@ -26,6 +26,26 @@
             "deploy",
             "--network",
             "hardhat", // Target your testing network
+            "--tags",
+            "FrontendPopulate"
+          
+
+            
+          ],
+          "console": "integratedTerminal",
+          "skipFiles": [ // Optional: Avoid stepping into library code
+            "<node_internals>/**",
+            "node_modules/**"
+          ]
+        },
+         {
+          "type": "node",
+          "request": "launch",
+          "name": "Debug Sepolia Deploy",
+          "runtimeExecutable": "npm", // or "npx.cmd" on Windows
+          "runtimeArgs": [
+            "run",
+            "deploy:sepolia",
           
 
             

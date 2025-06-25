@@ -11,23 +11,20 @@
     "compile": "npx hardhat compile",
     "deploy:local": "npx hardhat deploy --network localhost --show-stack-traces",
     "deploy:sepolia": "npx hardhat deploy --network sepolia",
+    "deploy:sepolia:Main": "npx hardhat deploy --network sepolia --tags Main",
     "deploy:local:core": "npx hardhat deploy --network localhost --tags Core",
+     "deploy:hardhat:frontend": "npx hardhat deploy --network localhost --tags FrontendPopulate",
     "deploy:local:version": "npx hardhat deploy --network localhost --tags DeployVersion",
     "postdeploy:local": "npx hardhat deploy --network localhost --tags PostDeploy",
     "start:server": "node ./server.js",
     "dev:node": "npx hardhat node",
     "test": "npx hardhat test"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mudgen/contracts-starter.git"
-  },
+
   "author": "Joe Cocchi",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/mudgen/contracts-starter/issues"
-  },
-  "homepage": "https://github.com/mudgen/contracts-starter#readme",
+ 
+ 
   "devDependencies": {
     "@faker-js/faker": "^8.0.2",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.3",
@@ -61,6 +58,7 @@
     "bn.js": "^5.1.2",
     "glob": "^11.0.1",
     "hardhat-diamond-abi": "^3.0.1",
+    "merkletreejs": "^0.5.2",
     "package.json": "^2.0.1",
     "solc": "^0.8.9",
     "viem": "^2.21.56"

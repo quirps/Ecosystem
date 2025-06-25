@@ -20,6 +20,7 @@ const typechainFactoriesDir = path.join(__dirname, "./types/ethers-contracts")
 const typechainBaseDir = path.join(__dirname, 'typechain-types');
 const ARTIFACTS_DIR = path.join( __dirname, "artifacts")
 const consolidatedArtifactFileName = "./server-artifacts/deployment-artifacts.json"
+const consolidatedArtifactBasePath = "./server-artifacts/deployment-artifacts"
 // Fallback if 'factories' subdirectory doesn't exist
 const typechainFallbackDir = typechainBaseDir;
 // ---
@@ -40,9 +41,10 @@ app.use((req, res, next) => {
 // --- Routes ---
 
 app.get('/api/v1/deployment-state', async (req, res) => {
-    const rootPath = process.cwd(); // Assumes server is started from project root
-    const stateFilePath = path.join(rootPath, consolidatedArtifactFileName);
-    console.log(`[Server] Request received for ${consolidatedArtifactFileName}`); // Server-side log
+    const rootPath = process.cwd(); // Assumes server is started from project root 
+    const {versionNumber} = req.query
+    const stateFilePath = path.join(rootPath, consolidatedArtifactBasePath + "-" + `${versionNumber}.json`);
+    console.log(`[Server] Request received for ${consolidatedArtifactBasePath}`); // Server-side log
   
     try {
       // Asynchronously read the file content
@@ -77,6 +79,15 @@ app.get('/', (req, res) => {
 
 // Endpoint to serve the consolidated deployment artifacts JSON
 app.get('/artifacts', async (req, res) => {
+  const versionNumber = req.query.version; // Get version from query parameter
+
+  if (!versionNumber) {
+    return res.status(400).json({ error: 'VERSION_NUMBER query parameter is required.' });
+  }
+
+  // Construct the full path to the specific version's artifact file
+  const consolidatedArtifactFile = `${consolidatedArtifactBasePath}-${versionNumber}.json`;
+
   try {
     // 1. Check if file exists and is accessible
     await fs.access(consolidatedArtifactFile); // Throws error if not accessible/found
@@ -84,23 +95,22 @@ app.get('/artifacts', async (req, res) => {
     // 2. If access succeeds, send the file
     // Use path.resolve to ensure absolute path for res.sendFile
     res.sendFile(path.resolve(consolidatedArtifactFile), (err) => {
-         // Optional: Add callback to handle potential errors during sendFile
-         if (err) {
-             console.error(`Error sending file ${consolidatedArtifactFile}:`, err);
-             // Avoid sending another response if headers already sent
-             if (!res.headersSent) {
-                 res.status(500).json({ error: 'Failed to send artifact file.' });
-             }
-         } else {
-              console.log(`Sent artifact file: ${consolidatedArtifactFile}`);
-         }
+      if (err) {
+        console.error(`Error sending file ${consolidatedArtifactFile}:`, err);
+        // Avoid sending another response if headers already sent
+        if (!res.headersSent) {
+          res.status(500).json({ error: 'Failed to send artifact file.' });
+        }
+      } else {
+        console.log(`Sent artifact file: ${consolidatedArtifactFile}`);
+      }
     });
 
   } catch (error) {
     // Handle errors (file not found, permissions etc.)
     if (error.code === 'ENOENT') { // ENOENT = Error NO ENTity (File not found)
       console.error(`Artifact file not found: ${consolidatedArtifactFile}`);
-      res.status(404).json({ error: 'Deployment artifacts not found. Run deployment first.' });
+      res.status(404).json({ error: `Deployment artifacts for version ${versionNumber} not found. Run deployment first.` });
     } else {
       console.error(`Error accessing artifact file ${consolidatedArtifactFile}:`, error);
       res.status(500).json({ error: 'Could not access deployment artifacts.' });

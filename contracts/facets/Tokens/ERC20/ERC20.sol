@@ -2,12 +2,12 @@
 pragma solidity ^0.8.0;
 
 import "../../../libraries/utils/Context.sol";
-import "../../../libraries/utils/Ownable.sol"; 
-import "./libraries/LibERC20.sol"; 
-import "../../Ownership/LibOwnership.sol";  
+import "../../../libraries/utils/Ownable.sol";
+import "./libraries/LibERC20.sol";
+import "../../Ownership/LibOwnership.sol";
 import "../ERC1155/libraries/LibERC1155.sol";
 import "../ERC1155/internals/iERC1155Transfer.sol";
- 
+
 import {iOwnership} from "../../Ownership/_Ownership.sol";
 
 event CurrencyNameChanged(string name);
@@ -15,19 +15,15 @@ event CurrencySymbolChanged(string name);
 
 contract ERC20Ecosystem is iOwnership, iERC1155Transfer {
 
-    function setCurrencyNames( string memory _currencyName, string memory _currencySymbol)
-    external {
-        isEcosystemOwnerVerification(); 
-        if( bytes(_currencyName).length != 0){
-            LibERC20._setName(_currencyName);
-            emit CurrencyNameChanged( _currencyName );
-        }
-        if( bytes(_currencySymbol).length != 0){ 
-            LibERC20._setSymbol(_currencySymbol);
-            emit CurrencySymbolChanged( _currencySymbol );
-        }
+    function setCurrencyName(string memory _name) external {
+        LibERC20._setName(_name);
+        emit CurrencyNameChanged(_name);
     }
-
+    
+    function setCurrencySymbol(string memory _symbol) external {
+        LibERC20._setSymbol(_symbol);
+        emit CurrencySymbolChanged(_symbol);
+    }
 
     //ERC20
     function name() external view returns (string memory) {
@@ -35,7 +31,7 @@ contract ERC20Ecosystem is iOwnership, iERC1155Transfer {
     }
 
     function symbol() external view returns (string memory) {
-      return LibERC20.getSymbol();
+        return LibERC20.getSymbol();
     }
 
     function decimals() external pure returns (uint8) {
@@ -62,16 +58,16 @@ contract ERC20Ecosystem is iOwnership, iERC1155Transfer {
         _safeTransferFrom(msgSender(), recipient, LibERC20.PRIMARY_CURRENCY_ID, amount, "");
         return true;
     }
-   
-    function approve(address spender, uint256 amount) external  returns (bool) {
+
+    function approve(address spender, uint256 amount) external returns (bool) {
         _setApprovalForAll(msgSender(), spender, amount != 0);
-        return true; 
+        return true;
     }
 
-    function approvePermit(address owner, address spender, uint256 amount) internal returns (bool){
+    function approvePermit(address owner, address spender, uint256 amount) internal returns (bool) {
         _setApprovalForAll(owner, spender, amount != 0);
     }
-    function transferFrom(address sender, address recipient, uint256 amount) external  returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool) {
         _safeTransferFrom(sender, recipient, LibERC20.PRIMARY_CURRENCY_ID, amount, "");
         return false; // Replace with appropriate transferFrom logic
     }
