@@ -114,6 +114,16 @@ module.exports = {
     user3 : {
       default : 3
     },
+    owner : {
+      default : 4,
+    },
+    ecosystem1Owner :{
+      default : 5,
+    }, ecosystem2Owner : {
+      default : 6,
+    }, royaltyReceiver : {
+      default : 7,
+    },
     paths: {
       sources: "./contracts",
       tests: "./test",

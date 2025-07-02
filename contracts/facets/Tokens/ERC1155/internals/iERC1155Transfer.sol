@@ -81,8 +81,8 @@ contract iERC1155Transfer is iERC1155ContractTransfer, iERC2771Recipient {
 
     function _balanceOf(address account, uint256 id) internal view returns (uint256 amount_){
         require(account != address(0), "ERC1155: address zero is not a valid owner");
-        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();        
-        return es.balance[id][account]; 
+        return LibERC1155.getBalance(id, account);        
+         
     }
      
 }

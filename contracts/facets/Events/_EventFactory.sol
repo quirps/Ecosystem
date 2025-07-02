@@ -99,7 +99,7 @@ contract iEventFactory is iOwnership, iAppRegistry, iERC1155Transfer, iERC1155{
         _;   
     }
 
-
+    address constant CONSUMPTION_ADDRESS = 0x0000000000000000000000000000000000000001; 
     // --- Internal Functions ---
 
     function _createEvent(

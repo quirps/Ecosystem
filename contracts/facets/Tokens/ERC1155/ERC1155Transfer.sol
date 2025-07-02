@@ -71,7 +71,7 @@ contract ERC1155Transfer is iERC1155Transfer {
      * - `account` cannot be the zero address.
      */
     function balanceOf(address account, uint256 id) public view returns (uint256) {
-        _balanceOf(account, id);
+        return _balanceOf(account, id);
     }
 
     /**

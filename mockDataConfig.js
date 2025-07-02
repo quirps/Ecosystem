@@ -4,6 +4,10 @@ const { ethers } = require('hardhat');
 // Define and export constants
 const CURRENCY_DECIMALS = 18;
 const CURRENCY_ID = 0;
+const CONSUMPTION_ADDRESS = "0x0000000000000000000000000000000000000001"; 
+
+
+
 /**
  * Creates a Merkle tree for off-chain allocations and returns the root and proofs.
  * @param {Array<object>} allocations - An array of allocation objects {user: string, purchaseId: number, amount: BigNumber}.
@@ -104,7 +108,8 @@ async function getMockData(signers, tokens) {
         offchainFulfillmentData,
         CURRENCY_ID,
         mockERC20InitialBalances,
-        airdropData
+        airdropData,
+        CONSUMPTION_ADDRESS
     };
 }
 

@@ -53,7 +53,7 @@ contract  iTransferSetConstraints is iOwnership, iMembers {
 
     // Check Transfer Limit (bit 0)
     if ((bitMap & (1 << 0)) != 0) {
-        uint256 maxTransfers = cs.tranfserLimit[_tokenId]; // Fix typo: tranfserLimit → transferLimit
+        bool isTransferrable = cs.transferrable[_tokenId]; // Fix typo: tranfserLimit → transferLimit
         nonTransferable(from, to, _tokenId); // Implement this 
     }
  
@@ -82,7 +82,7 @@ Would like to clean this function up at some point.
         uint128 nonce;
         uint128 incrementedNonce;
         uint256 ticketId;
-        if(_constraints.transferLimit.isActive){
+        if(_constraints.transferrable.isActive){
             //transferLimitConditions set
             bitMap ^= (1 << 1);
         }
@@ -112,8 +112,8 @@ Would like to clean this function up at some point.
         
 
         //store ticket constraints
-        if(_constraints.transferLimit.isActive){
-            cs.tranfserLimit[ticketId] = _constraints.transferLimit.maxTransfers;
+        if(_constraints.transferrable.isActive){
+            cs.transferrable[ticketId] = _constraints.transferrable.isTransferrable;
         }
         if(_constraints.minimumMembershipLevel.isActive){ 
             cs.minimumMemberLevel[ticketId] = _constraints.minimumMembershipLevel.minimumLevel;

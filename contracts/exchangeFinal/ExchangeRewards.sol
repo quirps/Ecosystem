@@ -21,12 +21,15 @@ import {ReentrancyGuardContract} from "../ReentrancyGuard.sol";
  * @dev Manages staking of Reward Tokens, distribution of platform fees,
  * passive reward accrual, NFT enhancements, discount vouchers, and passive holding rewards.
  */
-contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, IERC1155Receiver { 
+contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, IERC1155Receiver {
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.UintSet; // For user stake tracking
     using EnumerableSet for EnumerableSet.AddressSet; // For claim iteration
 
     // --- State Variables ---
+    //Token Sale variables
+    address public tokenSaleStakingContract;
+    uint16 public tokenSalePoolFeeShareBasisPoints;
 
     IRewardToken public immutable rewardToken; // Address of the RewardToken contract (ERC1155)
     address public ticketExchange; // Address of the TicketExchange contract
@@ -38,15 +41,15 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
     uint256 public nextStakeId;
     mapping(address => EnumerableSet.UintSet) private _userStakes; // user => set of active stake IDs
 
-     struct LockupOption {
-         uint256 duration; // seconds 
-         uint16 passiveRateMultiplierBp; // Multiplier for passive accrual rate (Stream 1), 10000 = 1x
-     }
+    struct LockupOption {
+        uint256 duration; // seconds
+        uint16 passiveRateMultiplierBp; // Multiplier for passive accrual rate (Stream 1), 10000 = 1x
+    }
     // Lockup options define duration and passive accrual multiplier
     LockupOption[] public lockupOptions; // Index maps to durationOption in stake()
 
     // Fee Share Reward Calculation State (Stream 2 - Accumulator Pattern)
-     struct RewardInfo { 
+    struct RewardInfo {
         uint256 rewardPerTokenStored; // Accumulated fee share rewards (ERC20) per EFFECTIVE token staked (scaled by 1e18)
         uint256 lastUpdateTime;
         uint256 totalStaked; // Total actual amount of this tokenId currently staked
@@ -58,7 +61,7 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
     uint256 public basePassiveStakingRate; // Wei of reward per second per wei staked, scaled by 1e18 for precision
 
     // --- Passive Holding Rewards State (Unstaked tokens) ---
-      struct HoldingRewardInfo {
+    struct HoldingRewardInfo {
         uint256 rewardPerTokenStored; // Accumulated rewards (ERC20) per token held (scaled by 1e18)
         uint256 lastUpdateTime;
     }
@@ -106,12 +109,13 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
     error InsufficientFundsForPassiveReward();
 
     // --- Constructor ---
-    constructor(address _rewardTokenAddress, address initialOwner) Ownable(initialOwner) { // Changed _owner to initialOwner
+    constructor(address _rewardTokenAddress, address initialOwner) Ownable(initialOwner) {
+        // Changed _owner to initialOwner
         if (_rewardTokenAddress == address(0)) revert ZeroAddress();
         rewardToken = IRewardToken(_rewardTokenAddress);
         // Initialize default lockup options with passive rate multipliers
-        lockupOptions.push(LockupOption(0, 10000));       // 0: No lock, 1.00x passive rate
-        lockupOptions.push(LockupOption(7 days, 11000));  // 1: 1 week,   1.10x passive rate
+        lockupOptions.push(LockupOption(0, 10000)); // 0: No lock, 1.00x passive rate
+        lockupOptions.push(LockupOption(7 days, 11000)); // 1: 1 week,   1.10x passive rate
         lockupOptions.push(LockupOption(14 days, 12000)); // 2: 2 weeks,  1.20x passive rate
         lockupOptions.push(LockupOption(30 days, 13500)); // 3: 1 month,  1.35x passive rate
         // Base passive staking rate must be set by admin
@@ -172,22 +176,18 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
     }
 
     /** @inheritdoc IExchangeRewards*/
-     function setNftProperties(
+    function setNftProperties(
         uint256 nftId,
         BonusType bonusType,
         address targetEcosystem,
         uint256 bonusValue,
         bool isActive
-     ) public override onlyOwner { // Public so owner can update later
+    ) public override onlyOwner {
+        // Public so owner can update later
         if (!rewardToken.isEnhancementNFT(nftId)) revert NotEnhancementNFT();
-        nftProperties[nftId] = NftProperties({
-            bonusType: bonusType,
-            targetEcosystem: targetEcosystem,
-            bonusValue: bonusValue,
-            isActive: isActive
-        });
+        nftProperties[nftId] = NftProperties({bonusType: bonusType, targetEcosystem: targetEcosystem, bonusValue: bonusValue, isActive: isActive});
         emit NftPropertiesSet(nftId, bonusType, targetEcosystem, bonusValue, isActive);
-     }
+    }
 
     // --- Core Interactions (Called by TicketExchange) ---
 
@@ -231,14 +231,14 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
         uint256 stakingRatio = 0;
         if (totalSupply > 0) {
             stakingRatio = (totalStaked * BASIS_POINTS_DIVISOR) / totalSupply;
-            if(stakingRatio > BASIS_POINTS_DIVISOR) stakingRatio = BASIS_POINTS_DIVISOR;
+            if (stakingRatio > BASIS_POINTS_DIVISOR) stakingRatio = BASIS_POINTS_DIVISOR;
         }
         uint256 boost = (stakingRatio * stakingRatioBoostFactor) / BASIS_POINTS_DIVISOR;
         uint256 multiplier = BASIS_POINTS_DIVISOR + boost;
 
-       // Final rate = BaseRate * Multiplier (adjusting for BP and using 1e18 precision for rate)
-         if (baseRewardRateDenominator == 0) return 0; // Avoid division by zero
-        rate = (baseRewardRateNumerator * PRECISION_FACTOR / baseRewardRateDenominator) * multiplier / BASIS_POINTS_DIVISOR;
+        // Final rate = BaseRate * Multiplier (adjusting for BP and using 1e18 precision for rate)
+        if (baseRewardRateDenominator == 0) return 0; // Avoid division by zero
+        rate = (((baseRewardRateNumerator * PRECISION_FACTOR) / baseRewardRateDenominator) * multiplier) / BASIS_POINTS_DIVISOR;
     }
 
     /** @inheritdoc IExchangeRewards*/
@@ -252,12 +252,12 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
     }
 
     /** @inheritdoc IExchangeRewards*/
-     function executeMint(address buyer, uint256 rewardTokenId, uint256 rewardAmount) external override {
+    function executeMint(address buyer, uint256 rewardTokenId, uint256 rewardAmount) external override {
         // Implementation unchanged
         if (msg.sender != ticketExchange) revert NotTicketExchange();
         if (rewardToken.isEnhancementNFT(rewardTokenId)) revert CannotMintNFTAsReward();
         rewardToken.mint(buyer, rewardTokenId, rewardAmount, "");
-     }
+    }
 
     /** @inheritdoc IExchangeRewards*/
     function verifyAndUsePurchaseBooster(
@@ -275,7 +275,7 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
         if (properties.bonusType != BonusType.PURCHASE_REWARD_MULTIPLIER) revert NftNotBoosterType();
         // Check target ecosystem (allow 0 address for global boost)
         if (properties.targetEcosystem != address(0) && properties.targetEcosystem != purchaseEcosystemAddress) {
-             revert NftTargetMismatch();
+            revert NftTargetMismatch();
         }
         // Check ownership (balance >= 1)
         if (rewardToken.balanceOf(buyer, boosterNftId) < 1) revert UserDoesNotOwnNFT();
@@ -290,17 +290,17 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
     // --- Admin Actions ---
 
     /** @inheritdoc IExchangeRewards*/
-        // Distributes passive rewards for *holding* unstaked tokens
+    // Distributes passive rewards for *holding* unstaked tokens
     function distributePassiveHoldingRewards(uint256[] calldata tokenIds) external override onlyOwner {
         // Implementation unchanged
-         for (uint i = 0; i < tokenIds.length; ++i) {
+        for (uint i = 0; i < tokenIds.length; ++i) {
             uint256 tokenId = tokenIds[i];
             address paymentToken = address(uint160(tokenId));
             uint256 poolAmount = passiveRewardPool[paymentToken];
             if (poolAmount > 0) {
                 uint256 totalSupply = rewardToken.totalSupply(tokenId);
                 if (totalSupply > 0) {
-                    uint256 addedRewardPerToken = poolAmount * PRECISION_FACTOR / totalSupply;
+                    uint256 addedRewardPerToken = (poolAmount * PRECISION_FACTOR) / totalSupply;
                     HoldingRewardInfo storage info = holdingRewardInfo[tokenId];
                     info.rewardPerTokenStored += addedRewardPerToken;
                     info.lastUpdateTime = block.timestamp;
@@ -333,11 +333,11 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
         // Create stake record - CORRECTED INITIALIZATION (10 fields)
         uint256 stakeId = nextStakeId++;
         // Use updated StakeInfo struct definition
-        stakes[stakeId] = StakeInfo({ 
+        stakes[stakeId] = StakeInfo({
             tokenId: tokenId,
             owner: msg.sender,
             amount: amount,
-            startTime: currentTime, 
+            startTime: currentTime,
             endTime: endTime,
             durationOption: durationOption,
             feeShareRewardDebt: stakingInfo.rewardPerTokenStored, // Initialize debt for fee share
@@ -358,15 +358,15 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
         emit Staked(msg.sender, stakeId, tokenId, amount, durationOption, endTime);
     }
 
-   /** @inheritdoc IExchangeRewards*/
-    function unstake(uint256 stakeId) external override ReentrancyGuard { // Use nonReentrant from custom import
-        StakeInfo storage stake = stakes[stakeId]; 
+    /** @inheritdoc IExchangeRewards*/
+    function unstake(uint256 stakeId) external override ReentrancyGuard {
+        // Use nonReentrant from custom import
+        StakeInfo storage stake = stakes[stakeId];
         address user = msg.sender;
         // ... (Ownership, active, lock checks) ...
         if (stake.owner != user) revert NotStakeOwner();
         if (!stake.active) revert StakeNotActive();
         if (stake.endTime != 0 && block.timestamp < stake.endTime) revert StakeLocked();
-
 
         uint256 tokenId = stake.tokenId;
         uint256 amount = stake.amount;
@@ -390,7 +390,6 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
         }
         _userStakes[user].remove(stakeId);
 
-
         // --- Transfer Assets ---
         // 1. Principal (ERC1155 RewardToken)
         IRewardToken(rewardToken).safeTransferFrom(address(this), user, tokenId, amount, "");
@@ -401,7 +400,7 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
             IERC20(paymentToken).safeTransfer(user, pendingFeeShare);
             emit StakingFeeShareRewardsClaimed(user, tokenId, pendingFeeShare);
         }
- 
+
         // 3. Passive Accrual Rewards (Stream 1 - MINT ERC1155 RewardToken)
         if (pendingPassive > 0) {
             // Mint the rewards directly to the user
@@ -411,7 +410,7 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
 
         // 4. Detached NFT (ERC1155 RewardToken - NFT ID)
         if (nftIdToReturn != 0) {
-             IRewardToken(rewardToken).safeTransferFrom(address(this), user, nftIdToReturn, 1, "");
+            IRewardToken(rewardToken).safeTransferFrom(address(this), user, nftIdToReturn, 1, "");
         }
 
         emit Unstaked(user, stakeId, tokenId, amount);
@@ -419,44 +418,44 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
 
     /** @inheritdoc IExchangeRewards*/
     function attachStakingNft(uint256 stakeId, uint256 nftId) external override ReentrancyGuard {
-         StakeInfo storage stake = stakes[stakeId];
-         address user = msg.sender;
-         if (stake.owner != user) revert NotStakeOwner();
-         if (!stake.active) revert StakeNotActive();
-         if (stake.attachedNftId != 0) revert EnhancementAlreadyAttached();
-         if (!rewardToken.isEnhancementNFT(nftId)) revert NotEnhancementNFT();
-         if (rewardToken.balanceOf(user, nftId) < 1) revert UserDoesNotOwnNFT();
+        StakeInfo storage stake = stakes[stakeId];
+        address user = msg.sender;
+        if (stake.owner != user) revert NotStakeOwner();
+        if (!stake.active) revert StakeNotActive();
+        if (stake.attachedNftId != 0) revert EnhancementAlreadyAttached();
+        if (!rewardToken.isEnhancementNFT(nftId)) revert NotEnhancementNFT();
+        if (rewardToken.balanceOf(user, nftId) < 1) revert UserDoesNotOwnNFT();
 
-         NftProperties storage properties = nftProperties[nftId];
-         if (!properties.isActive) revert NftInactive();
+        NftProperties storage properties = nftProperties[nftId];
+        if (!properties.isActive) revert NftInactive();
         // Check if NFT is a STAKING booster type (Passive or Fee Share)
-         if (properties.bonusType != BonusType.PASSIVE_STAKING_RATE_BOOST && properties.bonusType != BonusType.STAKING_FEE_SHARE_BOOST) {
-             revert NftNotBoosterType();
-         }
+        if (properties.bonusType != BonusType.PASSIVE_STAKING_RATE_BOOST && properties.bonusType != BonusType.STAKING_FEE_SHARE_BOOST) {
+            revert NftNotBoosterType();
+        }
 
-         RewardInfo storage stakingInfo = rewardInfo[stake.tokenId];
-         _updateFeeShareReward(stakingInfo); // Settle fee share rewards first
+        RewardInfo storage stakingInfo = rewardInfo[stake.tokenId];
+        _updateFeeShareReward(stakingInfo); // Settle fee share rewards first
 
         // Settle Fee Share debt before changing effective amount
-         uint256 pendingFeeShare = _calculatePendingFeeShareRewards(stakeId, stakingInfo.rewardPerTokenStored);
-         if (pendingFeeShare > 0) {
-              stake.feeShareRewardDebt = stakingInfo.rewardPerTokenStored; // Update debt before boost changes things
-         }
+        uint256 pendingFeeShare = _calculatePendingFeeShareRewards(stakeId, stakingInfo.rewardPerTokenStored);
+        if (pendingFeeShare > 0) {
+            stake.feeShareRewardDebt = stakingInfo.rewardPerTokenStored; // Update debt before boost changes things
+        }
 
-         // Settle Passive Rewards? No, boost applies going forward.
+        // Settle Passive Rewards? No, boost applies going forward.
 
-         uint256 oldEffectiveAmount = _getEffectiveStakedAmount(stake.amount, 0);
-         uint256 newEffectiveAmount = _getEffectiveStakedAmount(stake.amount, nftId);
+        uint256 oldEffectiveAmount = _getEffectiveStakedAmount(stake.amount, 0);
+        uint256 newEffectiveAmount = _getEffectiveStakedAmount(stake.amount, nftId);
 
-         IRewardToken(rewardToken).safeTransferFrom(user, address(this), nftId, 1, "");
-         IRewardToken(rewardToken).setNFTLocked(nftId, true);
+        IRewardToken(rewardToken).safeTransferFrom(user, address(this), nftId, 1, "");
+        IRewardToken(rewardToken).setNFTLocked(nftId, true);
 
-         stake.attachedNftId = nftId;
+        stake.attachedNftId = nftId;
         // Boost BPs are now read dynamically via _getNftBoosts or _getEffectiveStakedAmount
 
-         stakingInfo.totalEffectiveStaked = stakingInfo.totalEffectiveStaked - oldEffectiveAmount + newEffectiveAmount;
+        stakingInfo.totalEffectiveStaked = stakingInfo.totalEffectiveStaked - oldEffectiveAmount + newEffectiveAmount;
 
-         emit StakingNftAttached(stakeId, nftId);
+        emit StakingNftAttached(stakeId, nftId);
     }
 
     /**
@@ -465,7 +464,8 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
      * @param stakeId The ID of the stake being modified.
      * @return nftId The ID of the detached NFT, or 0 if none.
      */
-     function _detachStakingNftInternal(StakeInfo storage stake, uint256 stakeId) internal returns (uint256 nftId) { // Added stakeId param
+    function _detachStakingNftInternal(StakeInfo storage stake, uint256 stakeId) internal returns (uint256 nftId) {
+        // Added stakeId param
         nftId = stake.attachedNftId;
         if (nftId == 0) return 0; // Nothing attached
 
@@ -478,13 +478,12 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
         emit StakingNftDetached(stakeId, nftId); // Now we have stakeId to emit correctly
 
         return nftId; // Return ID so caller can transfer it back
-     }
+    }
 
-
-
-       /** @inheritdoc IExchangeRewards*/
-    function claimFeeShareRewards(uint256[] calldata stakeIds) external override ReentrancyGuard { // Use nonReentrant from custom import
-        address user = msg.sender;  
+    /** @inheritdoc IExchangeRewards*/
+    function claimFeeShareRewards(uint256[] calldata stakeIds) external override ReentrancyGuard {
+        // Use nonReentrant from custom import
+        address user = msg.sender;
         // Use dynamic array + count for unique token tracking locally
         address[] memory uniquePaymentTokensList = new address[](stakeIds.length); // Max size needed
         uint256 uniqueTokenCount = 0;
@@ -525,9 +524,9 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
                 // --- Add to list if not found ---
                 if (!found) {
                     // Add check to prevent overflow - unlikely but safe
-                    if(uniqueTokenCount < uniquePaymentTokensList.length) {
-                         uniquePaymentTokensList[uniqueTokenCount] = paymentToken;
-                         uniqueTokenCount++; // Increment count of unique tokens found
+                    if (uniqueTokenCount < uniquePaymentTokensList.length) {
+                        uniquePaymentTokensList[uniqueTokenCount] = paymentToken;
+                        uniqueTokenCount++; // Increment count of unique tokens found
                     }
                     // else { revert("Too many unique tokens"); } // Optional safety
                 }
@@ -538,28 +537,29 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
         // --- Transfer Phase ---
         // Iterate only up to the actual number of unique tokens found
         for (uint i = 0; i < uniqueTokenCount; ++i) {
-             address paymentToken = uniquePaymentTokensList[i];
-             // Retrieve the aggregated amount from the temporary mapping
-             uint256 amountToTransfer = totalRewardsByToken[paymentToken];
+            address paymentToken = uniquePaymentTokensList[i];
+            // Retrieve the aggregated amount from the temporary mapping
+            uint256 amountToTransfer = totalRewardsByToken[paymentToken];
 
-             if (amountToTransfer > 0) {
-                 // Perform the transfer
-                 IERC20(paymentToken).safeTransfer(user, amountToTransfer);
+            if (amountToTransfer > 0) {
+                // Perform the transfer
+                IERC20(paymentToken).safeTransfer(user, amountToTransfer);
 
-                 // Emit event for each token type claimed
-                 uint256 correspondingTokenId = uint256(uint160(paymentToken));
-                 emit StakingFeeShareRewardsClaimed(user, correspondingTokenId, amountToTransfer);
+                // Emit event for each token type claimed
+                uint256 correspondingTokenId = uint256(uint160(paymentToken));
+                emit StakingFeeShareRewardsClaimed(user, correspondingTokenId, amountToTransfer);
 
-                 // Optional: Clear the temporary map entry
-                 // delete totalRewardsByToken[paymentToken];
-             }
+                // Optional: Clear the temporary map entry
+                // delete totalRewardsByToken[paymentToken];
+            }
         }
     }
 
     /** @inheritdoc IExchangeRewards*/
-    function claimPassiveStakingRewards(uint256[] calldata stakeIds) external override ReentrancyGuard { // Use nonReentrant from custom import
+    function claimPassiveStakingRewards(uint256[] calldata stakeIds) external override ReentrancyGuard {
+        // Use nonReentrant from custom import
         address user = msg.sender;
- 
+
         // Use dynamic array + count for unique token tracking locally
         address[] memory uniquePaymentTokensList = new address[](stakeIds.length); // Max size needed
         uint256 uniqueTokenCount = 0;
@@ -599,9 +599,9 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
                 if (!found) {
                     // Add check to prevent overflow if stakeIds contains duplicates leading to > length unique tokens
                     // Though this shouldn't happen with correct external input.
-                    if(uniqueTokenCount < uniquePaymentTokensList.length) {
-                         uniquePaymentTokensList[uniqueTokenCount] = paymentToken;
-                         uniqueTokenCount++; // Increment count of unique tokens found
+                    if (uniqueTokenCount < uniquePaymentTokensList.length) {
+                        uniquePaymentTokensList[uniqueTokenCount] = paymentToken;
+                        uniqueTokenCount++; // Increment count of unique tokens found
                     }
                     // else { revert("Too many unique tokens found"); } // Optional safety
                 }
@@ -628,16 +628,18 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
                 // Consider changing event or accepting imprecision
                 uint256 correspondingTokenId = uint256(uint160(paymentToken));
                 uint256 emittedStakeId = 0; // Default if no suitable ID found quickly
-                 for(uint j=0; j<stakeIds.length; ++j) { // Find first matching stakeId for event context
-                     if(stakes[stakeIds[j]].tokenId == correspondingTokenId && stakes[stakeIds[j]].owner == user ) { // Basic check
-                         emittedStakeId = stakeIds[j];
-                         break;
-                     }
-                 }
+                for (uint j = 0; j < stakeIds.length; ++j) {
+                    // Find first matching stakeId for event context
+                    if (stakes[stakeIds[j]].tokenId == correspondingTokenId && stakes[stakeIds[j]].owner == user) {
+                        // Basic check
+                        emittedStakeId = stakeIds[j];
+                        break;
+                    }
+                }
                 emit PassiveStakingRewardsClaimed(user, emittedStakeId, amountToTransfer); // Emit with best-effort stakeId
 
-                 // Optional: Clear the temporary map entry (usually not necessary for storage map local var)
-                 // delete totalRewardsByToken[paymentToken];
+                // Optional: Clear the temporary map entry (usually not necessary for storage map local var)
+                // delete totalRewardsByToken[paymentToken];
             }
         }
     }
@@ -645,31 +647,31 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
     /** @inheritdoc IExchangeRewards*/
     function claimHoldingReward(uint256 tokenId) external override ReentrancyGuard {
         // Implementation unchanged from previous version
-         address user = msg.sender;
-         if (rewardToken.isEnhancementNFT(tokenId)) revert CannotClaimForNFT();
-         uint256 pending = pendingHoldingRewards(user, tokenId);
-         if (pending == 0) revert NoRewardsToClaim();
-         userHoldingRewardDebt[user][tokenId] = holdingRewardInfo[tokenId].rewardPerTokenStored;
-         address paymentToken = address(uint160(tokenId));
-         IERC20(paymentToken).safeTransfer(user, pending);
-         emit HoldingRewardsClaimed(user, tokenId, pending);
+        address user = msg.sender;
+        if (rewardToken.isEnhancementNFT(tokenId)) revert CannotClaimForNFT();
+        uint256 pending = pendingHoldingRewards(user, tokenId);
+        if (pending == 0) revert NoRewardsToClaim();
+        userHoldingRewardDebt[user][tokenId] = holdingRewardInfo[tokenId].rewardPerTokenStored;
+        address paymentToken = address(uint160(tokenId));
+        IERC20(paymentToken).safeTransfer(user, pending);
+        emit HoldingRewardsClaimed(user, tokenId, pending);
     }
 
     /** @inheritdoc IExchangeRewards*/
     function claimDiscountVoucher(uint256 rewardTokenId, uint256 amountToBurn) external override ReentrancyGuard {
         // Implementation unchanged from previous version
-         address user = msg.sender;
-         if (rewardToken.isEnhancementNFT(rewardTokenId)) revert CannotClaimForNFT();
-         if (amountToBurn == 0) revert AmountMustBePositive();
-         if (rewardToken.balanceOf(user, rewardTokenId) < amountToBurn) revert InsufficientBalance();
-         uint256 discountRatePerPaymentTokenUnit = 10; // TODO: Configurable
-         if (discountRatePerPaymentTokenUnit == 0) revert("Discount rate not set");
-         uint256 discountValue = amountToBurn / discountRatePerPaymentTokenUnit;
-         if (discountValue == 0) revert BurnAmountTooSmall();
-         rewardToken.burnFrom(user, rewardTokenId, amountToBurn);
-         address paymentToken = address(uint160(rewardTokenId));
-         userDiscountCredit[user][paymentToken] += discountValue;
-         emit DiscountVoucherClaimed(user, rewardTokenId, amountToBurn, discountValue, paymentToken);
+        address user = msg.sender;
+        if (rewardToken.isEnhancementNFT(rewardTokenId)) revert CannotClaimForNFT();
+        if (amountToBurn == 0) revert AmountMustBePositive();
+        if (rewardToken.balanceOf(user, rewardTokenId) < amountToBurn) revert InsufficientBalance();
+        uint256 discountRatePerPaymentTokenUnit = 10; // TODO: Configurable
+        if (discountRatePerPaymentTokenUnit == 0) revert("Discount rate not set");
+        uint256 discountValue = amountToBurn / discountRatePerPaymentTokenUnit;
+        if (discountValue == 0) revert BurnAmountTooSmall();
+        rewardToken.burnFrom(user, rewardTokenId, amountToBurn);
+        address paymentToken = address(uint160(rewardTokenId));
+        userDiscountCredit[user][paymentToken] += discountValue;
+        emit DiscountVoucherClaimed(user, rewardTokenId, amountToBurn, discountValue, paymentToken);
     }
 
     // --- Helper & View Functions ---
@@ -694,28 +696,27 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
     }
 
     /** @dev Calculates pending passive staking rewards (Stream 1) for a single stake up to a given time.*/
-     function _calculatePendingPassiveStakingRewards(StakeInfo storage stake, uint256 calculationTime) internal view returns (uint256 pending) {
+    function _calculatePendingPassiveStakingRewards(StakeInfo storage stake, uint256 calculationTime) internal view returns (uint256 pending) {
         // Implementation unchanged
-         if (!stake.active || calculationTime <= stake.lastPassiveRewardClaimTime) {
-             return 0;
-         } 
-         uint256 baseRate = basePassiveStakingRate;
-         if (baseRate == 0) return 0;
-         uint16 lockupMultiplierBp = lockupOptions[stake.durationOption].passiveRateMultiplierBp;
-         uint16 nftBoostBp = _getPassiveRateBoostBP(stake.attachedNftId);
-         uint256 effectiveRateScaled = baseRate * lockupMultiplierBp / BASIS_POINTS_DIVISOR;
-         effectiveRateScaled = effectiveRateScaled * (BASIS_POINTS_DIVISOR + nftBoostBp) / BASIS_POINTS_DIVISOR;
-         uint256 timeElapsed = calculationTime - stake.lastPassiveRewardClaimTime;
-         pending = (effectiveRateScaled * stake.amount * timeElapsed) / PRECISION_FACTOR;
-         return pending; // Returns amount of RewardToken (ID=stake.tokenId) to mint
-     }
+        if (!stake.active || calculationTime <= stake.lastPassiveRewardClaimTime) {
+            return 0;
+        }
+        uint256 baseRate = basePassiveStakingRate;
+        if (baseRate == 0) return 0;
+        uint16 lockupMultiplierBp = lockupOptions[stake.durationOption].passiveRateMultiplierBp;
+        uint16 nftBoostBp = _getPassiveRateBoostBP(stake.attachedNftId);
+        uint256 effectiveRateScaled = (baseRate * lockupMultiplierBp) / BASIS_POINTS_DIVISOR;
+        effectiveRateScaled = (effectiveRateScaled * (BASIS_POINTS_DIVISOR + nftBoostBp)) / BASIS_POINTS_DIVISOR;
+        uint256 timeElapsed = calculationTime - stake.lastPassiveRewardClaimTime;
+        pending = (effectiveRateScaled * stake.amount * timeElapsed) / PRECISION_FACTOR;
+        return pending; // Returns amount of RewardToken (ID=stake.tokenId) to mint
+    }
 
     /** @dev Calculates pending passive staking rewards (Stream 1) - Internal helper taking ID */
     function _calculatePendingPassiveStakingRewards(uint256 stakeId) internal view returns (uint256) {
         // Calls the struct version with current block time
         return _calculatePendingPassiveStakingRewards(stakes[stakeId], block.timestamp);
     }
-
 
     /** @dev Calculates the effective stake amount considering NFT boost */
     function _getEffectiveStakedAmount(uint256 actualAmount, uint256 attachedNftId) internal view returns (uint256 effectiveAmount) {
@@ -724,22 +725,22 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
         if (attachedNftId != 0) {
             NftProperties storage properties = nftProperties[attachedNftId];
             if (properties.isActive && properties.bonusType == BonusType.STAKING_FEE_SHARE_BOOST) {
-                 effectiveAmount = (actualAmount * (BASIS_POINTS_DIVISOR + uint16(properties.bonusValue))) / BASIS_POINTS_DIVISOR;
+                effectiveAmount = (actualAmount * (BASIS_POINTS_DIVISOR + uint16(properties.bonusValue))) / BASIS_POINTS_DIVISOR;
             }
         }
     }
 
-      /** @dev Gets passive rate boost BP from attached NFT */
-     function _getPassiveRateBoostBP(uint256 attachedNftId) internal view returns (uint16 boostBp) {
-         // Implementation unchanged
+    /** @dev Gets passive rate boost BP from attached NFT */
+    function _getPassiveRateBoostBP(uint256 attachedNftId) internal view returns (uint16 boostBp) {
+        // Implementation unchanged
         boostBp = 0;
         if (attachedNftId != 0) {
-             NftProperties storage properties = nftProperties[attachedNftId];
+            NftProperties storage properties = nftProperties[attachedNftId];
             if (properties.isActive && properties.bonusType == BonusType.PASSIVE_STAKING_RATE_BOOST) {
-                 boostBp = uint16(properties.bonusValue);
-            } 
+                boostBp = uint16(properties.bonusValue);
+            }
         }
-     }
+    }
 
     /** @inheritdoc IExchangeRewards*/
     function pendingFeeShareRewards(uint256 stakeId) external view override returns (uint256) {
@@ -760,8 +761,8 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
 
     /** @inheritdoc IExchangeRewards*/
     function getStakeInfo(uint256 stakeId) external view override returns (StakeInfo memory) {
-         // Access check? No, info is public.
-         return stakes[stakeId];
+        // Access check? No, info is public.
+        return stakes[stakeId];
     }
 
     /** @inheritdoc IExchangeRewards*/
@@ -770,51 +771,67 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
     }
 
     /** @inheritdoc IExchangeRewards*/
-     function getNftProperties(uint256 nftId) external view override returns (NftProperties memory) {
-          if (!rewardToken.isEnhancementNFT(nftId)) revert NotEnhancementNFT();
-          return nftProperties[nftId];
-     }
+    function getNftProperties(uint256 nftId) external view override returns (NftProperties memory) {
+        if (!rewardToken.isEnhancementNFT(nftId)) revert NotEnhancementNFT();
+        return nftProperties[nftId];
+    }
 
     /** @inheritdoc IExchangeRewards*/
-     function getUserDiscountCredit(address user, address paymentToken) external view override returns (uint256) {
-         return userDiscountCredit[user][paymentToken];
-     }
+    function getUserDiscountCredit(address user, address paymentToken) external view override returns (uint256) {
+        return userDiscountCredit[user][paymentToken];
+    }
 
     /** @inheritdoc IExchangeRewards*/
-     function pendingHoldingRewards(address user, uint256 tokenId) public view override returns (uint256) {
+    function pendingHoldingRewards(address user, uint256 tokenId) public view override returns (uint256) {
         // Implementation unchanged from previous version
-         HoldingRewardInfo storage info = holdingRewardInfo[tokenId];
-         uint256 globalRewardPerToken = info.rewardPerTokenStored;
-         uint256 userDebtPerToken = userHoldingRewardDebt[user][tokenId];
-         if (globalRewardPerToken <= userDebtPerToken) return 0;
-         uint256 userBalance = rewardToken.balanceOf(user, tokenId);
-         if (userBalance == 0) return 0;
-         uint256 reward = (userBalance * (globalRewardPerToken - userDebtPerToken)) / PRECISION_FACTOR;
-         return reward;
-     }
+        HoldingRewardInfo storage info = holdingRewardInfo[tokenId];
+        uint256 globalRewardPerToken = info.rewardPerTokenStored;
+        uint256 userDebtPerToken = userHoldingRewardDebt[user][tokenId];
+        if (globalRewardPerToken <= userDebtPerToken) return 0;
+        uint256 userBalance = rewardToken.balanceOf(user, tokenId);
+        if (userBalance == 0) return 0;
+        uint256 reward = (userBalance * (globalRewardPerToken - userDebtPerToken)) / PRECISION_FACTOR;
+        return reward;
+    }
 
     /** @inheritdoc IExchangeRewards*/
     function getLockupOptions() external view override returns (uint256[] memory durations, uint16[] memory passiveRateMultipliers) {
         // Implementation unchanged
-         uint256 length = lockupOptions.length;
-         durations = new uint256[](length);
-         passiveRateMultipliers = new uint16[](length);
-         for(uint i = 0; i < length; ++i) {
-             durations[i] = lockupOptions[i].duration;
-             passiveRateMultipliers[i] = lockupOptions[i].passiveRateMultiplierBp;
-         }
-         return (durations, passiveRateMultipliers);
-     }
+        uint256 length = lockupOptions.length;
+        durations = new uint256[](length);
+        passiveRateMultipliers = new uint16[](length);
+        for (uint i = 0; i < length; ++i) {
+            durations[i] = lockupOptions[i].duration;
+            passiveRateMultipliers[i] = lockupOptions[i].passiveRateMultiplierBp;
+        }
+        return (durations, passiveRateMultipliers);
+    }
 
+    function setTokenSaleStakingContract(address _contractAddress, uint16 _feeShareBp) external onlyOwner {
+        tokenSaleStakingContract = _contractAddress;
+        tokenSalePoolFeeShareBasisPoints = _feeShareBp;
+    }
     // --- IERC1155Receiver ---
     /** @inheritdoc IERC1155Receiver*/
-    function onERC1155Received( address /*operator*/, address /*from*/, uint256 /*id*/, uint256 /*value*/, bytes calldata /*data*/) external override returns (bytes4) {
+    function onERC1155Received(
+        address /*operator*/,
+        address /*from*/,
+        uint256 /*id*/,
+        uint256 /*value*/,
+        bytes calldata /*data*/
+    ) external override returns (bytes4) {
         // Basic implementation accepts transfers (needed for NFT attach)
-         return this.onERC1155Received.selector;
-    } 
+        return this.onERC1155Received.selector;
+    }
 
     /** @inheritdoc IERC1155Receiver*/
-    function onERC1155BatchReceived( address /*operator*/, address /*from*/, uint256[] calldata /*ids*/, uint256[] calldata /*values*/, bytes calldata /*data*/) external override returns (bytes4) {
+    function onERC1155BatchReceived(
+        address /*operator*/,
+        address /*from*/,
+        uint256[] calldata /*ids*/,
+        uint256[] calldata /*values*/,
+        bytes calldata /*data*/
+    ) external override returns (bytes4) {
         return this.onERC1155BatchReceived.selector;
     }
 

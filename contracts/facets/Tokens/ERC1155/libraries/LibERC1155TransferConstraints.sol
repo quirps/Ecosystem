@@ -5,7 +5,7 @@ library LibERC1155TransferConstraints{
     bytes32 constant ERC1155_CONSTRAINT_STORAGE_POSITION = keccak256("diamond.erc1155constraints");
 
 struct ConstraintStorage{
-    mapping(uint256 => uint256) tranfserLimit; 
+    mapping(uint256 => bool) transferrable; 
     mapping(uint256 => int64) minimumMemberLevel; 
     mapping(uint256 => uint32) expireTime;
     mapping(uint256 => uint24) royaltyFee;
@@ -22,13 +22,13 @@ function erc1155ConstraintStorage() internal pure returns (ConstraintStorage sto
     uint256 constant NUMBER_INTERVALS = 2**128; // max 60 constraints
     uint8 constant CURRENT_MAX_INTERVALS = 8;
     struct Constraints{
-        TransferLimit transferLimit;
+        Transferrable transferrable;
         MemberLevelDependency minimumMembershipLevel;
         Expireable expireable;
         RoyaltyFee royaltyFee;
     }
-     struct TransferLimit{
-        uint256 maxTransfers;
+     struct Transferrable{
+        bool isTransferrable;
         bool isActive;
     } 
     struct MemberLevelDependency{

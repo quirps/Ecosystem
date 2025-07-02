@@ -453,7 +453,8 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
         (ctx.royaltyReceiver, ctx.currentRoyaltyFee) = _handleRoyalty(
             ctx.ecosystemAddr, ctx.ticketId, ctx.grossSalePrice, buyerExpectedRoyaltyFee
         );
-        ctx.sellerReceives = ctx.grossSalePrice - ctx.currentRoyaltyFee;
+        // total amount seller receives
+        ctx.sellerReceives = ctx.grossSalePrice -  ctx.platformFee- ctx.currentRoyaltyFee;
 
         // --- Apply Discount ---
         ctx.discountAmount = rewardsContract.useDiscount(ctx.buyer, ctx.paymentTokenAddr);

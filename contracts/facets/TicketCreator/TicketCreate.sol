@@ -28,14 +28,14 @@ contract TicketCreate is iTransferSetConstraints, iERC1155 {
 
     //The order of the Constraint struct matches the order of the if statements
     //and correspond to the constraint bitmap in ascending order.
-    function ticketCreate(uint256 _amount, TicketMeta memory _ticketMeta, LibERC1155TransferConstraints.Constraints memory _constraints) public {
+    function ticketCreate(uint256 _amount, TicketMeta memory _ticketMeta, LibERC1155TransferConstraints.Constraints memory _constraints) public returns (uint256 ticketId_){
         isEcosystemOwnerVerification();
+ 
+        ticketId_ = ticketConstraintHandler(_constraints);
 
-        uint256 ticketId = ticketConstraintHandler(_constraints);
+        _mint(msgSender(), ticketId_, _amount, "");
 
-        _mint(msgSender(), ticketId, _amount, "");
-
-        emit TicketsCreated(ticketId, _amount, _ticketMeta);
+        emit TicketsCreated(ticketId_, _amount, _ticketMeta);
     }
 }
 
