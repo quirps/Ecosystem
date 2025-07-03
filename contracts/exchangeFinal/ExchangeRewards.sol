@@ -77,7 +77,8 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
     uint256 public baseRewardRateNumerator = 1;
     uint256 public baseRewardRateDenominator = 100;
     uint16 public stakingRatioBoostFactor = 5000;
-
+    
+    uint256 public txOriginFeeShareBasisPoints = 100;
     // --- NFT Properties State ---
     mapping(uint256 => NftProperties) public nftProperties; // nftId => Properties (Struct/Enum defined in interface)
 
@@ -192,34 +193,60 @@ contract ExchangeRewards is IExchangeRewards, Ownable, ReentrancyGuardContract, 
     // --- Core Interactions (Called by TicketExchange) ---
 
     /** @inheritdoc IExchangeRewards*/
-    function recordFee(address paymentToken, uint256 platformFeeAmount) external payable override ReentrancyGuard {
+   /**
+     * @notice Receives fees and splits them between the platform (TokenSaleStaking), the tx initiator, and the main staking pool.
+     * @dev This function now orchestrates a three-way fee split using a secure txInitiator parameter.
+     * 1. A share is sent to the transaction initiator.
+     * 2. A share is sent to the TokenSaleStaking contract (platform revenue).
+     * 3. The remainder is allocated to this contract's main staking reward pool.
+     */
+    function recordFee(
+        address paymentToken,
+        uint256 platformFeeAmount,
+        address txInitiator // <-- NEW PARAMETER
+    ) external override ReentrancyGuard {
         if (msg.sender != ticketExchange) revert NotTicketExchange();
         if (platformFeeAmount == 0) return;
 
-        uint256 tokenId = uint256(uint160(paymentToken));
-        uint256 amountForStaking = platformFeeAmount;
+        uint256 remainingFee = platformFeeAmount;
+        IERC20 token = IERC20(paymentToken);
 
-        // Allocate portion to Passive Holding Reward Pool
-        if (passiveRewardFeeShareBasisPoints > 0) {
-            uint256 passiveShare = (platformFeeAmount * passiveRewardFeeShareBasisPoints) / BASIS_POINTS_DIVISOR;
-            if (passiveShare > 0) {
-                passiveRewardPool[paymentToken] += passiveShare;
-                amountForStaking -= passiveShare;
+        // --- 1. Allocate share to the Transaction Initiator ---
+        if (txOriginFeeShareBasisPoints > 0) { 
+            uint256 initiatorShare = (platformFeeAmount * txOriginFeeShareBasisPoints) / BASIS_POINTS_DIVISOR;
+            if (initiatorShare > 0 && initiatorShare <= remainingFee) {
+                remainingFee -= initiatorShare;
+                // Directly transfer the share to the initiator address provided.
+                token.safeTransfer(txInitiator, initiatorShare);
             }
         }
 
-        // Allocate remaining portion to Staking Fee Share Rewards (Stream 2)
-        if (amountForStaking > 0) {
-            RewardInfo storage stakingInfo = rewardInfo[tokenId];
-            stakingInfo.lastUpdateTime = block.timestamp; // Update timestamp
+        // --- 2. Allocate share to the Token Sale Staking Pool (Platform Revenue) ---
+        if (tokenSaleStakingContract != address(0) && tokenSalePoolFeeShareBasisPoints > 0) {
+            uint256 salePoolShare = (platformFeeAmount * tokenSalePoolFeeShareBasisPoints) / BASIS_POINTS_DIVISOR;
+            if (salePoolShare > 0 && salePoolShare <= remainingFee) {
+                remainingFee -= salePoolShare;
+                // Forward the funds and notify the TokenSaleStaking contract
+                token.safeTransfer(tokenSaleStakingContract, salePoolShare);
+                // The recordFee function on TokenSaleStaking does not need the txInitiator
+                IExchangeRewards(tokenSaleStakingContract).recordFee(paymentToken, salePoolShare, address(0));
+            }
+        }
 
-            // Distribute rewards based on TOTAL EFFECTIVE STAKED amount
+        // --- 3. Allocate the final remainder to the main Staking Fee Share Rewards pool ---
+        if (remainingFee > 0) {
+            uint256 tokenId = uint256(uint160(paymentToken));
+            RewardInfo storage stakingInfo = rewardInfo[tokenId];
+            stakingInfo.lastUpdateTime = block.timestamp;
+
             if (stakingInfo.totalEffectiveStaked > 0) {
-                uint256 rewardAddedPerEffectiveToken = (amountForStaking * PRECISION_FACTOR) / stakingInfo.totalEffectiveStaked;
+                uint256 rewardAddedPerEffectiveToken = (remainingFee * PRECISION_FACTOR) / stakingInfo.totalEffectiveStaked;
                 stakingInfo.rewardPerTokenStored += rewardAddedPerEffectiveToken;
             }
         }
-        emit FeeRecorded(paymentToken, amountForStaking);
+
+        // Emit event for the total fee processed by this contract's main pool
+        emit FeeRecorded(paymentToken, remainingFee);
     }
 
     /** @inheritdoc IExchangeRewards*/

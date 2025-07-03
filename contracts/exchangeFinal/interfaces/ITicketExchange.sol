@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "../../facets/ERC2981/IERC2981.sol"; // Include needed interfaces
-  
+
 /**
  * @title ITicketExchange Interface
  * @dev Interface for the multi-ecosystem ticket marketplace contract.
@@ -37,13 +37,51 @@ interface ITicketExchange {
         bool isEcosystemOwnerListing; // True if seller == owner at time of listing
         bool active;
     }
- 
+
     // --- Events ---
-    event SaleCreated(uint256 indexed saleId, address indexed creator, address indexed ecosystemAddress, address paymentTokenAddress, uint256 ticketId, uint256 paymentAmount);
-    event SalePurchase(uint256 indexed saleId, address indexed buyer, address indexed paymentTokenAddress, uint256 valuePaid, uint256 platformFee, uint256 discountApplied, uint256 rewardTokensMinted, bool boosterNftUsed, uint256 ticketId, uint256 ticketAmountPerPurchase);
+    event SaleCreated(
+        uint256 indexed saleId,
+        address indexed creator,
+        address indexed ecosystemAddress,
+        address paymentTokenAddress,
+        uint256 ticketId,
+        uint256 paymentAmount
+    );
+    event SalePurchase(
+        uint256 indexed saleId,
+        address indexed buyer,
+        address indexed paymentTokenAddress,
+        uint256 valuePaid,
+        uint256 platformFee,
+        uint256 discountApplied,
+        uint256 rewardTokensMinted,
+        bool boosterNftUsed,
+        uint256 ticketId,
+        uint256 ticketAmountPerPurchase
+    );
     event EcosystemOwnerInteraction(address indexed ecosystemAddress, address indexed user, address indexed paymentToken, uint256 valuePaid); // Tracks owner sales/listings purchases
-    event TicketListed(uint256 indexed listingId, address indexed seller, address indexed ecosystemAddress, uint256  ticketId, uint256 amount, uint256 pricePerTicket, bool isOwnerListing);
-    event TicketPurchased(uint256 indexed listingId, address indexed buyer, address indexed seller, address paymentTokenAddress, uint256 amountBought, uint256 grossSalePrice, uint256 platformFee, uint256 royaltyPaid, uint256 discountApplied, uint256 rewardTokensMinted, bool boosterNftUsed);
+    event TicketListed(
+        uint256 indexed listingId,
+        address indexed seller,
+        address indexed ecosystemAddress,
+        uint256 ticketId,
+        uint256 amount,
+        uint256 pricePerTicket,
+        bool isOwnerListing
+    );
+    event TicketPurchased(
+        uint256 indexed listingId,
+        address indexed buyer,
+        address indexed seller,
+        address paymentTokenAddress,
+        uint256 amountBought,
+        uint256 grossSalePrice,
+        uint256 platformFee,
+        uint256 royaltyPaid,
+        uint256 discountApplied,
+        uint256 rewardTokensMinted,
+        bool boosterNftUsed
+    );
     event TicketListingCancelled(uint256 indexed listingId);
     event RewardsContractSet(address indexed rewardsContract);
     // Removed TicketTokenSet as we don't have a single ticket token anymore
@@ -65,11 +103,6 @@ interface ITicketExchange {
         uint256 paymentAmount // Price 'P' per unit
     ) external;
 
-    function purchaseFromSale(
-        uint256 saleId,
-        uint256 boosterNftId // Optional: Pass 0 if not using
-    ) external;
-
     // --- Listing Functions ---
     function listTicket(
         address ecosystemAddress, // The ecosystem/ticket contract
@@ -77,13 +110,6 @@ interface ITicketExchange {
         uint256 amount,
         uint256 pricePerTicket, // Price 'P'
         address paymentToken
-    ) external;
-
-    function purchaseTicket(
-        uint256 listingId,
-        uint256 amountToBuy,
-        uint256 buyerExpectedRoyaltyFee, // Royalty verification
-        uint256 boosterNftId // Optional: Pass 0 if not using
     ) external;
 
     function cancelListing(uint256 listingId) external;
@@ -95,12 +121,11 @@ interface ITicketExchange {
     function setMaxRoyalty(address ecosystemAddress, uint16 _maxBasisPoints) external; // 0 address for global?
     function setGlobalMaxRoyalty(uint16 _maxBasisPoints) external;
 
-
     // --- View Functions ---
     function getSale(uint256 saleId) external view returns (SaleInfo memory);
     function getListing(uint256 listingId) external view returns (ListingInfo memory);
     function getUserSalePurchases(uint256 saleId, address user) external view returns (uint256 unitsPurchased);
-    function getUserEcosystemValue(address ecosystemAddress, address user, address paymentToken) external view returns (uint256 totalValuePaid); // Renamed for clarity
+     function getUserEcosystemValue(address ecosystemAddress, address user, address paymentToken) external view returns (uint256 totalValuePaid); // Renamed for clarity
     function isPaymentTokenAllowed(address token) external view returns (bool);
     function getRewardsContract() external view returns (address);
     function getPlatformFee() external view returns (uint16);
@@ -109,6 +134,17 @@ interface ITicketExchange {
     function getBuyerPriceForSale(uint256 saleId) external view returns (uint256 buyerPrice);
     function getBuyerPriceForListing(uint256 listingId, uint256 amountToBuy) external view returns (uint256 totalBuyerPrice);
     // Calculate expected royalty for UI hints
-    function getExpectedRoyalty(address ecosystemAddress, uint256 ticketId, uint256 grossSalePrice) external view returns (address receiver, uint256 royaltyAmount);
-
+    function getExpectedRoyalty(
+        address ecosystemAddress,
+        uint256 ticketId,
+        uint256 grossSalePrice
+    ) external view returns (address receiver, uint256 royaltyAmount);
+    function purchaseFromSale(uint256 saleId, uint256 boosterNftId, address txInitiator) external;
+    function purchaseTicket(
+        uint256 listingId,
+        uint256 amountToBuy,
+        uint256 buyerExpectedRoyaltyFee,
+        uint256 boosterNftId,
+        address txInitiator
+    )  external;
 }

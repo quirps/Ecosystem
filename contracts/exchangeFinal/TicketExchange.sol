@@ -6,7 +6,7 @@ import "./interfaces/ITicketExchange.sol";
 import "./interfaces/IExchangeRewards.sol";
 import "./interfaces/IRewardToken.sol";
 import "../facets/Ownership/IOwnership.sol";
-import "../facets/ERC2981/IERC2981.sol"; 
+import "../facets/ERC2981/IERC2981.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 // Libraries
@@ -59,7 +59,6 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
     uint256 private constant EARLY_SUPPORTER_COUNT = 20; // Number of purchases eligible
     uint16 private constant MAX_EARLY_BONUS_BP = 1000; // 10% max bonus (Basis Points)
 
-
     // --- Errors ---
     error PaymentTokenNotAllowed();
     error InvalidTimeRange();
@@ -85,11 +84,7 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
     error BoosterNftFailed();
 
     // --- Constructor ---
-    constructor(
-        address _rewardsContractAddress,
-        address _rewardTokenAddress,
-        address _owner
-    ) Ownable( _owner ) {
+    constructor(address _rewardsContractAddress, address _rewardTokenAddress, address _owner) Ownable(_owner) {
         if (_rewardsContractAddress == address(0) || _rewardTokenAddress == address(0)) revert ZeroAddress();
         rewardsContract = IExchangeRewards(_rewardsContractAddress);
         rewardToken = IRewardToken(_rewardTokenAddress);
@@ -122,17 +117,21 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
 
     /** @inheritdoc ITicketExchange*/
     function setMaxRoyalty(address /*ecosystemAddress*/, uint16 /*_maxBasisPoints*/) external override onlyOwner {
-         revert("Royalty limits removed; use buyerExpectedRoyaltyFee check.");
+        revert("Royalty limits removed; use buyerExpectedRoyaltyFee check.");
     }
 
     /** @inheritdoc ITicketExchange*/
     function setGlobalMaxRoyalty(uint16 /*_maxBasisPoints*/) external override onlyOwner {
-         revert("Royalty limits removed; use buyerExpectedRoyaltyFee check.");
+        revert("Royalty limits removed; use buyerExpectedRoyaltyFee check.");
     }
 
-    
-    function adminMintTickets(address /*to*/, uint256[] calldata /*ids*/, uint256[] calldata /*amounts*/, bytes calldata /*data*/) external /*override removed*/ onlyOwner {
-         revert("adminMintTickets removed; manage ticket supply externally per ecosystem.");
+    function adminMintTickets(
+        address /*to*/,
+        uint256[] calldata /*ids*/,
+        uint256[] calldata /*amounts*/,
+        bytes calldata /*data*/
+    ) external /*override removed*/ onlyOwner {
+        revert("adminMintTickets removed; manage ticket supply externally per ecosystem.");
     }
 
     // --- Sale Logic (Primary Market - Owner Only) ---
@@ -160,9 +159,9 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
         // --- Check Ownership ---
         address ecosystemOwner;
         try IOwnership(ecosystemAddress).owner() returns (address owner) {
-             ecosystemOwner = owner;
+            ecosystemOwner = owner;
         } catch {
-             revert("Cannot verify ecosystem owner"); // Revert if owner cannot be determined
+            revert("Cannot verify ecosystem owner"); // Revert if owner cannot be determined
         }
         if (msg.sender != ecosystemOwner) revert MustBeEcosystemOwner();
 
@@ -188,7 +187,7 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
         emit SaleCreated(saleId, msg.sender, ecosystemAddress, paymentTokenAddress, ticketId, paymentAmount);
     }
 
-// --- Context Struct Definition (as you provided it) ---
+    // --- Context Struct Definition (as you provided it) ---
     struct PurchaseSaleContext {
         SaleInfo saleRef; // Use storage pointer for updates
         address buyer;
@@ -204,12 +203,12 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
         bool boosted; // Will be populated by helper
     }
 
-
     /** @inheritdoc ITicketExchange*/
     function purchaseFromSale(
         uint256 saleId,
-        uint256 boosterNftId
-    ) external override ReentrancyGuard {
+        uint256 boosterNftId,
+        address txInitiator // <-- NEW PARAMETER
+    ) external  ReentrancyGuard { 
         // --- Context Struct ---
         PurchaseSaleContext memory ctx;
 
@@ -229,7 +228,7 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
         ctx.creator = ctx.saleRef.creator;
         ctx.ticketId = ctx.saleRef.ticketId;
         ctx.ticketAmount = ctx.saleRef.ticketAmountPerPurchase;
-        ctx.platformFee = ctx.priceP * platformFeeBasisPoints / BASIS_POINTS_DIVISOR;
+        ctx.platformFee = (ctx.priceP * platformFeeBasisPoints) / BASIS_POINTS_DIVISOR;
         uint256 buyerPays = ctx.priceP + ctx.platformFee; // Local temp variable
 
         // --- Apply Discount ---
@@ -250,28 +249,32 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
             ctx.finalCostToBuyer = creatorReceivesAdjusted + ctx.platformFee;
         }
 
-
         // --- Handle Payment & Fee Distribution ---
         // Pass the correctly calculated adjusted amount for the creator
+        // Update the call to the internal helper function
         _handlePaymentAndFee(
             ctx.buyer,
             ctx.paymentTokenAddr,
             ctx.finalCostToBuyer,
             ctx.platformFee,
-            creatorReceivesAdjusted, // <<< Pass the adjusted amount
-            ctx.creator
+            creatorReceivesAdjusted,
+            ctx.creator,
+            txInitiator // <-- PASS PARAMETER
         );
 
         // --- Handle Rewards & Bonuses ---
         // Capture BOTH return values using tuple assignment
         (ctx.finalRewardAmount, ctx.boosted) = _handlePrimarySaleRewards(
-            ctx.buyer, boosterNftId, ctx.ecosystemAddr, ctx.paymentTokenAddr, ctx.priceP, saleId // Reward still based on original priceP
+            ctx.buyer,
+            boosterNftId,
+            ctx.ecosystemAddr,
+            ctx.paymentTokenAddr,
+            ctx.priceP,
+            saleId // Reward still based on original priceP
         );
 
         // --- Ticket Transfer ---
-        IERC1155(ctx.ecosystemAddr).safeTransferFrom(
-            ctx.creator, ctx.buyer, ctx.ticketId, ctx.ticketAmount, ""
-        );
+        IERC1155(ctx.ecosystemAddr).safeTransferFrom(ctx.creator, ctx.buyer, ctx.ticketId, ctx.ticketAmount, "");
 
         // --- Update State ---
         userSalePurchases[saleId][ctx.buyer]++;
@@ -282,9 +285,16 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
         // --- Emit Events ---
         // Use local discountAmount and ctx fields which now hold correct values
         emit SalePurchase(
-            saleId, ctx.buyer, ctx.paymentTokenAddr, ctx.priceP, ctx.platformFee, discountAmount,
-            ctx.finalRewardAmount, ctx.boosted,
-            ctx.ticketId, ctx.ticketAmount
+            saleId,
+            ctx.buyer,
+            ctx.paymentTokenAddr,
+            ctx.priceP,
+            ctx.platformFee,
+            discountAmount,
+            ctx.finalRewardAmount,
+            ctx.boosted,
+            ctx.ticketId,
+            ctx.ticketAmount
         );
         emit EcosystemOwnerInteraction(ctx.ecosystemAddr, ctx.buyer, ctx.paymentTokenAddr, ctx.priceP);
     }
@@ -298,7 +308,8 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
         uint256 finalCostToBuyer,
         uint256 platformFee,
         uint256 creatorReceives, // Receives the adjusted amount calculated in purchaseFromSale
-        address creator
+        address creator,
+        address txInitiator // <-- NEW PARAMETER
     ) internal {
         IERC20 paymentToken = IERC20(paymentTokenAddr);
         // 1. Buyer -> Exchange
@@ -306,11 +317,12 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
         // 2. Exchange -> Rewards Contract (Fee)
         if (platformFee > 0) {
             paymentToken.safeTransfer(address(rewardsContract), platformFee);
-            rewardsContract.recordFee(paymentTokenAddr, platformFee);
+            // Update the call to recordFee
+            rewardsContract.recordFee(paymentTokenAddr, platformFee, txInitiator);
         }
         // 3. Exchange -> Creator (Adjusted Proceeds)
         if (creatorReceives > 0) {
-             paymentToken.safeTransfer(creator, creatorReceives);
+            paymentToken.safeTransfer(creator, creatorReceives);
         }
         // Internal accounting check passed in previous thought step
     }
@@ -318,40 +330,40 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
     // Ensure the _handlePrimarySaleRewards function signature and logic remain unchanged,
     // returning both amount and boosted status.
     /** @dev Handles reward calculation and minting trigger for primary sales */
-     function _handlePrimarySaleRewards(
+    function _handlePrimarySaleRewards(
         address buyer,
         uint256 boosterNftId,
         address ecosystemAddr,
         address paymentTokenAddr,
         uint256 priceP, // Base reward on original price
         uint256 saleId
-     ) internal returns (uint256 finalRewardAmount, bool boosted) {
+    ) internal returns (uint256 finalRewardAmount, bool boosted) {
         // ... (implementation including nonce, bonus, booster check, minting) ...
-         // --- Early Supporter Bonus Check ---
-         uint256 currentNonce = ++salePurchaseNonce[saleId];
-         uint16 bonusBp = 0;
-         if (currentNonce <= EARLY_SUPPORTER_COUNT) {
-              bonusBp = uint16(MAX_EARLY_BONUS_BP * (EARLY_SUPPORTER_COUNT + 1 - currentNonce) / EARLY_SUPPORTER_COUNT);
-         }
+        // --- Early Supporter Bonus Check ---
+        uint256 currentNonce = ++salePurchaseNonce[saleId];
+        uint16 bonusBp = 0;
+        if (currentNonce <= EARLY_SUPPORTER_COUNT) {
+            bonusBp = uint16((MAX_EARLY_BONUS_BP * (EARLY_SUPPORTER_COUNT + 1 - currentNonce)) / EARLY_SUPPORTER_COUNT);
+        }
 
-         // --- Booster NFT Handling ---
-         boosted = false; // Initialize return value
-         if (boosterNftId != 0) {
+        // --- Booster NFT Handling ---
+        boosted = false; // Initialize return value
+        if (boosterNftId != 0) {
             boosted = rewardsContract.verifyAndUsePurchaseBooster(buyer, boosterNftId, ecosystemAddr);
-         }
+        }
 
-         // --- Reward Token Calculation & Mint ---
-         uint256 rewardRate = rewardsContract.getRewardMintRate(paymentTokenAddr);
-         uint256 baseRewardAmount = priceP * rewardRate / WEI_PER_ETHER;
-         if (bonusBp > 0) {
-             baseRewardAmount = baseRewardAmount * (BASIS_POINTS_DIVISOR + bonusBp) / BASIS_POINTS_DIVISOR;
-         }
-         finalRewardAmount = boosted ? baseRewardAmount * 2 : baseRewardAmount;
+        // --- Reward Token Calculation & Mint ---
+        uint256 rewardRate = rewardsContract.getRewardMintRate(paymentTokenAddr);
+        uint256 baseRewardAmount = (priceP * rewardRate) / WEI_PER_ETHER;
+        if (bonusBp > 0) {
+            baseRewardAmount = (baseRewardAmount * (BASIS_POINTS_DIVISOR + bonusBp)) / BASIS_POINTS_DIVISOR;
+        }
+        finalRewardAmount = boosted ? baseRewardAmount * 2 : baseRewardAmount;
 
-         if (finalRewardAmount > 0) {
-             rewardsContract.executeMint(buyer, uint256(uint160(paymentTokenAddr)), finalRewardAmount);
-         }
-     }
+        if (finalRewardAmount > 0) {
+            rewardsContract.executeMint(buyer, uint256(uint160(paymentTokenAddr)), finalRewardAmount);
+        }
+    }
     // --- Listing Logic (Secondary Market) ---
 
     /** @inheritdoc ITicketExchange*/
@@ -374,7 +386,9 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
             if (owner == msg.sender && owner != address(0)) {
                 isOwnerListing = true;
             }
-        } catch { /* Ignore error */ }
+        } catch {
+            /* Ignore error */
+        }
 
         // --- Escrow Tickets ---
         IERC1155(ecosystemAddress).safeTransferFrom(msg.sender, address(this), ticketId, amount, "");
@@ -382,54 +396,53 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
         // --- Create Listing ---
         uint256 listingId = nextListingId++;
         listings[listingId] = ListingInfo({
-             listingId: listingId,
-             seller: msg.sender,
-             ecosystemAddress: ecosystemAddress,
-             ticketId: ticketId,
-             amountAvailable: amount,
-             pricePerTicket: pricePerTicket,
-             paymentToken: paymentToken,
-             isEcosystemOwnerListing: isOwnerListing,
-             active: true
-         });
+            listingId: listingId,
+            seller: msg.sender,
+            ecosystemAddress: ecosystemAddress,
+            ticketId: ticketId,
+            amountAvailable: amount,
+            pricePerTicket: pricePerTicket,
+            paymentToken: paymentToken,
+            isEcosystemOwnerListing: isOwnerListing,
+            active: true
+        });
 
         emit TicketListed(listingId, msg.sender, ecosystemAddress, ticketId, amount, pricePerTicket, isOwnerListing);
     }
 
-    
-        // --- Context Struct ---
-        // Group variables to potentially help stack management
-        struct PurchaseTicketContext {
-            ListingInfo  listingRef; // Pointer to update storage
-            // Actors & IDs
-            address buyer;
-            address seller;
-            address paymentTokenAddr;
-            address ecosystemAddr;
-            uint256 ticketId;
-            // Calculated Values
-            uint256 grossSalePrice;
-            uint256 platformFee;
-            uint256 buyerPaysTotal;
-            uint256 discountAmount;
-            uint256 finalCostToBuyer;
-            address royaltyReceiver;
-            uint256 currentRoyaltyFee;
-            uint256 sellerReceives;
-            bool boosted;
-            uint256 finalRewardAmount;
-            bool isOwnerListing; // Cache owner flag
-        }
- 
+    // --- Context Struct ---
+    // Group variables to potentially help stack management
+    struct PurchaseTicketContext {
+        ListingInfo listingRef; // Pointer to update storage
+        // Actors & IDs
+        address buyer;
+        address seller;
+        address paymentTokenAddr;
+        address ecosystemAddr;
+        uint256 ticketId;
+        // Calculated Values
+        uint256 grossSalePrice;
+        uint256 platformFee;
+        uint256 buyerPaysTotal;
+        uint256 discountAmount;
+        uint256 finalCostToBuyer;
+        address royaltyReceiver;
+        uint256 currentRoyaltyFee;
+        uint256 sellerReceives;
+        bool boosted;
+        uint256 finalRewardAmount;
+        bool isOwnerListing; // Cache owner flag
+    }
+
     /** @inheritdoc ITicketExchange*/
     /* Refactored to reduce stack depth.*/
-      function purchaseTicket(
+    function purchaseTicket(
         uint256 listingId,
         uint256 amountToBuy,
         uint256 buyerExpectedRoyaltyFee,
-        uint256 boosterNftId
-    ) external override ReentrancyGuard {
-    
+        uint256 boosterNftId,
+        address txInitiator
+    ) external  ReentrancyGuard {
         PurchaseTicketContext memory ctx; // Declare struct in memory
 
         // --- Fetch Listing Info & Initial Checks ---
@@ -446,15 +459,13 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
         ctx.ticketId = ctx.listingRef.ticketId;
         ctx.isOwnerListing = ctx.listingRef.isEcosystemOwnerListing; // Cache before potential deactivation
         ctx.grossSalePrice = ctx.listingRef.pricePerTicket * amountToBuy;
-        ctx.platformFee = ctx.grossSalePrice * platformFeeBasisPoints / BASIS_POINTS_DIVISOR;
+        ctx.platformFee = (ctx.grossSalePrice * platformFeeBasisPoints) / BASIS_POINTS_DIVISOR;
         ctx.buyerPaysTotal = ctx.grossSalePrice + ctx.platformFee;
 
         // --- Royalty Calculation & Verification ---
-        (ctx.royaltyReceiver, ctx.currentRoyaltyFee) = _handleRoyalty(
-            ctx.ecosystemAddr, ctx.ticketId, ctx.grossSalePrice, buyerExpectedRoyaltyFee
-        );
+        (ctx.royaltyReceiver, ctx.currentRoyaltyFee) = _handleRoyalty(ctx.ecosystemAddr, ctx.ticketId, ctx.grossSalePrice, buyerExpectedRoyaltyFee);
         // total amount seller receives
-        ctx.sellerReceives = ctx.grossSalePrice -  ctx.platformFee- ctx.currentRoyaltyFee;
+        ctx.sellerReceives = ctx.grossSalePrice - ctx.platformFee - ctx.currentRoyaltyFee;
 
         // --- Apply Discount ---
         ctx.discountAmount = rewardsContract.useDiscount(ctx.buyer, ctx.paymentTokenAddr);
@@ -462,19 +473,26 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
 
         // --- Handle Payment & Distribution ---
         _handleSecondaryPaymentAndDistribution(
-            ctx.buyer, ctx.paymentTokenAddr, ctx.finalCostToBuyer, ctx.platformFee,
-            ctx.royaltyReceiver, ctx.currentRoyaltyFee, ctx.seller, ctx.sellerReceives
+            ctx.buyer,
+            ctx.paymentTokenAddr,
+            ctx.finalCostToBuyer,
+            ctx.platformFee,
+            ctx.royaltyReceiver,
+            ctx.currentRoyaltyFee,
+            ctx.seller,
+            ctx.sellerReceives,
+            txInitiator // <-- PASS PARAMETER
         );
 
         // --- Booster NFT Handling ---
         if (boosterNftId != 0) {
-             // Directly call; let any errors propagate
-             ctx.boosted = rewardsContract.verifyAndUsePurchaseBooster(ctx.buyer, boosterNftId, ctx.ecosystemAddr);
+            // Directly call; let any errors propagate
+            ctx.boosted = rewardsContract.verifyAndUsePurchaseBooster(ctx.buyer, boosterNftId, ctx.ecosystemAddr);
         }
- 
+
         // --- Reward Token Minting ---
         uint256 rewardRate = rewardsContract.getRewardMintRate(ctx.paymentTokenAddr);
-        uint256 baseRewardAmount = ctx.grossSalePrice * rewardRate / WEI_PER_ETHER;
+        uint256 baseRewardAmount = (ctx.grossSalePrice * rewardRate) / WEI_PER_ETHER;
         ctx.finalRewardAmount = ctx.boosted ? baseRewardAmount * 2 : baseRewardAmount;
         if (ctx.finalRewardAmount > 0) {
             rewardsContract.executeMint(ctx.buyer, uint256(uint160(ctx.paymentTokenAddr)), ctx.finalRewardAmount);
@@ -492,16 +510,25 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
         // --- Update Ecosystem Owner Tracking if needed ---
         if (ctx.isOwnerListing) {
             userEcosystemPurchasesValue[ctx.ecosystemAddr][ctx.buyer][ctx.paymentTokenAddr] += ctx.grossSalePrice;
-             emit EcosystemOwnerInteraction(ctx.ecosystemAddr, ctx.buyer, ctx.paymentTokenAddr, ctx.grossSalePrice);
+            emit EcosystemOwnerInteraction(ctx.ecosystemAddr, ctx.buyer, ctx.paymentTokenAddr, ctx.grossSalePrice);
         }
 
         // --- Emit Event ---
         emit TicketPurchased(
-            listingId, ctx.buyer, ctx.seller, ctx.paymentTokenAddr, amountToBuy, ctx.grossSalePrice,
-            ctx.platformFee, ctx.currentRoyaltyFee, ctx.discountAmount, ctx.finalRewardAmount, ctx.boosted
+            listingId,
+            ctx.buyer,
+            ctx.seller,
+            ctx.paymentTokenAddr,
+            amountToBuy,
+            ctx.grossSalePrice,
+            ctx.platformFee,
+            ctx.currentRoyaltyFee,
+            ctx.discountAmount,
+            ctx.finalRewardAmount,
+            ctx.boosted
         );
-     }
-       // --- Internal Helper Functions --- (Keep existing helpers, arguments were already minimal)
+    }
+    // --- Internal Helper Functions --- (Keep existing helpers, arguments were already minimal)
 
     /** @dev Handles royalty checks for secondary sales (Arguments seem okay) */
     function _handleRoyalty(
@@ -511,7 +538,7 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
         uint256 buyerExpectedRoyaltyFee
     ) internal view returns (address receiver, uint256 royaltyFee) {
         // ... (implementation unchanged) ...
-         try IERC2981(ecosystemAddr).royaltyInfo(ticketId, grossSalePrice) returns (address r, uint256 amount) {
+        try IERC2981(ecosystemAddr).royaltyInfo(ticketId, grossSalePrice) returns (address r, uint256 amount) {
             if (amount > grossSalePrice) revert RoyaltyExceedsPrice();
             if (amount != buyerExpectedRoyaltyFee) revert RoyaltyMismatch();
             receiver = r;
@@ -532,122 +559,131 @@ contract TicketExchange is ITicketExchange, Ownable, ReentrancyGuardContract, ER
         address royaltyReceiver,
         uint256 royaltyFee,
         address seller,
-        uint256 sellerReceives
+        uint256 sellerReceives,
+        address txInitiator // <-- NEW PARAMETER
     ) internal {
-         // ... (implementation unchanged - performs external calls) ...
-         IERC20 paymentToken = IERC20(paymentTokenAddr);
-         paymentToken.safeTransferFrom(buyer, address(this), finalCostToBuyer);
-         if (platformFee > 0) {
-             paymentToken.safeTransfer(address(rewardsContract), platformFee);
-             rewardsContract.recordFee(paymentTokenAddr, platformFee);
-         }
-         if (royaltyFee > 0 && royaltyReceiver != address(0)) {
-             paymentToken.safeTransfer(royaltyReceiver, royaltyFee);
-         }
-         if (sellerReceives > 0) {
-             paymentToken.safeTransfer(seller, sellerReceives);
-         }
+        // ... (implementation unchanged - performs external calls) ...
+        IERC20 paymentToken = IERC20(paymentTokenAddr);
+        paymentToken.safeTransferFrom(buyer, address(this), finalCostToBuyer);
+        if (platformFee > 0) {
+            paymentToken.safeTransfer(address(rewardsContract), platformFee);
+            // Update the call to recordFee
+            rewardsContract.recordFee(paymentTokenAddr, platformFee, txInitiator);  
+        }
+        if (royaltyFee > 0 && royaltyReceiver != address(0)) {
+            paymentToken.safeTransfer(royaltyReceiver, royaltyFee);
+        }
+        if (sellerReceives > 0) {
+            paymentToken.safeTransfer(seller, sellerReceives);
+        }
     }
-
 
     /** @inheritdoc ITicketExchange*/
     function cancelListing(uint256 listingId) external override ReentrancyGuard {
-         ListingInfo storage listing = listings[listingId];
-         if (listing.seller != msg.sender) revert NotListingOwner();
-         if (!listing.active) revert ListingNotActive();
+        ListingInfo storage listing = listings[listingId];
+        if (listing.seller != msg.sender) revert NotListingOwner();
+        if (!listing.active) revert ListingNotActive();
 
-         listing.active = false;
-         uint256 amountToReturn = listing.amountAvailable;
-         listing.amountAvailable = 0;
+        listing.active = false;
+        uint256 amountToReturn = listing.amountAvailable;
+        listing.amountAvailable = 0;
 
-         if (amountToReturn > 0) {
-             IERC1155(listing.ecosystemAddress).safeTransferFrom(address(this), msg.sender, listing.ticketId, amountToReturn, "");
-         }
+        if (amountToReturn > 0) {
+            IERC1155(listing.ecosystemAddress).safeTransferFrom(address(this), msg.sender, listing.ticketId, amountToReturn, "");
+        }
 
-         emit TicketListingCancelled(listingId);
+        emit TicketListingCancelled(listingId);
     }
 
     // --- View Functions ---
 
     /** @inheritdoc ITicketExchange*/
     function getSale(uint256 saleId) external view override returns (SaleInfo memory) {
-         return sales[saleId];
-     }
+        return sales[saleId];
+    }
 
     /** @inheritdoc ITicketExchange*/
-     function getListing(uint256 listingId) external view override returns (ListingInfo memory) {
-         return listings[listingId];
-     }
+    function getListing(uint256 listingId) external view override returns (ListingInfo memory) {
+        return listings[listingId];
+    }
 
     /** @inheritdoc ITicketExchange*/
-     function getUserSalePurchases(uint256 saleId, address user) external view override returns (uint256 unitsPurchased) {
+    function getUserSalePurchases(uint256 saleId, address user) external view override returns (uint256 unitsPurchased) {
         return userSalePurchases[saleId][user];
-     }
+    }
 
     /** @inheritdoc ITicketExchange*/
-     function getUserEcosystemValue(address ecosystemAddress, address user, address paymentToken) external view override returns (uint256 totalValuePaid) {
+    function getUserEcosystemValue(
+        address ecosystemAddress,
+        address user,
+        address paymentToken
+    ) external view override returns (uint256 totalValuePaid) {
         return userEcosystemPurchasesValue[ecosystemAddress][user][paymentToken];
-     }
+    }
 
     /** @inheritdoc ITicketExchange*/
-     function isPaymentTokenAllowed(address token) external view override returns (bool) {
+    function isPaymentTokenAllowed(address token) external view override returns (bool) {
         return paymentTokensWhitelist[token];
-     }
-
-     /** @inheritdoc ITicketExchange*/
-     function getRewardsContract() external view override returns (address) {
-         return address(rewardsContract);
-     }
+    }
 
     /** @inheritdoc ITicketExchange*/
-     function getPlatformFee() external view override returns (uint16) {
-         return platformFeeBasisPoints;
-     }
+    function getRewardsContract() external view override returns (address) {
+        return address(rewardsContract);
+    }
 
     /** @inheritdoc ITicketExchange*/
-     function getMaxRoyalty(address /*ecosystemAddress*/) external view override returns (uint16) {
-         // Royalty limits removed
-         return 0;
-     }
- 
-     /** @inheritdoc ITicketExchange*/
-     function getBuyerPriceForSale(uint256 saleId) external view override returns (uint256 buyerPrice) {
-         SaleInfo storage sale = sales[saleId];
-         // Revert instead of returning 0 if inactive? More explicit.
-         if (!sale.active) revert SaleNotActive();
-         uint256 priceP = sale.paymentAmount;
-         uint256 platformFee = priceP * platformFeeBasisPoints / BASIS_POINTS_DIVISOR;
-         return priceP + platformFee;
-     }
+    function getPlatformFee() external view override returns (uint16) {
+        return platformFeeBasisPoints;
+    }
 
-     /** @inheritdoc ITicketExchange*/
-     function getBuyerPriceForListing(uint256 listingId, uint256 amountToBuy) external view override returns (uint256 totalBuyerPrice) {
-         ListingInfo storage listing = listings[listingId];
-         if (!listing.active) revert ListingNotActive();
-         if (amountToBuy == 0) revert AmountMustBePositive();
-         if (listing.amountAvailable < amountToBuy) revert NotEnoughListed();
+    /** @inheritdoc ITicketExchange*/
+    function getMaxRoyalty(address /*ecosystemAddress*/) external view override returns (uint16) {
+        // Royalty limits removed
+        return 0;
+    }
 
-         uint256 grossSalePrice = listing.pricePerTicket * amountToBuy;
-         uint256 platformFee = grossSalePrice * platformFeeBasisPoints / BASIS_POINTS_DIVISOR;
-         return grossSalePrice + platformFee;
-     }
+    /** @inheritdoc ITicketExchange*/
+    function getBuyerPriceForSale(uint256 saleId) external view override returns (uint256 buyerPrice) {
+        SaleInfo storage sale = sales[saleId];
+        // Revert instead of returning 0 if inactive? More explicit.
+        if (!sale.active) revert SaleNotActive();
+        uint256 priceP = sale.paymentAmount;
+        uint256 platformFee = (priceP * platformFeeBasisPoints) / BASIS_POINTS_DIVISOR;
+        return priceP + platformFee;
+    }
 
-     /** @inheritdoc ITicketExchange*/
-     function getExpectedRoyalty(address ecosystemAddress, uint256 ticketId, uint256 grossSalePrice) external view override returns (address receiver, uint256 royaltyAmount) {
-         // Royalty limit checks removed here too, only call and return raw value or 0.
-         try IERC2981(ecosystemAddress).royaltyInfo(ticketId, grossSalePrice) returns (address r, uint256 a) {
-              if (a > grossSalePrice) { // Sanity check
-                 return (address(0), 0);
-              }
-             return (r, a);
-         } catch {
-             return (address(0), 0); // No royalty if interface not supported or call reverts
-         }
-     }
+    /** @inheritdoc ITicketExchange*/
+    function getBuyerPriceForListing(uint256 listingId, uint256 amountToBuy) external view override returns (uint256 totalBuyerPrice) {
+        ListingInfo storage listing = listings[listingId];
+        if (!listing.active) revert ListingNotActive();
+        if (amountToBuy == 0) revert AmountMustBePositive();
+        if (listing.amountAvailable < amountToBuy) revert NotEnoughListed();
 
-    // --- Supports Interface --- 
-    function supportsInterface(bytes4 interfaceId) public view virtual override( ERC1155Holder ) returns (bool) { 
-        return interfaceId == type(ITicketExchange).interfaceId
-            || super.supportsInterface(interfaceId);
+        uint256 grossSalePrice = listing.pricePerTicket * amountToBuy;
+        uint256 platformFee = (grossSalePrice * platformFeeBasisPoints) / BASIS_POINTS_DIVISOR;
+        return grossSalePrice + platformFee;
+    }
+
+    /** @inheritdoc ITicketExchange*/
+    function getExpectedRoyalty(
+        address ecosystemAddress,
+        uint256 ticketId,
+        uint256 grossSalePrice
+    ) external view override returns (address receiver, uint256 royaltyAmount) {
+        // Royalty limit checks removed here too, only call and return raw value or 0.
+        try IERC2981(ecosystemAddress).royaltyInfo(ticketId, grossSalePrice) returns (address r, uint256 a) {
+            if (a > grossSalePrice) {
+                // Sanity check
+                return (address(0), 0);
+            }
+            return (r, a);
+        } catch {
+            return (address(0), 0); // No royalty if interface not supported or call reverts
+        }
+    }
+
+    // --- Supports Interface ---
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155Holder) returns (bool) {
+        return interfaceId == type(ITicketExchange).interfaceId || super.supportsInterface(interfaceId);
     }
 }
