@@ -62,6 +62,7 @@ contract iERC1155 is iERC1155ContractTransfer, iOwnership {
         _doSafeTransferAcceptanceCheck(operator, address(0), to, id, amount, data);
     }
 
+
     /**
      * @dev xref:ROOT:erc1155.adoc#batch-operations[Batched] version of {_mint}.
      *

@@ -82,19 +82,19 @@ Would like to clean this function up at some point.
         uint128 nonce;
         uint128 incrementedNonce;
         uint256 ticketId;
-        if(_constraints.transferrable.isActive){
+        if(_constraints.isTransferable){
             //transferLimitConditions set
             bitMap ^= (1 << 1);
         }
-        if(_constraints.minimumMembershipLevel.isActive){
+        if(_constraints.isMembershipLevelActive){
             //memberRankDependency set
             bitMap ^= (1 << 2); 
         } 
-        if(_constraints.expireable.isActive){ 
+        if(_constraints.expireTime > 0){ 
             //expireable set
             bitMap ^= (1 << 3);
         }
-        if(_constraints.royaltyFee.isActive){ 
+        if(_constraints.royaltyFee > 0){  
             //expireable set
             bitMap ^= (1 << 4);
         }
@@ -112,17 +112,17 @@ Would like to clean this function up at some point.
         
 
         //store ticket constraints
-        if(_constraints.transferrable.isActive){
-            cs.transferrable[ticketId] = _constraints.transferrable.isTransferrable;
+        if(_constraints.isTransferable){
+            cs.transferrable[ticketId] = _constraints.isTransferable;
         }
-        if(_constraints.minimumMembershipLevel.isActive){ 
-            cs.minimumMemberLevel[ticketId] = _constraints.minimumMembershipLevel.minimumLevel;
+        if(_constraints.isMembershipLevelActive){ 
+            cs.minimumMemberLevel[ticketId] = _constraints.minimumMembershipLevel;
         }   
-        if(_constraints.expireable.isActive){   
-            cs.expireTime[ticketId] = _constraints.expireable.expireTime;
+        if(_constraints.expireTime > 0 ){   
+            cs.expireTime[ticketId] = _constraints.expireTime;
         } 
-        if(_constraints.expireable.isActive){   
-            cs.royaltyFee[ticketId] = _constraints.royaltyFee.fee;
+        if(_constraints.royaltyFee > 0){   
+            cs.royaltyFee[ticketId] = _constraints.royaltyFee;
         } 
         
 

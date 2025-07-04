@@ -2,37 +2,38 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19; // Match factory pragma
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { IAppInstanceFactory } from "./IAppInstanceFactory.sol"; // Use interface 
-import { IAppRegistryLinkFacet } from "../facets/AppRegistry/IAppRegistryLinkFacet.sol"; // Use correct path
-  
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {IAppInstanceFactory} from "./IAppInstanceFactory.sol"; // Use interface
+import {IEventFacet} from "../facets/Events/IEventFacet.sol";
 // Interface for ecosystem owner check
 interface IEcosystemOwner {
     function owner() external view returns (address);
 }
 
 contract AppRegistry is Ownable {
-
-    enum AppStatus { Pending, Active, Deprecated, Archived }
+    enum AppStatus {
+        Pending,
+        Active,
+        Deprecated,
+        Archived
+    }
 
     // App Information - Implementation is the source of code, Factory deploys it
- struct AppInfo {
-    // Core Addresses/Hashes
-    address factoryAddress;        // Address of the factory for this type
-    bytes32 expectedBytecodeHash;  // Hash the factory expects
-
-    // Metadata (Passed during registration call)
-    string name;                // User-friendly name (e.g., "Basic Poll v1")
-    string description;         // Added
-    string developerName;       // Added
-    string logoURI;             // Added
-    string sourceCodeURI;       // Added
-    string[] tags;              // Added (Note: dynamic arrays increase gas cost)
-
-    // Status & Timestamps (Set by the contract logic)
-    AppStatus status;            // Status at time of registration
-    uint256 registrationTimestamp; // Set via block.timestamp in registration function
-}
+    struct AppInfo {
+        // Core Addresses/Hashes
+        address factoryAddress; // Address of the factory for this type
+        bytes32 expectedBytecodeHash; // Hash the factory expects
+        // Metadata (Passed during registration call)
+        string name; // User-friendly name (e.g., "Basic Poll v1")
+        string description; // Added
+        string developerName; // Added
+        string logoURI; // Added
+        string sourceCodeURI; // Added
+        string[] tags; // Added (Note: dynamic arrays increase gas cost)
+        // Status & Timestamps (Set by the contract logic)
+        AppStatus status; // Status at time of registration
+        uint256 registrationTimestamp; // Set via block.timestamp in registration function
+    }
 
     // --- State ---
 
@@ -40,18 +41,18 @@ contract AppRegistry is Ownable {
 
     // *** Mappings using eventType (bytes32) as the key ***
     mapping(bytes32 => AppInfo) private s_appInfo; // eventType => Info
-    bytes32[] private s_registeredEventTypes;      // Array of registered eventTypes for enumeration
+    bytes32[] private s_registeredEventTypes; // Array of registered eventTypes for enumeration
     mapping(bytes32 => uint256) private s_eventTypeIndex; // eventType => array index + 1
 
     // --- Events ---
 
     // Fired when a new App Type (eventType) is registered
-  event AppTypeRegistered(
-    bytes32 indexed eventType,      // The unique ID for this app type
-    address indexed registrant,     // Who called the registration function
-    uint256 arrayIndex,           // Index within the contract's internal list (s_registeredEventTypes?)
-    AppInfo appInfo               // Struct containing the detailed information
-);
+    event AppTypeRegistered(
+        bytes32 indexed eventType, // The unique ID for this app type
+        address indexed registrant, // Who called the registration function
+        uint256 arrayIndex, // Index within the contract's internal list (s_registeredEventTypes?)
+        AppInfo appInfo // Struct containing the detailed information
+    );
 
     // Fired when metadata of an existing app type is updated
     event AppTypeMetadataUpdated(bytes32 indexed eventType, string name);
@@ -64,10 +65,9 @@ contract AppRegistry is Ownable {
 
     // Fired *after* successful deployment AND callback to ecosystem
     event AppInstanceInstalledForEcosystem(
-        bytes32 indexed eventType,          // The type of app installed
-        address indexed ecosystemAddress,   // The target ecosystem
-        address instanceAddress,        // Address of the new app instance
-        address indexed creator             // The ecosystem owner who initiated the installation
+        bytes32 indexed eventType, // The type of app installed
+        address indexed ecosystemAddress, // The target ecosystem
+        address indexed instanceAddress // Address of the new app instance
     );
 
     // --- Modifiers ---
@@ -98,49 +98,37 @@ contract AppRegistry is Ownable {
      * @param eventType A unique identifier for this app type (e.g., keccak256("RAFFLE_V1")).
      * @param info The metadata including implementation source, factory, and hash.
      */
-    function registerAppType(bytes32 eventType, AppInfo calldata info)
-        public
-        onlyOwnerIfRestricted
-    {
+    function registerAppType(bytes32 eventType, AppInfo calldata info) public onlyOwnerIfRestricted {
         require(eventType != bytes32(0), "AppRegistry: Zero eventType");
         require(s_eventTypeIndex[eventType] == 0, "AppRegistry: EventType already registered"); // Global uniqueness check
         require(info.factoryAddress != address(0), "AppRegistry: Zero factory address");
         require(info.expectedBytecodeHash != bytes32(0), "AppRegistry: Zero bytecode hash");
         require(bytes(info.name).length > 0, "AppRegistry: Name required");
- 
+
         IAppInstanceFactory factory = IAppInstanceFactory(info.factoryAddress);
         bytes32 actualFactoryExpectedHash = factory.getExpectedBytecodeHash();
         require(actualFactoryExpectedHash == info.expectedBytecodeHash, "AppRegistry: Factory expected hash mismatch");
 
-        // --- Storage --- 
-        uint256 eventTypeIndex = s_registeredEventTypes.length; 
+        // --- Storage ---
+        uint256 eventTypeIndex = s_registeredEventTypes.length;
         s_appInfo[eventType] = info;
         s_registeredEventTypes.push(eventType);
         s_eventTypeIndex[eventType] = eventTypeIndex + 1; // Store index+1
 
-        emit AppTypeRegistered(
-            eventType,
-            _msgSender(),
-            eventTypeIndex,
-            info 
-        );
+        emit AppTypeRegistered(eventType, _msgSender(), eventTypeIndex, info);
     }
 
     /**
      * @notice Updates the status of an existing app type.
      */
-    function setAppTypeStatus(bytes32 eventType, AppStatus newStatus)
-        public
-        onlyOwnerIfRestricted
-    {
+    function setAppTypeStatus(bytes32 eventType, AppStatus newStatus) public onlyOwnerIfRestricted {
         require(s_eventTypeIndex[eventType] != 0, "AppRegistry: AppType not registered");
         s_appInfo[eventType].status = newStatus;
         emit AppTypeStatusChanged(eventType, newStatus);
     }
 
-    function isAppExist( bytes32 eventType) external view returns( bool ) {
+    function isAppExist(bytes32 eventType) external view returns (bool) {
         return s_appInfo[eventType].factoryAddress != address(0);
-
     }
     // Add other management functions like updateMetadata if needed...
 
@@ -154,9 +142,7 @@ contract AppRegistry is Ownable {
      * @param ecosystemAddress The address of the target ecosystem contract.
      * @param eventType The type identifier of the app to install.
      */
-    function installAppForEcosystem(address ecosystemAddress, bytes calldata bytecode, bytes32 eventType)
-        external
-    {
+    function installAppForEcosystem(address ecosystemAddress, bytes calldata bytecode, bytes32 eventType) external {
         // --- Pre-checks ---
         require(ecosystemAddress != address(0), "AppRegistry: Zero ecosystem address");
         require(s_eventTypeIndex[eventType] != 0, "AppRegistry: AppType not registered");
@@ -179,47 +165,34 @@ contract AppRegistry is Ownable {
 
         // --- Prepare for CREATE2 ---
         address factoryAddress = info.factoryAddress;
-        IAppInstanceFactory factory = IAppInstanceFactory(factoryAddress);   
-        bytes32 salt = keccak256(abi.encodePacked(ecosystemAddress, eventType)); // Salt specific to ecosystem/appType
+        IAppInstanceFactory factory = IAppInstanceFactory(factoryAddress);
+        bytes32 salt = getSalt(ecosystemAddress, eventType); // Salt specific to ecosystem/appType
 
-        // --- Deploy Instance ---   
-        address newInstanceAddress; 
-        try factory.deployInstance( ecosystemAddress, bytecode, salt) returns (address deployedAddr) {
+        // --- Deploy Instance ---
+        address newInstanceAddress;
+        try factory.deployInstance(ecosystemAddress, bytecode, salt) returns (address deployedAddr) {
             newInstanceAddress = deployedAddr;
         } catch Error(string memory reason) {
-             revert(string.concat("AppRegistry: Factory deployment failed: ", reason));
+            revert(string.concat("AppRegistry: Factory deployment failed: ", reason));
         } catch (bytes memory lowLevelData) {
-             // Using lowLevelData might expose internal factory reverts, could be less user-friendly
-             revert(string.concat("AppRegistry: Factory deployment failed with low-level data")); // Avoid showing raw bytes usually
-             // Alternatively: revert("AppRegistry: Factory deployment failed");
+            // Using lowLevelData might expose internal factory reverts, could be less user-friendly
+            revert(string.concat("AppRegistry: Factory deployment failed with low-level data")); // Avoid showing raw bytes usually
+            // Alternatively: revert("AppRegistry: Factory deployment failed");
         }
 
         // --- Post-Deployment Callback to Ecosystem ---
         // The ecosystem contract MUST trust this AppRegistry address
-        try IAppRegistryLinkFacet(ecosystemAddress).setInstalledAppFromRegistry(eventType, newInstanceAddress) {
-            // Callback succeeded
-            emit AppInstanceInstalledForEcosystem(
-                eventType,
-                ecosystemAddress,
-                newInstanceAddress,
-                msg.sender // The ecosystem owner who initiated
-            );
-        } catch Error(string memory reason) {
-            // CRITICAL: What happens if the callback fails?
-            // The instance is deployed, but the ecosystem doesn't know about it.
-            // Options:
-            // 1. Revert the whole transaction (current behavior if try/catch block reverts). This is safest.
-            // 2. Emit an error event and leave instance orphaned (less ideal).
-            // 3. Have a recovery mechanism (complex).
-            // -> Reverting is the standard approach unless specific handling is needed.
-            revert(string.concat("AppRegistry: Ecosystem callback failed: ", reason));
-        } catch {
-             revert("AppRegistry: Ecosystem callback failed with unknown error");
+        try IEventFacet(ecosystemAddress).registerApp(newInstanceAddress, true) {} catch {
+            revert("Failed to register App");
         }
+        emit AppInstanceInstalledForEcosystem(
+            eventType, // The type of app installed
+            ecosystemAddress, // The target ecosystem
+            newInstanceAddress // Address of the new app instance
+        );
 
         // Note: No return value needed as state change is confirmed by event/callback.
     }
-
 
     // --- Internal Bytecode Fetching ---
 
@@ -244,45 +217,49 @@ contract AppRegistry is Ownable {
     }
 
     /**
-      * @notice Get the number of registered app types.
-      */
-     function getAppTypesCount() public view returns (uint256) {
-         return s_registeredEventTypes.length;
-     }
+     * @notice Get the number of registered app types.
+     */
+    function getAppTypesCount() public view returns (uint256) {
+        return s_registeredEventTypes.length;
+    }
 
-     /**
-      * @notice Get a paginated list of registered event types.
-      */
-     function getPaginatedAppTypes(uint256 cursor, uint256 size)
-         public
-         view
-         returns (bytes32[] memory eventTypes, uint256 nextCursor)
-     {
-         uint256 len = s_registeredEventTypes.length;
-         if (size == 0 || cursor >= len) {
-             return (new bytes32[](0), len);
-         }
-         uint256 end = cursor + size;
-         if (end > len) {
-             end = len;
-         }
+    /**
+     * @notice Get a paginated list of registered event types.
+     */
+    function getPaginatedAppTypes(uint256 cursor, uint256 size) public view returns (bytes32[] memory eventTypes, uint256 nextCursor) {
+        uint256 len = s_registeredEventTypes.length;
+        if (size == 0 || cursor >= len) {
+            return (new bytes32[](0), len);
+        }
+        uint256 end = cursor + size;
+        if (end > len) {
+            end = len;
+        }
 
-         eventTypes = new bytes32[](end - cursor);
-         for (uint256 i = cursor; i < end; i++) {
-             eventTypes[i - cursor] = s_registeredEventTypes[i];
-         }
-         return (eventTypes, end);
-     }
+        eventTypes = new bytes32[](end - cursor);
+        for (uint256 i = cursor; i < end; i++) {
+            eventTypes[i - cursor] = s_registeredEventTypes[i];
+        }
+        return (eventTypes, end);
+    }
 
     /**
      * @notice Predicts deployment address for a given app type and ecosystem.
      * @dev Requires implementation code to be available for prediction via factory.
      */
-    function predictDeploymentAddress(address ecosystemAddress, bytes32 eventType)
-        public
-        view
-        returns (address predictedAddress)
-    {
-        
+    // Then, the implementation for predictDeploymentAddress in AppRegistry.sol:
+    function predictDeploymentAddress(address ecosystemAddress, bytes32 eventType) public view returns (address predictedAddress) {
+        require(ecosystemAddress != address(0), "AppRegistry: Zero ecosystem address");
+        require(s_eventTypeIndex[eventType] != 0, "AppRegistry: AppType not registered");
+
+        AppInfo storage info = s_appInfo[eventType];
+        IAppInstanceFactory factory = IAppInstanceFactory(info.factoryAddress);
+        bytes32 salt = getSalt(ecosystemAddress, eventType);
+
+        // Calls the predictAddress function on the registered factory
+        predictedAddress = factory.predictAddress(info.expectedBytecodeHash, salt);
+    }
+    function getSalt(address ecosystemAddress, bytes32 eventType) private pure returns (bytes32 salt_) {
+        salt_ = keccak256(abi.encodePacked(ecosystemAddress, eventType));
     }
 }

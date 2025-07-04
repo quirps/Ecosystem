@@ -38,11 +38,13 @@ contract ERC1155Transfer is iERC1155Transfer {
         _safeBatchTransferFrom(from, to, ids, amounts, data);
     }
 
+    //restricted to tokenId 0 until we have time for the expanded version
     function airDrop(address from, address[] memory to, uint256[] memory ids, uint256[] memory amounts, bytes memory message) public {
         require(from == msgSender() || isApprovedForAll(from, msgSender()), "ERC1155: caller is not token owner or approved");
         require(to.length == ids.length, "Mismatching input param array lengths; to - ids");
         require(to.length == amounts.length, "Mismatching input param array lengths; to - amounts");
         for (uint256 i; i < to.length; i++) {
+            require( ids[i] == 0, "Can only airdrop currency at the moment." );
             _safeTransferFrom(from, to[i], ids[i], amounts[i], message);
         }
         emit AirDrop(from, to, ids, amounts, message);

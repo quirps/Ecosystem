@@ -30,14 +30,14 @@ interface IAppInstanceFactory {
         payable
         returns (address instanceAddress);
 
-    /**
+    /** 
      * @notice Predicts the deployment address after verifying the provided bytecode's hash.
      * @dev Requires the caller to provide the bytecode for hash verification.
-     * @param bytecodeToPredict The bytecode intended for deployment.
+     * @param bytecodeHash The bytecode intended for deployment.
      * @param salt A unique salt used for CREATE2 deployment.
      * @return predictedAddress The address where the contract will be deployed if deployInstance is called with the same arguments.
      */
-    function predictAddress(bytes calldata bytecodeToPredict, bytes32 salt)
+    function predictAddress(bytes32 bytecodeHash, bytes32 salt)
         external
         view
         returns (address predictedAddress);

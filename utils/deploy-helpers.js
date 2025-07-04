@@ -1,6 +1,8 @@
 // In deploy-helpers.js
 
 const { Interface } = require("@ethersproject/abi"); // Or from ethers v6
+// deploy/utils/ticketUtils.js
+const { ethers } = require("hardhat");
 
 // Assume getSelectors returns [{selector: string, signature: string}]
 function getSelectors(abi) {
@@ -96,11 +98,70 @@ async function createFacetCuts_RemoveOnlyDuplicates(facetNames, deployments) {
     return facetCuts;
 }
 
+
+
+
+
+/**
+ * @notice Helper function to create structured parameters for ticket creation.
+ * @dev Exposes all parameters directly in the function signature for easy developer viewing,
+ * aligning with a Solidity Constraints struct where most active flags are implicit.
+ * @param name The name of the ticket. Defaults to "Default Ecosystem Ticket".
+ * @param symbol The symbol of the ticket. Defaults to "ECOT".
+ * @param uri The URI for the ticket's metadata. Defaults to "ipfs://default_ticket_metadata_uri".
+ * @param isTransferrable Set to true if the ticket is transferable, false otherwise. Defaults to true.
+ * @param isMembershipLevelActive Set to true to activate the minimum membership level constraint. Defaults to false.
+ * @param minimumLevel If isMembershipLevelActive is true, the minimum member level required. Defaults to 0.
+ * @param expireTime The Unix timestamp when the ticket expires. Set to 0 for no expiration. Defaults to 0.
+ * @param fee The royalty fee amount. Set to 0 for no fee. Defaults to 0.
+ * @returns An object containing the structured ticketMeta and constraints for Solidity.
+ */
+const createTicketParams = (
+    title = "Default Ecosystem Ticket",
+    description = "ECOT",
+    imageHash = "sdfhishdfishfhsdhufishf",
+    isTransferable = true, // Directly maps to Solidity's isTransferable
+    isMembershipLevelActive = false, // Explicit active flag for membership level
+    minimumLevel = 0, // Directly maps to Solidity's minimumMembershipLevel
+    expireTime = 0, // Directly maps to Solidity's expireTime
+    fee = 0 // Directly maps to Solidity's fee
+) => {
+    const ticketMeta = {
+        title,
+        description,
+        imageHash,
+    };
+
+    // Aligning with the new Solidity struct:
+    // struct Constraints {
+    //     bool isTransferable;
+    //     int64 minimumMembershipLevel;
+    //     bool isMembershipLevelActive;
+    //     uint32 expireTime;
+    //     uint24 fee;
+    // }
+    const constraints = {
+        isTransferable: isTransferable,
+        minimumMembershipLevel: minimumLevel,
+        isMembershipLevelActive: isMembershipLevelActive,
+        expireTime: expireTime,
+        royaltyFee: fee,
+    };
+
+    return {
+        ticketMeta: ticketMeta,
+        constraints: constraints,
+    };
+};
+
+
+
 // Export the new function and potentially the modified getSelectors
 module.exports = {
     // ... other existing helpers ...
     getSelectors, // Export modified helper if needed elsewhere
     createFacetCuts_RemoveOnlyDuplicates, // Export new function
+    createTicketParams,
     // Keep old createFacetCuts if needed, maybe rename it? Or remove if replaced.
     // createFacetCuts: oldCreateFacetCuts,
 };

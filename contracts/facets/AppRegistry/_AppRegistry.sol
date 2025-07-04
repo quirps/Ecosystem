@@ -41,3 +41,6 @@ contract iAppRegistry {
         return LibAppStorage.isAppInstalled(eventType);
     }
 }
+
+/**
+Likely need to link registry to the ecosystem LibEventFacet.registeredApps */

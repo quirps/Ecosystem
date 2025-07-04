@@ -27,7 +27,7 @@
             "--network",
             "hardhat", // Target your testing network
             "--tags",
-            "FrontendPopulate"
+            "Main"
           
 
             

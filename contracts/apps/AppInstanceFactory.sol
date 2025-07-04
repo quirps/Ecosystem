@@ -79,17 +79,17 @@ contract AppInstanceFactory is Ownable {
 
     /**
      * @notice Predicts the deployment address after verifying the provided bytecode's hash.
-     * @param bytecodeToPredict The bytecode intended for deployment.
+     * @param bytecodeHash The bytecode intended for deployment.
      * @param salt A unique salt used for CREATE2 deployment.
      * @return predictedAddress The address where the contract will be deployed.
      */
-    function predictAddress(bytes calldata bytecodeToPredict, bytes32 salt)
+    function predictAddress(bytes32 bytecodeHash, bytes32 salt)
         public 
         view
         returns (address predictedAddress)
     {
-        bytes32 receivedBytecodeHash = keccak256(bytecodeToPredict);
-        require(receivedBytecodeHash == expectedBytecodeHash, "Factory: Bytecode mismatch for prediction");
+        
+        require( bytecodeHash == expectedBytecodeHash, "Factory: Bytecode mismatch for prediction");
 
         // Use OpenZeppelin's helper for CREATE2 address prediction
         predictedAddress = Create2.computeAddress(salt, expectedBytecodeHash, address(this));        // Alternatively, using the assembly method from OZ Address.sol:

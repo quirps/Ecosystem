@@ -33,9 +33,15 @@ contract TicketCreate is iTransferSetConstraints, iERC1155 {
  
         ticketId_ = ticketConstraintHandler(_constraints);
 
-        _mint(msgSender(), ticketId_, _amount, "");
+        _mint(msgSender(), ticketId_, _amount, ""); 
 
         emit TicketsCreated(ticketId_, _amount, _ticketMeta);
+    }
+
+    function getTicketConstraints( uint256 ticketId ) external view returns (LibERC1155TransferConstraints.Constraints memory contraints_){
+        LibERC1155TransferConstraints.ConstraintStorage storage cs = LibERC1155TransferConstraints.erc1155ConstraintStorage()
+
+        constraints_ = 
     }
 }
 
