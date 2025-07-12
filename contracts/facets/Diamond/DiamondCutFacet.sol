@@ -34,19 +34,19 @@ contract DiamondCutFacet is IDiamondCut, iOwnership {
      * @notice Initiate a migration away from the massDX ecosystem versions. 
      * There is a 3 day minimum required timespan
      */
-    function initiateMigration() external {
+    function initiateMigration() external returns (uint32 expireTime) {
         isEcosystemOwnerVerification();
 
-        _initiateMigration();
+        return _initiateMigration();
     }
 
     /**
      * @notice If an ongoing migration exists and hasn't surpassed the 3 day 
      * minimum wait time, then the migration will be cancelled.
      */
-    function cancelMigration() external {
+    function cancelMigration() external returns (uint32 expireTime){
         isEcosystemOwnerVerification();
 
-        _cancelMigration();
+        return _cancelMigration();
     }
 }

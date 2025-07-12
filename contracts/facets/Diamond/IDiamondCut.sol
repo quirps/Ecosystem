@@ -16,6 +16,14 @@ interface IDiamondCut {
         bytes4[] functionSelectors;
     }
 
+    function initiateMigration() external returns (uint32 expireTime);
+
+    /**
+     * @notice If an ongoing migration exists and hasn't surpassed the 3 day 
+     * minimum wait time, then the migration will be cancelled.
+     */
+    function cancelMigration() external returns (uint32 expireTime);
+
     /// @notice Add/replace/remove any number of functions and optionally execute
     ///         a function with delegatecall
     /// @param _diamondCut Contains the facet addresses and function selectors

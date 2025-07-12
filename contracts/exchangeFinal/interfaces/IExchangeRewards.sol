@@ -35,6 +35,7 @@ interface IExchangeRewards {
     }
 
     // --- Events ---
+    event InitiatorFeeChange( uint16 feeShareBp);
     event HoldingRewardsClaimed(address indexed user, uint256 indexed tokenId, uint256 indexed pending);
     event FeeRecorded(address indexed paymentToken, uint256 amountAllocatedToStaking);
     event PassiveRewardsDistributed(uint256 indexed tokenId, uint256 totalAmountDistributed, uint256 rewardAddedPerToken); // For holding rewards

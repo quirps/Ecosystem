@@ -7,6 +7,7 @@ library LibERC1155TransferConstraints {
     struct ConstraintStorage {
         mapping(uint256 => bool) transferrable;
         mapping(uint256 => int64) minimumMemberLevel;
+        mapping(uint256 => bool) isMembershipLevelActive;
         mapping(uint256 => uint32) expireTime;
         mapping(uint256 => uint24) royaltyFee;
         mapping(uint128 => uint128) ticketIntervalNonce;
@@ -29,11 +30,15 @@ library LibERC1155TransferConstraints {
         uint24 royaltyFee;
     }
 
+    function _ticketConstraints(uint256 _ticketId) internal view returns (Constraints memory constraints_){
+        ConstraintStorage storage cs = erc1155ConstraintStorage();
+        constraints_ = Constraints( 
+            cs.transferrable[ _ticketId],
+            cs.minimumMemberLevel[ _ticketId],
+            cs.isMembershipLevelActive[ _ticketId],
+            cs.expireTime[ _ticketId],
+            cs.royaltyFee[ _ticketId]
+        );
+    }
 
-    //Blacklist contained in MemberRankDependency, rank 0 is blacklist,
-    //set min rank as 1 or greater
-
-    // struct MemberRankTieredDelay{
-    //     LibMembers.rank minimumRank;
-    // }
 }

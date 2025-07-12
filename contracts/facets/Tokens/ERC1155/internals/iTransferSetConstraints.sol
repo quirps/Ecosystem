@@ -102,13 +102,14 @@ Would like to clean this function up at some point.
         
         //get nonce
         nonce = cs.ticketIntervalNonce[ bitMap ];  
-        incrementedNonce = nonce + 1;
         
         //generate ticket id 
         ticketId = ( nonce ) +  bitMap * LibERC1155TransferConstraints.INTERVAL_SIZE;
+        
          
-       
-        cs.ticketIntervalNonce[bitMap] = incrementedNonce;
+        
+       // increment interval nonce
+        cs.ticketIntervalNonce[bitMap]++;
         
 
         //store ticket constraints
@@ -117,6 +118,7 @@ Would like to clean this function up at some point.
         }
         if(_constraints.isMembershipLevelActive){ 
             cs.minimumMemberLevel[ticketId] = _constraints.minimumMembershipLevel;
+            cs.isMembershipLevelActive[ticketId] = _constraints.isMembershipLevelActive;
         }   
         if(_constraints.expireTime > 0 ){   
             cs.expireTime[ticketId] = _constraints.expireTime;

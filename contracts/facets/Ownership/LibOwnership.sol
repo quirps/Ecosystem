@@ -4,8 +4,8 @@ pragma solidity ^0.8.0;
 
 library LibOwnership {
 bytes32 constant OWNERSHIP_STORAGE_POSITION = keccak256("diamond.ownership.storage");
-uint24 constant MIGRATION_TRANSITION_LOCK_TIMESPAN = 259200; // 3 days
-
+uint32 constant MIGRATION_TRANSITION_LOCK_TIMESPAN = 259200; // 3 days
+uint32 constant MAX_TIMESTAMP = type( uint32 ).max;
 struct OwnershipStorage{
     address ecosystemOwner;
     address registry;
@@ -13,7 +13,7 @@ struct OwnershipStorage{
 }
 struct Migration{
     bool isMigrating;
-    uint32 initiationTimestamp;
+    uint32 expirationTimestamp;
 }
 
 function ownershipStorage() internal pure returns (OwnershipStorage storage os) {

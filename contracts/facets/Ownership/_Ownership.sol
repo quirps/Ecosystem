@@ -41,7 +41,7 @@ contract iOwnership is iERC2771Recipient {
     function isEffectiveOwner() internal view {
         LibOwnership.OwnershipStorage storage os = LibOwnership.ownershipStorage();
         LibOwnership.Migration storage _migration = os.migration;
-        if( _migration.isMigrating && isMigrationPeriodOver( _migration.initiationTimestamp ) ){
+        if( _migration.isMigrating && uint32(block.timestamp) >= _migration.expirationTimestamp ){
             require( msgSender() == os.ecosystemOwner, "Sender must be the owner.");
         }
         else{
@@ -53,7 +53,7 @@ contract iOwnership is iERC2771Recipient {
     /**
      * @dev start the migration 
      */
-    function _initiateMigration() internal {
+    function _initiateMigration() internal returns (uint32 expirationTime_) {
         LibOwnership.OwnershipStorage storage os = LibOwnership.ownershipStorage();
         LibOwnership.Migration storage _migration = os.migration;
         if( _migration.isMigrating ){
@@ -61,21 +61,23 @@ contract iOwnership is iERC2771Recipient {
         }
         else{
             _migration.isMigrating = true;
-            _migration.initiationTimestamp = uint32(block.timestamp);
+            expirationTime_ =  uint32(block.timestamp) + LibOwnership.MIGRATION_TRANSITION_LOCK_TIMESPAN;
+            _migration.expirationTimestamp = expirationTime_; 
             emit MigrationInitiated(msgSender(), uint32(block.timestamp) );
         } 
     }
-    function _cancelMigration() internal {
+    function _cancelMigration() internal returns (uint32 expirationTime_) {
         LibOwnership.OwnershipStorage storage os = LibOwnership.ownershipStorage();
         LibOwnership.Migration storage _migration = os.migration;
-        uint32 _initiationTimestamp = _migration.initiationTimestamp;
+        uint32 _expirationTimestamp = _migration.expirationTimestamp;
         if( _migration.isMigrating  ) {
-            if(isMigrationPeriodOver( _initiationTimestamp )){
+            if( uint32(block.timestamp) >= _expirationTimestamp ){
                 revert MigrationAlreadyCompleted();
             }
             else{
                 _migration.isMigrating = false;
-                emit MigrationCancelled(msgSender(), uint32(block.timestamp));
+                expirationTime_ = LibOwnership.MAX_TIMESTAMP;
+                emit MigrationCancelled(msgSender(), expirationTime_);
             }
         }
         else {
@@ -83,8 +85,6 @@ contract iOwnership is iERC2771Recipient {
         }
         
     }
-    function isMigrationPeriodOver( uint32 _initiationTimestamp ) internal view returns (bool isOver_){
-        isOver_ = uint32(block.timestamp) + LibOwnership.MIGRATION_TRANSITION_LOCK_TIMESPAN > _initiationTimestamp;
-    }
+   
 }
  
