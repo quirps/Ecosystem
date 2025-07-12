@@ -13,18 +13,15 @@
     "deploy:sepolia": "npx hardhat deploy --network sepolia",
     "deploy:sepolia:Main": "npx hardhat deploy --network sepolia --tags Main",
     "deploy:local:core": "npx hardhat deploy --network localhost --tags Core",
-     "deploy:hardhat:frontend": "npx hardhat deploy --network localhost --tags FrontendPopulate",
+    "deploy:hardhat:frontend": "npx hardhat deploy --network localhost --tags FrontendPopulate",
     "deploy:local:version": "npx hardhat deploy --network localhost --tags DeployVersion",
     "postdeploy:local": "npx hardhat deploy --network localhost --tags PostDeploy",
     "start:server": "node ./server.js",
     "dev:node": "npx hardhat node",
     "test": "npx hardhat test"
   },
-
   "author": "Joe Cocchi",
   "license": "MIT",
- 
- 
   "devDependencies": {
     "@faker-js/faker": "^8.0.2",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.3",
@@ -56,6 +53,7 @@
     "@openzeppelin/contracts": "=5.1.0",
     "@uniswap/v3-periphery": "^1.4.4",
     "bn.js": "^5.1.2",
+    "ethers": "^6.15.0",
     "glob": "^11.0.1",
     "hardhat-diamond-abi": "^3.0.1",
     "merkletreejs": "^0.5.2",
