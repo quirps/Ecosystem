@@ -47,7 +47,7 @@ contract AppInstanceFactory is Ownable {
         // Initialize a variable to hold the deployed address
         address deployedAddress; 
 
-        require(keccak256(bytecodeToDeploy) == expectedBytecodeHash, "Bytecode must match that of the Diamond associated with this contract.");
+        require(keccak256(bytecodeToDeploy) == expectedBytecodeHash, "Bytecode must match that of the App associated with this contract.");
         // ABI encode the constructor parameters
         bytes memory encodedParams = abi.encode(ecosystemAddress); 
 

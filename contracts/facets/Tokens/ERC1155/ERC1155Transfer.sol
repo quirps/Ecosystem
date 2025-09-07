@@ -12,6 +12,7 @@ import "../../../libraries//utils/Address.sol";
 import "../../../libraries/utils/Context.sol";
 import "./libraries/LibERC1155.sol";
 import "./internals/iERC1155Transfer.sol";
+import "hardhat/console.sol";
 /**
  * @dev Implementation of the basic standard multi-token.
  * See https://eips.ethereum.org/EIPS/eip-1155
@@ -60,9 +61,8 @@ contract ERC1155Transfer is iERC1155Transfer {
      * @dev See {IERC1155-isApprovedForAll}.
      */
     function isApprovedForAll(address account, address operator) public view returns (bool) {
-        LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
-
-        return es.operatorApprovals[account][operator];
+        console.log(1);
+        return LibERC1155.getOperatorApproval(account, operator);
     }
 
     /**

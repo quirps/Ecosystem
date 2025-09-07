@@ -3,7 +3,58 @@
 const { Interface } = require("@ethersproject/abi"); // Or from ethers v6
 // deploy/utils/ticketUtils.js
 const { ethers } = require("hardhat");
+const { keccak256, toUtf8Bytes } = require("ethers/lib/utils");
+const EcosystemArtifact = require("../artifacts/hardhat-diamond-abi/HardhatDiamondABI.sol/Ecosystem.json")
+// Type for facetCuts
 
+
+function getSelectorFromSignature(signature) {
+  return keccak256(toUtf8Bytes(signature)).slice(0, 10); // 0x + 4 bytes = 10 characters
+}
+
+function findSelectorCollisions(facetCuts) {
+  const abi = EcosystemArtifact.abi;
+
+  const selectorToSigs = {};
+  const sigToSelector = {};
+
+  // Build signature -> selector mapping
+  for (const item of abi) {
+    if (item.type !== "function") continue;
+    const signature = `${item.name}(${item.inputs.map((i) => i.type).join(",")})`;
+    const selector = getSelectorFromSignature(signature);
+    sigToSelector[signature] = selector;
+
+    if (!selectorToSigs[selector]) {
+      selectorToSigs[selector] = new Set();
+    }
+    selectorToSigs[selector].add(signature);
+  }
+
+  const collisionReport = {};
+
+  // Go through all selectors in facetCuts and find conflicts
+  for (const cut of facetCuts) {
+    for (const selector of cut.functionSelectors) {
+      const sigs = selectorToSigs[selector];
+      if (sigs && sigs.size > 1) {
+        collisionReport[selector] = Array.from(sigs);
+      }
+    }
+  }
+
+  if (Object.keys(collisionReport).length === 0) {
+    console.log("✅ No selector collisions found.");
+  } else {
+    console.log("🚨 Selector collisions detected:");
+    for (const [selector, sigs] of Object.entries(collisionReport)) {
+      console.log(`Selector: ${selector}`);
+      for (const sig of sigs) {
+        console.log(`  - ${sig}`);
+      }
+    }
+  }
+}
 // Assume getSelectors returns [{selector: string, signature: string}]
 function getSelectors(abi) {
     const iface = new Interface(abi);
@@ -153,7 +204,10 @@ const createTicketParams = (
         constraints: constraints,
     };
 };
-
+// Helper to parse event logs
+const findEvent = (receipt, eventName, contractInterface) => {
+    for (const log of receipt.logs) { try { const p = contractInterface.parseLog(log); if (p.name === eventName) return p; } catch (e) {} } return null;
+};
 
 
 // Export the new function and potentially the modified getSelectors
@@ -162,6 +216,8 @@ module.exports = {
     getSelectors, // Export modified helper if needed elsewhere
     createFacetCuts_RemoveOnlyDuplicates, // Export new function
     createTicketParams,
+    findSelectorCollisions, 
+    findEvent
     // Keep old createFacetCuts if needed, maybe rename it? Or remove if replaced.
     // createFacetCuts: oldCreateFacetCuts,
 };

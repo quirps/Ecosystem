@@ -24,23 +24,23 @@ interface ITicketExchange is IERC165 {
         uint16 basisPoints;
     }
 
-    struct SaleInfo {
-        uint256 saleId;
-        address creator;
-        address ecosystemAddress; // The ERC1155 contract address for the ticket
-        uint32 startTime;
-        uint32 endTime;
-        uint16 membershipLevel;
-        address paymentTokenAddress; // The ERC20 token used for payment
-        uint256 limitPerUser; // Max units per user for this sale
-        uint256 predecessorSaleId; // For sequential sales (0 if none)
-        uint256 ticketId; // The ID of the ERC1155 ticket being sold
-        uint256 ticketAmountPerPurchase; // How many tickets per purchase unit
-        uint256 paymentAmount; // Price 'P' set by owner for one purchase unit
-        uint256 totalSoldUnits; // Total units sold in this sale
-        bool active;
-        DistributionShare[] distribution; // NEW: How proceeds are split
-    }
+struct SaleInfo {
+    uint256 saleId;
+    address creator;
+    address ecosystemAddress;
+    uint32 startTime;
+    uint32 endTime;
+    uint16 membershipLevel;
+    address paymentTokenAddress;
+    uint256 limitPerUser;
+    uint256 predecessorSaleId;
+    uint256 ticketId;
+    uint256 ticketAmount; // NEW: Total quantity of tickets available for this sale
+    uint256 paymentAmount; // Price per single ticket
+    uint256 totalSoldUnits;
+    bool active;
+    DistributionShare[] distribution;
+}
 
     struct ListingInfo {
         uint256 listingId;
@@ -65,17 +65,18 @@ interface ITicketExchange is IERC165 {
         uint256 ticketId,
         uint256 paymentAmount
     );
-    event SalePurchase(
+   event ListingCancelled(uint256 listingId,address seller, uint256 ticketId, uint256 amountAvailable);
+
+   event SalePurchase(
         uint256 indexed saleId,
         address indexed buyer,
         address paymentTokenAddress,
-        uint256 pricePaid, // Original price P
+        uint256 pricePaid, // Original gross price paid by buyer for `amountToBuy`
         uint256 platformFee,
         uint256 discountAmount,
         uint256 rewardAmount,
-        bool boosted,
         uint256 ticketId,
-        uint256 ticketAmount
+        uint256 ticketAmount // The actual amount of tickets bought
     );
     event EcosystemOwnerInteraction(
         address indexed ecosystemAddress,
@@ -102,8 +103,7 @@ interface ITicketExchange is IERC165 {
         uint256 platformFee,
         uint256 royaltyFee,
         uint256 discountAmount,
-        uint256 rewardAmount,
-        bool boosted
+        uint256 rewardAmount
     );
     event TicketListingCancelled(uint256 indexed listingId);
     event SalePaused(uint256 indexed saleId);
@@ -111,6 +111,8 @@ interface ITicketExchange is IERC165 {
 
 
     // --- Errors ---
+    error UserPurchaseLimitZero();
+    error NotEnoughTicketsInSale(); // NEW ERROR
     error PaymentTokenNotAllowed();
     error InvalidTimeRange();
     error PaymentAmountZero();
@@ -131,7 +133,6 @@ interface ITicketExchange is IERC165 {
     error RoyaltyMismatch();
     error RoyaltyExceedsPrice();
     error ZeroAddress();
-    error BoosterNftFailed(); // Not directly used in TicketExchange, but in ExchangeRewards
     error SaleIsPaused(); // NEW
     error PurchaseAmountExceedsMax(); // NEW
     error MaxTicketsPerBuyerExceeded(); // NEW
@@ -142,7 +143,7 @@ interface ITicketExchange is IERC165 {
     // --- Admin / Configuration Functions ---
     function setRewardsContract(address _rewardsContractAddress) external;
     function setPlatformFee(uint16 _feeBasisPoints) external;
-    function setEcosystemRegistry(address _registryAddress) external; // Public, but only callable once
+    function setEcosystemRegistry(address ecosystemRegistryAddress) external; // Public, but only callable once
     function setMaxRoyalty(address ecosystemAddress, uint16 _maxBasisPoints) external; // Function exists but reverts
     function setGlobalMaxRoyalty(uint16 _maxBasisPoints) external; // Function exists but reverts
     function adminMintTickets(address to, uint256[] calldata ids, uint256[] calldata amounts, bytes calldata data) external; // Function exists but reverts
@@ -158,16 +159,18 @@ interface ITicketExchange is IERC165 {
         uint32 endTime,
         uint16 membershipLevel,
         address paymentTokenAddress,
-        uint256 limitPerUser,
+        uint256 limitPerUser, // Max tickets per buyer
         uint256 predecessorSaleId,
         uint256 ticketId,
-        uint256 ticketAmountPerPurchase,
-        uint256 paymentAmount,
+        uint256 totalTicketsForSale, // NEW PARAMETER: Total quantity for this sale
+        uint256 paymentAmount, // Price per single ticket
         DistributionShare[] calldata distribution
-    ) external;
+    ) external returns (uint256 currentSaleId_);
+
+  
     function purchaseFromSale(
         uint256 saleId,
-        uint256 boosterNftId,
+        uint256 amountToBuy, // NEW PARAMETER: Total quantity buyer wants
         address txInitiator
     ) external;
 
@@ -183,7 +186,6 @@ interface ITicketExchange is IERC165 {
         uint256 listingId,
         uint256 amountToBuy,
         uint256 buyerExpectedRoyaltyFee,
-        uint256 boosterNftId,
         address txInitiator
     ) external;
     function cancelListing(uint256 listingId) external;

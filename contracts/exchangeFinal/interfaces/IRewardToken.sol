@@ -60,4 +60,5 @@ interface IRewardToken is IERC1155 {
     function setNFTLocked(uint256 nftId, bool locked) external;
 
     function ownerMintEnhancementNFT(address to, uint256 id, uint256 amount, bytes calldata data) external;
+    function ownerMintRewardToken(address to, uint256 id, uint256 amount, bytes calldata data) external;
 }

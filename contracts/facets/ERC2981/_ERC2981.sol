@@ -9,7 +9,7 @@ contract iERC2981 is iOwnership{
     function _royaltyInfo(
         uint256 tokenId,
         uint256 salePrice
-    ) internal  returns (address receiver, uint256 royaltyAmount) {
+    ) internal view  returns (address receiver, uint256 royaltyAmount) {
         LibERC1155TransferConstraints.ConstraintStorage storage cs = 
         LibERC1155TransferConstraints.erc1155ConstraintStorage();
         
@@ -18,6 +18,5 @@ contract iERC2981 is iOwnership{
         receiver = _ecosystemOwner();
         royaltyAmount = ( salePrice * _royalteFee ) / 100000; // Basis points calculation
         
-        emit RoyaltyFeeAccessed(msgSender(), tokenId, salePrice, royaltyAmount); 
     }
 }

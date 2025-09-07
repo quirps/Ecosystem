@@ -35,6 +35,7 @@ interface IExchangeRewards {
     }
 
     // --- Events ---
+    event TokenSaleStakingContractConnected( address tokenStakingAddress, uint16 feeShareBp);
     event InitiatorFeeChange( uint16 feeShareBp);
     event HoldingRewardsClaimed(address indexed user, uint256 indexed tokenId, uint256 indexed pending);
     event FeeRecorded(address indexed paymentToken, uint256 amountAllocatedToStaking);
@@ -79,7 +80,6 @@ interface IExchangeRewards {
     function getRewardMintRate(address paymentToken) external view returns (uint256 rate); // Rate per unit (wei), scaled 1e18
     function useDiscount(address user, address paymentToken) external returns (uint256 discountAmount);
     function executeMint(address buyer, uint256 rewardTokenId, uint256 rewardAmount) external;
-    function verifyAndUsePurchaseBooster(address buyer, uint256 boosterNftId, address purchaseEcosystemAddress) external returns (bool boosted);
 
     // --- Admin Actions ---
     function distributePassiveHoldingRewards(uint256[] calldata tokenIds) external;

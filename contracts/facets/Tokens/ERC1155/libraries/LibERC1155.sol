@@ -1,7 +1,7 @@
 pragma solidity ^0.8.0;
 
 library LibERC1155 {
-    bytes32 constant STORAGE_ERC1155 = "diamond.storage.erc1155";
+    bytes32 constant STORAGE_ERC1155 = keccak256("diamond.storage.erc1155");
 
     struct ERC1155Storage {
         // Mapping from token ID to account balances

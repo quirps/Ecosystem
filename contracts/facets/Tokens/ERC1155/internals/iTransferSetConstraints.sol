@@ -2,7 +2,7 @@ pragma solidity ^0.8.9;
 
 import {LibERC1155TransferConstraints} from "../libraries/LibERC1155TransferConstraints.sol";
 import { iOwnership } from "../../../Ownership/_Ownership.sol";
-import { iMembers } from "../../../MemberLevel/_Members.sol" ;   
+import { iMembers } from "../../../MemberLevel/_MembershipLevels.sol" ;   
 /**
  * @title  
  * @author 

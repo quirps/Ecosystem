@@ -11,7 +11,7 @@ contract TicketCreate is iTransferSetConstraints, iERC1155 {
         string imageHash;
     }
 
-    event TicketsCreated(uint256, uint256, TicketMeta);
+    event TicketsCreated(uint256 ticketId, uint256 amount,LibERC1155TransferConstraints.Constraints constraints, TicketMeta ticketMeta);
     /**
         Owner verification at ticketCreate
      */
@@ -35,12 +35,24 @@ contract TicketCreate is iTransferSetConstraints, iERC1155 {
 
         _mint(msgSender(), ticketId_, _amount, ""); 
 
-        emit TicketsCreated(ticketId_, _amount, _ticketMeta);
+        emit TicketsCreated(ticketId_, _amount, _constraints, _ticketMeta);
     }
 
     function getTicketConstraints( uint256 _ticketId ) external view returns (LibERC1155TransferConstraints.Constraints memory constraints_){
         constraints_ = LibERC1155TransferConstraints._ticketConstraints( _ticketId);
     }
+
+    //Mint additional _amount of _ticketId
+    function mintExisting( uint256 _ticketId, uint256 _amount ) external {
+
+    }
+
+       //Burn  _amount of _ticketId
+    function burnExisting( uint256 _ticketId, uint256 _amount ) external {
+
+    }
+
+    
 }
 
 /**

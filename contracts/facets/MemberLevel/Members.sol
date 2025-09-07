@@ -1,104 +1,88 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18; // Use a recent stable version
+pragma solidity ^0.8.6;
 
-// --- Interfaces ---
-// Assuming IMembers defines the external functions for this facet
-// import { IMembers } from "./IMembers.sol";
+import {IMembers} from "./IMembershipLevels.sol";
+import {iMembers} from "./_MembershipLevels.sol";
+import {LibMemberLevel} from "./LibMemberLevel.sol";
+// Importing OpenZeppelin's Ownable for basic access control
 
-// --- Libraries ---
-// Needed for Leaf struct definition used in batchSetLevels
-import { LibMemberLevel } from "./LibMemberLevel.sol"; 
-// --- Implementation Contracts ---
-import { iMembers } from "./_Members.sol"; // Import the internal logic
+/// @title MembershipLevels
+/// @notice This is the external facet contract for managing membership levels within a Diamond architecture.
+/// It exposes the functions defined in `IMembershipLevels` and delegates their execution to the
+/// `MembershipLevelsInternal` contract, acting as a proxy.
+/// Administrative functions are protected by `onlyOwner` modifier inherited from OpenZeppelin's Ownable.
+contract MembershipLevels is IMembers, iMembers {
 
-/// @title Members Facet External Interface
-/// @notice Provides external functions to manage and view member levels using int64.
-/// Handles access control and forwards calls to internal logic.
-contract Members is /* IMembers, */ iMembers { // Implement interface, Inherit internal logic
-
-    // --- Owner Functions ---
-
-    /// @notice EXTERNAL: Updates the Merkle root for level proofs. Owner only.
-    /// @param _merkleRoot New Merkle root hash.
-    function updateMemberMerkleRoot(bytes32 _merkleRoot) external onlyOwner {
-        _updateMemberMerkleRoot(_merkleRoot);
+    /// @inheritdoc IMembers
+    function verifyAndSetLevel(LibMemberLevel.Leaf memory _leaf, bytes32[] calldata _merkleProof) external override {
+        // Delegates to the internal logic function
+        _verifyAndSetLevel(_leaf, _merkleProof);
     }
 
-    /// @notice EXTERNAL: Batch sets levels for multiple members. Owner only.
-    /// @dev Uses Leaf struct containing address, level (int64), and timestamp.
-    /// @param _leaves Array of member level data.
-    function batchSetLevels(LibMemberLevel.Leaf[] calldata _leaves) external onlyOwner {
-        _batchSetLevels(_leaves);
+    /// @inheritdoc IMembers
+    function batchSetLevels(LibMemberLevel.Leaf[] calldata _leaves, bytes32[][] calldata _merkleProofs) external override {
+        // Delegates to the internal logic function
+        _batchSetLevels(_leaves, _merkleProofs);
     }
 
-    /// @notice EXTERNAL: Directly sets the level for a single member. Owner only.
-    /// @dev Requires the new timestamp implicit in the call (block.timestamp) to be newer than the existing one.
-    /// @param user Address of the member.
-    /// @param level The new level (int64, can be negative e.g., BANNED_LEVEL).
-    function setMemberLevel(address user, int64 level) external onlyOwner {
-        _setMemberLevel(user, level);
+    /// @inheritdoc IMembers
+    function banMember(LibMemberLevel.Leaf memory _bannedLeaf, bytes32[] calldata _merkleProof) external override {
+        // This function facilitates setting a user's level to a "banned" tier via Merkle proof.
+        // The `_bannedLeaf` must be pre-constructed off-chain with the appropriate banned level ID and timestamp.
+        _banMember(_bannedLeaf, _merkleProof);
     }
 
-    /// @notice EXTERNAL: Bans a member by setting their level to BANNED_LEVEL (-1). Owner only.
-    /// @param _user Address of the user to ban.
-    function banMember(address _user) external onlyOwner {
-        _banMember(_user);
-    }
-
-    // --- User Functions ---
-
-    /// @notice EXTERNAL: Allows a user to claim their level using a Merkle proof.
-    /// @dev Proof must be valid against the current root and match msg.sender, level, and timestamp.
-    /// Consider internal timestamp check if strict ordering/replay prevention is needed beyond proof validation.
-    /// @param level The level (int64) being claimed.
-    /// @param timestamp The timestamp associated with the claim (must match proof).
-    /// @param _merkleProof Array of hashes for Merkle verification.
-    function verifyAndSetLevel(int64 level, uint32 timestamp, bytes32[] calldata _merkleProof) external {
-        _verifyAndSetLevel(level, timestamp, _merkleProof);
-    }
-
-    // --- View Functions ---
-
-    /// @notice Gets the full level struct (level and timestamp) for a given address.
-    /// @param _user Address to query.
-    /// @return struct containing level (int64) and timestamp (uint32).
-    function getMemberLevelStruct(address _user) external view returns (LibMemberLevel.MemberLevel memory) {
+    /// @inheritdoc IMembers
+    function getMemberLevelStruct(address _user) external view override returns (int64 level, uint32 timestamp) {
+        // Delegates to the internal logic function
         return _getMemberLevelStruct(_user);
     }
 
-    /// @notice Gets just the level (int64) for a given address.
-    /// @dev Level can be positive, zero, or negative (e.g., BANNED_LEVEL).
-    /// @param _user Address to query.
-    /// @return int64 The user's current level.
-    function getMemberLevel(address _user) external view returns (int64) {
+    /// @inheritdoc IMembers
+    function getMemberLevel(address _user) external view override returns (int64 memberLevel_) {
+        // Delegates to the internal logic function
         return _getMemberLevel(_user);
     }
 
-    /// @notice Gets just the timestamp for the last level update of a given address.
-    /// @param _user Address to query.
-    /// @return uint32 The Unix timestamp of the last level update.
-    function getMemberLevelTimestamp(address _user) external view returns (uint32) {
-        return _getMemberLevelTimestamp(_user);
+    /// @inheritdoc IMembers
+    function addLevelDefinition(int64 _level, string calldata _name, string calldata _badge, string calldata _color) external override onlyOwner {
+        // Delegates to the internal logic function; restricted to owner
+        _addLevelDefinition(_level, _name, _badge, _color);
     }
 
-     /// @notice Gets the currently active Merkle root being used for level proofs.
-     /// @return bytes32 The current Merkle root hash.
-    function getMerkleRoot() external view returns (bytes32) {
-        // Access storage via the library function inherited implicitly
-        LibMemberLevel.MemberLevelStorage storage mrs = LibMemberLevel.memberLevelStorage();
-        return mrs.merkleRoot;
+    /// @inheritdoc IMembers
+    function updateLevelDefinition(int64 _level, string calldata _name, string calldata _badge, string calldata _color) external override onlyOwner {
+        // Delegates to the internal logic function; restricted to owner
+        _updateLevelDefinition(_level, _name, _badge, _color);
     }
 
-    /// @notice Gets the defined constant value representing a banned level.
-    /// @return int64 The value indicating a ban (e.g., -1).
-    function getBannedLevel() external pure returns (int64) {
-        // Access constant defined in inherited iMembers
-        return BANNED_LEVEL;
+    /// @inheritdoc IMembers
+    function removeLevelDefinition(int64 _level) external override onlyOwner {
+        // Delegates to the internal logic function; restricted to owner
+        _removeLevelDefinition(_level);
     }
 
-    // --- Cleanup Legacy/Unused Imports (Review Manually) ---
-    // Remove `import "../Tokens/ERC1155/ERC1155Transfer.sol";` if unused.
-    // Remove `import "./_Members.sol";` (replaced by iMembers).
-    // Remove `import "../../libraries/merkleVerify/MembersVerify.sol";` (Merkle logic now internal).
-    // Ensure `import "./IMembers.sol";` is correct if using the interface.
+    /// @inheritdoc IMembers
+    function getLevelDefinition(int64 _level) external view override returns (LibMemberLevel.LevelDefinition memory levelDefinition) {
+        // Delegates to the internal logic function
+        return _getLevelDefinition(_level);
+    }
+
+    /// @inheritdoc IMembers
+    function getAllLevelDefinitions() external view override returns (LibMemberLevel.LevelDefinition[] memory levelDefinitions) {
+        // Delegates to the internal logic function
+        return _getAllLevelDefinitions();
+    }
+
+    /// @inheritdoc IMembers
+    function getLevelNames() external view override returns (string[] memory levelNames) {
+        // Delegates to the internal logic function
+        return _getLevelNames();
+    }
+
+    /// @inheritdoc IMembers
+    function setMerkleRoot(bytes32 _newRoot) external override onlyOwner {
+        // Delegates to the internal logic function; restricted to owner
+        _setMerkleRoot(_newRoot);
+    }
 }

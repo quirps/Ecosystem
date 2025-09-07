@@ -6,7 +6,7 @@ contract ERC2981 is iERC2981{
     function royaltyInfo(
         uint256 tokenId,
         uint256 salePrice
-    ) external  returns (address receiver, uint256 royaltyAmount) {
-       _royaltyInfo(tokenId, salePrice);
+    ) external view returns (address receiver, uint256 royaltyAmount) {
+       (receiver, royaltyAmount) =  _royaltyInfo(tokenId, salePrice);
     }
 }

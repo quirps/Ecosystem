@@ -52,16 +52,23 @@
     "@ethersproject/abi": "^5.8.0",
     "@ethersproject/keccak256": "^5.8.0",
     "@ethersproject/strings": "^5.8.0",
+    "@matterlabs/hardhat-zksync": "0.3.0",
+    "@matterlabs/hardhat-zksync-deploy": "^1.8.0",
+    "@matterlabs/hardhat-zksync-solc": "^1.5.0",
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",
     "@openzeppelin/contracts": "=5.1.0",
+    "@uniswap/v3-core": "^1.0.1",
     "@uniswap/v3-periphery": "^1.4.4",
     "bn.js": "^5.1.2",
+    "cors": "^2.8.5",
     "ethers": "^5.7.2",
+    "express": "^5.1.0",
     "glob": "^11.0.1",
     "hardhat-diamond-abi": "^3.0.1",
     "merkletreejs": "^0.5.2",
     "package.json": "^2.0.1",
     "solc": "^0.8.9",
-    "viem": "^2.21.56"
+    "viem": "^2.21.56",
+    "zksync-ethers": "5.0.0"
   }
 }

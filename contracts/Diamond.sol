@@ -22,19 +22,7 @@ contract Diamond is iOwnership {
         LibDiamond.diamondCut(_cuts, address(0), "");
     }
  
-    function getOwner() external view returns (address owner_) {
-        owner_ = _ecosystemOwner();
-    }
-
-    function getFacetAddresses() external view returns (address[] memory facetAddresses_){
-        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-        facetAddresses_ = ds.facetAddresses;
-    }
-
-    function getSelectors ( address facetAddress) external view returns (bytes4[] memory selectors_){
-        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-        return ds.facetFunctionSelectors[ facetAddress ].functionSelectors;  
-    }
+    
 
     // Find facet for function that is called and execute the
     // function if a facet is found and return any value.

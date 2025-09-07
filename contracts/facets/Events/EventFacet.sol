@@ -3,7 +3,7 @@ pragma solidity ^0.8.19;
 
 import { LibEventFacet } from "./LibEventFacet.sol";
 import { IEventFacet, IERC1155, ITieredPermission } from "./IEventFacet.sol"; // Import its own interface and dependencies
-import { iMembers } from "../MemberLevel/_Members.sol";  //imports iOwnership
+import { iMembers } from "../MemberLevel/_MembershipLevels.sol";  //imports iOwnership
 import {iERC1155Transfer} from "../Tokens/ERC1155/internals/iERC1155Transfer.sol";
 import "hardhat/console.sol";
 /**

@@ -52,9 +52,7 @@ contract iERC1155 is iERC1155ContractTransfer, iOwnership {
 
         LibERC1155.ERC1155Storage storage es = LibERC1155.erc1155Storage();
         address operator = msgSender();
-        uint256[] memory ids = LibERC1155._asSingletonArray(id);
-        uint256[] memory amounts = LibERC1155._asSingletonArray(amount);
-
+        
         es.balance[id][to] += amount;
         es.totalSupply += amount;
         emit TransferSingle(operator, address(0), to, id, amount);
