@@ -4,7 +4,7 @@ const VERSION_NUMBER = "1.0.0"
 const LATEST_VERSION = ethers.utils.formatBytes32String(VERSION_NUMBER);
 const V1 = [
   'DiamondCutFacet', 'EventFacet','DiamondInit', 'DiamondLoupeFacet', 'ERC1155Ecosystem', 'ERC1155Transfer','ERC1155ReceiverEcosystem','ERC20Ecosystem', 'MemberRegistry',
-  'MembershipLevels', 'Moderator', 'OwnershipFacet', 'StakeConfig','ERC2981','TicketCreate','AppRegistryLinkFacet','TieredPermission'
+  'MembershipLevels', 'Moderator', 'OwnershipFacet', 'StakeConfig','ERC2981','TicketCreate','AppRegistryLinkFacet','TieredPermission', 'UtilityAddressManagement'
 ]
 const chainlinkConfig = {vrfCoordinator: "0x8103B0A8A00be2DDC778e6e7eaa21791Cd364625", // <-- Paste from Chainlink Docs
   vrfSubscriptionId: 0, // <-- Set this to 0, we'll create/set it in the configure script

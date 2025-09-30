@@ -12,7 +12,7 @@ require("hardhat-deploy");
 dotenv.config()
 const FACETS = [
     'DiamondCutFacet', 'DiamondInit', 'DiamondLoupeFacet', 'ERC1155Ecosystem', 'ERC1155Transfer','ERC1155ReceiverEcosystem','ERC20Ecosystem', 'MemberRegistry',
-    'MembershipLevels', 'Moderator', 'OwnershipFacet', 'EventFactory', 'StakeConfig','ERC2981','TicketCreate',
+    'MembershipLevels', 'Moderator', 'OwnershipFacet', 'EventFactory', 'StakeConfig','ERC2981','TicketCreate','UtilityAddressManagement',
 ]
 const INTERFACES = [
   'IEventFacet'

@@ -10,8 +10,8 @@ Unsure, need to resolve this.
 contract Subcription{
     event GiftedSubscription(address from, address to, uint256 ticketId, uint256 amount);
     function subscribe( address _subscriber, uint256 _ticketId, uint256 _amount) external {
-        if ( msgSender() != _subscriber ){
-            emit GiftedSubscription(msgSender(), _subscriber, )
+        if ( msg.sender != _subscriber ){
+            emit GiftedSubscription(msg.sender, _subscriber, _ticketId, _amount);
         }
     }
 }
