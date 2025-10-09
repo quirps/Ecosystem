@@ -81,7 +81,8 @@ module.exports = {
   defaultNetwork: "hardhat",
   networks: {
       hardhat: {
-     accounts: getWallets('hardhat'),
+         accounts: getWallets('hardhat'),
+         chainId: 31337,
       //  blockGasLimit: 10000000,
         gas: 900719925474099,  // 12 million
         blockGasLimit : 900719925474099,
