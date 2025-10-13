@@ -31,6 +31,7 @@ contract EcosystemRegistry is IEcosystemRegistry, iOwnership {
     address public owner;
     mapping(bytes32 => Version) public versions;
     mapping(address => Ecosystem[]) userEcosystems;
+    mapping(bytes32 => bool) uniqueNamespace;
     address public immutable ticketExchangeAddress;
     //mapping(uint240 => mapping(bytes32 => address)) optimizedFacet;
 
@@ -107,6 +108,12 @@ function cancelMigration(address ecosystem) external {
         console.log(1);
         require(_version.exists, "Version is not valid or not active");
          console.log(2);
+        bytes32 nameHash = keccak256( abi.encode(name) );
+
+        bool isNamespaceOccupied = uniqueNamespace[ nameHash ];
+        require( !isNamespaceOccupied , "Ecosystem name must be unique in the registry namespace");
+        uniqueNamespace[ nameHash ] = !isNamespaceOccupied;
+
         ecosystemAddress_ = IDiamondDeploy(_version.diamondDeployAddress).deploy(msgSender(), salt, diamondBytecode, _version.facetCuts);
         // Step 4: Update the user's ecosystems
         Ecosystem memory newEcosystem = Ecosystem(name, ecosystemAddress_, versionNumber);

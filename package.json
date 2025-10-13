@@ -57,6 +57,8 @@
     "@matterlabs/hardhat-zksync-solc": "^1.5.0",
     "@nomicfoundation/hardhat-toolbox": "^1.0.2",
     "@openzeppelin/contracts": "=5.1.0",
+    "@typechain/ethers-v5": "^11.1.2",
+    "@typechain/hardhat": "^9.1.0",
     "@uniswap/v3-core": "^1.0.1",
     "@uniswap/v3-periphery": "^1.4.4",
     "bn.js": "^5.1.2",
@@ -68,6 +70,7 @@
     "merkletreejs": "^0.5.2",
     "package.json": "^2.0.1",
     "solc": "^0.8.9",
+    "typechain": "^8.3.2",
     "viem": "^2.21.56",
     "zksync-ethers": "5.0.0"
   }

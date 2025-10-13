@@ -334,7 +334,7 @@ app.get('/types/factories', async (req, res) => {
   }
 
   // --- MODIFIED: Process req.query.files (expecting array or string) ---
-  const filesQueryParam = req.body.files; // Could be string[], string, or undefined
+  const filesQueryParam = req.query.files; // Could be string[], string, or undefined
   let requestedBasenames = [];
   const specificFilesRequested = filesQueryParam !== undefined;
   // --- End Modification Block ---

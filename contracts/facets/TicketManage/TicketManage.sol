@@ -11,7 +11,7 @@ contract TicketCreate is iTransferSetConstraints, iERC1155 {
         string imageHash;
     }
 
-    event TicketsCreated(uint256 ticketId, uint256 amount,LibERC1155TransferConstraints.Constraints constraints, TicketMeta ticketMeta);
+    event TicketsCreated(uint256  ticketId, uint256  amount,LibERC1155TransferConstraints.Constraints  constraints, TicketMeta ticketMeta);
     /**
         Owner verification at ticketCreate
      */
