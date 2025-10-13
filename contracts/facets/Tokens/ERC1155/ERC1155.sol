@@ -54,25 +54,6 @@ contract ERC1155Ecosystem is  iERC1155, IERC1155, IERC1155MetadataURI {
     }
 
 
-    function mint(address to, uint256 id, uint256 amount, bytes memory data) external override {
-        _mint(to, id, amount, data);
-    }
-
-/*
-
- */
-    function mintPremiumVoterPass() external {
-        _mint(msgSender(), uint256(5), uint256(1), "");
-    }
-    function mintBatch(
-            address to,
-            uint256[] memory ids,
-            uint256[] memory amounts,
-            bytes memory data
-        ) external override {
-        _mintBatch( to, ids, amounts, data);
-        }
-
     function burn(address from, uint256 id, uint256 amount) external override {
         _burn( from, id, amount); 
     }

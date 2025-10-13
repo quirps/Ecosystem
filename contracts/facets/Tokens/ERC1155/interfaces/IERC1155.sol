@@ -30,9 +30,6 @@ interface IERC1155 {
      * Clients calling this function must replace the `\{id\}` substring with the
      * actual token type ID.
      */
-    function mint(address to, uint256 id, uint256 amount, bytes memory data) external;
-
-    function mintBatch(address to, uint256[] memory ids, uint256[] memory amounts, bytes memory data) external;
 
     function burn(address from, uint256 id, uint256 amount) external;
 
