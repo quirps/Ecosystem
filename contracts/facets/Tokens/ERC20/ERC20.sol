@@ -7,13 +7,13 @@ import "./libraries/LibERC20.sol";
 import "../../Ownership/LibOwnership.sol";
 import "../ERC1155/libraries/LibERC1155.sol";
 import "../ERC1155/internals/iERC1155Transfer.sol";
-
+import {iERC1155} from "../ERC1155/internals/iERC1155.sol";
 import {iOwnership} from "../../Ownership/_Ownership.sol";
 
 event CurrencyNameChanged(string name);
 event CurrencySymbolChanged(string name);
 
-contract ERC20Ecosystem is iOwnership, iERC1155Transfer {
+contract ERC20Ecosystem is iOwnership, iERC1155Transfer,  iERC1155 {
 
     function setCurrencyName(string memory _name) external {
         LibERC20._setName(_name);
@@ -37,7 +37,9 @@ contract ERC20Ecosystem is iOwnership, iERC1155Transfer {
     function decimals() external pure returns (uint8) {
         return 18;
     }
-
+    function mint(address to, uint256 amount) external onlyOwner {
+        _mint(to, LibERC20.PRIMARY_CURRENCY_ID, amount, "");
+    }
     function totalSupply() public view returns (uint256) {
         // Assuming the ERC1155 contract implements a function to get the total supply for a token ID
         // If not, this function will need to be removed or modified
